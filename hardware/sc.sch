@@ -16686,7 +16686,7 @@ Source: http://www.diodes.com/datasheets/ds23001.pdf</description>
 <part name="GND3" library="SparkFun" deviceset="GND" device=""/>
 <part name="GND4" library="SparkFun" deviceset="GND" device=""/>
 <part name="GND5" library="SparkFun" deviceset="GND" device=""/>
-<part name="C4" library="rcl" deviceset="C-EU" device="C0805" value="470pF"/>
+<part name="C4" library="rcl" deviceset="C-EU" device="C0805" value="1uF"/>
 <part name="GND6" library="SparkFun" deviceset="GND" device=""/>
 <part name="C6" library="rcl" deviceset="C-EU" device="C0805" value="100nF"/>
 <part name="GND9" library="SparkFun" deviceset="GND" device=""/>
@@ -16708,12 +16708,12 @@ Source: http://www.diodes.com/datasheets/ds23001.pdf</description>
 <part name="R6" library="rcl" deviceset="R-EU_" device="R0805W" value="4.7k"/>
 <part name="R7" library="rcl" deviceset="R-EU_" device="R0805W" value="4.7k"/>
 <part name="GND26" library="SparkFun" deviceset="GND" device=""/>
-<part name="Q2" library="Omat_komponentit" deviceset="CRYTAL" device="" value="8MHz"/>
-<part name="C21" library="rcl" deviceset="C-EU" device="C0805" value="22p"/>
-<part name="C22" library="rcl" deviceset="C-EU" device="C0805" value="22p"/>
-<part name="Y1" library="Simplex-FreqCtrl" deviceset="CRYSTAL" device="3.2X1.5" value="32768Hz"/>
-<part name="C23" library="rcl" deviceset="C-EU" device="C0805" value="22p"/>
-<part name="C24" library="rcl" deviceset="C-EU" device="C0805" value="22p"/>
+<part name="Q2" library="Omat_komponentit" deviceset="CRYTAL" device="" value="8MHz 18pF"/>
+<part name="C21" library="rcl" deviceset="C-EU" device="C0805" value="33pF"/>
+<part name="C22" library="rcl" deviceset="C-EU" device="C0805" value="33pF"/>
+<part name="Y1" library="Simplex-FreqCtrl" deviceset="CRYSTAL" device="3.2X1.5" value="32768Hz CFPX-217 12.5pF"/>
+<part name="C23" library="rcl" deviceset="C-EU" device="C0805" value="22pF"/>
+<part name="C24" library="rcl" deviceset="C-EU" device="C0805" value="22pF"/>
 <part name="GND33" library="SparkFun" deviceset="GND" device=""/>
 <part name="GND35" library="SparkFun" deviceset="GND" device=""/>
 <part name="U$3" library="Simplex-rlc" deviceset="RES_ARR" device="" value="100k"/>
@@ -16731,10 +16731,10 @@ Source: http://www.diodes.com/datasheets/ds23001.pdf</description>
 <part name="R20" library="rcl" deviceset="R-EU_" device="R0805W" value="100k"/>
 <part name="GND49" library="SparkFun" deviceset="GND" device=""/>
 <part name="R21" library="rcl" deviceset="R-EU_" device="R0805W" value="10k"/>
-<part name="R22" library="rcl" deviceset="R-EU_" device="R0805W" value="100k"/>
-<part name="R24" library="rcl" deviceset="R-EU_" device="R0805W" value="100k"/>
-<part name="R25" library="rcl" deviceset="R-EU_" device="R0805W" value="100k"/>
-<part name="R26" library="rcl" deviceset="R-EU_" device="R0805W" value="100k"/>
+<part name="R22" library="rcl" deviceset="R-EU_" device="R0805W" value="2M"/>
+<part name="R24" library="rcl" deviceset="R-EU_" device="R0805W" value="240k"/>
+<part name="R25" library="rcl" deviceset="R-EU_" device="R0805W" value="2M"/>
+<part name="R26" library="rcl" deviceset="R-EU_" device="R0805W" value="240k"/>
 <part name="GND34" library="SparkFun" deviceset="GND" device=""/>
 <part name="JP2" library="SparkFun" deviceset="M02" device="PTH" value="bat"/>
 <part name="GND51" library="SparkFun" deviceset="GND" device=""/>
@@ -16762,7 +16762,7 @@ Source: http://www.diodes.com/datasheets/ds23001.pdf</description>
 <part name="SUPPLY9" library="supply2" deviceset="VCC" device=""/>
 <part name="+3V2" library="supply1" deviceset="+3V3" device=""/>
 <part name="R13" library="rcl" deviceset="R-EU_" device="R0805W" value="100k"/>
-<part name="R15" library="rcl" deviceset="R-EU_" device="R0805W" value="NA"/>
+<part name="R15" library="rcl" deviceset="R-EU_" device="R0805W" value="56k"/>
 <part name="GND14" library="SparkFun" deviceset="GND" device=""/>
 <part name="C5" library="rcl" deviceset="C-EU" device="C0805" value="100nF"/>
 <part name="GND17" library="SparkFun" deviceset="GND" device=""/>
@@ -16779,7 +16779,7 @@ Source: http://www.diodes.com/datasheets/ds23001.pdf</description>
 <part name="R29" library="rcl" deviceset="R-EU_" device="R0805W" value="27"/>
 <part name="GND20" library="SparkFun" deviceset="GND" device=""/>
 <part name="C12" library="rcl" deviceset="C-EU" device="C0805" value="10p"/>
-<part name="C13" library="rcl" deviceset="C-EU" device="C0805" value="10p"/>
+<part name="C13" library="rcl" deviceset="C-EU" device="C0805" value="10pF"/>
 <part name="GND21" library="SparkFun" deviceset="GND" device=""/>
 <part name="U$6" library="SparkFun-Connectors" deviceset="USB-MINIB" device="-5PIN"/>
 <part name="R30" library="rcl" deviceset="R-EU_" device="R0805W" value="1M"/>
@@ -16787,7 +16787,7 @@ Source: http://www.diodes.com/datasheets/ds23001.pdf</description>
 <part name="R31" library="rcl" deviceset="R-EU_" device="R0805W" value="1.5k"/>
 <part name="R32" library="rcl" deviceset="R-EU_" device="R0805W" value="100"/>
 <part name="GND28" library="SparkFun" deviceset="GND" device=""/>
-<part name="C14" library="rcl" deviceset="C-EU" device="C0805" value="100n"/>
+<part name="C14" library="rcl" deviceset="C-EU" device="C0805" value="100nF"/>
 <part name="R33" library="rcl" deviceset="R-EU_" device="R0805W" value="33k"/>
 <part name="GND29" library="SparkFun" deviceset="GND" device=""/>
 <part name="JP5" library="SparkFun-Connectors" deviceset="M07" device="" value="debug"/>
@@ -16825,8 +16825,8 @@ Source: http://www.diodes.com/datasheets/ds23001.pdf</description>
 <part name="C15" library="rcl" deviceset="C-EU" device="C1206" value="10uF"/>
 <part name="GND46" library="SparkFun" deviceset="GND" device=""/>
 <part name="U$8" library="Simplex-Switches" deviceset="TACT_SW" device="" value="USB_BSL"/>
-<part name="C18" library="rcl" deviceset="C-EU" device="C0805" value="100nF"/>
-<part name="C19" library="rcl" deviceset="C-EU" device="C0805" value="100nF"/>
+<part name="C18" library="rcl" deviceset="C-EU" device="C0805" value="10nF"/>
+<part name="C19" library="rcl" deviceset="C-EU" device="C0805" value="10nF"/>
 <part name="JP1" library="SparkFun-Connectors" deviceset="M04" device="PTH" value="i2c"/>
 <part name="SUPPLY1" library="Simplex-Power" deviceset="VCC_EN" device=""/>
 <part name="SUPPLY6" library="Simplex-Power" deviceset="VCC_EN" device=""/>
@@ -16838,7 +16838,7 @@ Source: http://www.diodes.com/datasheets/ds23001.pdf</description>
 <part name="R5" library="rcl" deviceset="R-EU_" device="R0805W" value="4.7k"/>
 <part name="SUPPLY13" library="Simplex-Power" deviceset="VCC_EN" device=""/>
 <part name="X1" library="con-phoenix-508" deviceset="MKDSN1,5/2-5,08" device=""/>
-<part name="LED2" library="led" deviceset="LED" device="CHIP-LED0805" value="green"/>
+<part name="LED2" library="led" deviceset="LED" device="CHIP-LED0805" value="orange"/>
 <part name="R27" library="rcl" deviceset="R-EU_" device="R0805W" value="1K"/>
 <part name="GND36" library="SparkFun" deviceset="GND" device=""/>
 <part name="D6" library="diode" deviceset="DIODE-" device="C1702-05" value="diode"/>
@@ -17841,7 +17841,7 @@ Source: http://www.diodes.com/datasheets/ds23001.pdf</description>
 <label x="-5.08" y="264.16" size="1.778" layer="95"/>
 </segment>
 </net>
-<net name="VBAT_IN" class="0">
+<net name="PV+" class="0">
 <segment>
 <wire x1="71.12" y1="91.44" x2="76.2" y2="91.44" width="0.1524" layer="91"/>
 <label x="76.2" y="91.44" size="1.778" layer="95"/>
