@@ -1,0 +1,9 @@
+#ifndef __ADC_H__
+#define __ADC_H__
+
+#include "sc.h"
+
+void adc10_read(const uint8_t port, uint16_t *rv);
+void adc10_halt(void);
+
+#endif
