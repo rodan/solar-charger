@@ -34,8 +34,13 @@
 #define PRESSURE_MAX        206842.7            // 30psi (and we want results in pascals)
 
 
-#define MCLK_FREQ           4000000
+#define MCLK_FREQ           8000000
 #define USB_MCLK_FREQ       4000000
+
+#define true                1
+#define false               0
+
+#define RELAY_MIN_V         10
 
 void main_init(void);
 
@@ -45,6 +50,10 @@ void check_events(void);
 
 void opt_power_enable(void);
 void opt_power_disable(void);
+void charge_enable(void);
+void charge_disable(void);
+void sw_enable(void);
+void sw_disable(void);
 
 uint8_t read_ps(void);
 

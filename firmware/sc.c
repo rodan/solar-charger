@@ -4,11 +4,11 @@
 //  available from:  https://github.com/rodan/
 //  license:         GNU GPLv3
 
-
 #include <stdio.h>
 #include <string.h>
 
 #include "sc.h"
+#include "calib.h"
 #include "drivers/sys_messagebus.h"
 #include "drivers/pmm.h"
 #include "drivers/rtc.h"
@@ -35,7 +35,10 @@ char str_temp[64];
 FATFS fatfs;
 FIL f;
 
-float vref=2.4405;
+float v_bat, v_pv, itemp;
+
+uint8_t relay_ch_ena;
+uint8_t relay_opt_ena;
 
 void die(uint8_t loc, FRESULT rc)
 {
@@ -52,74 +55,95 @@ static void do_smth(enum sys_message msg)
     // test of ADC
     //
 
-    uint16_t a2 = 0, int_temp = 0, int_temp_c;
-    float vin2;
-    //adc10_read(10, &int_temp);
-    //timer_a0_delay(1000);
-    //int_temp_c = ((int_temp*1.4662)-688)*3.968; // see temperature sensor transfer function
-                                                // in slau208 datasheet page ~707
-    adc10_read(2, &a2);
+    uint16_t q_bat = 0, q_pv = 0, q_itemp = 0;
+
+    adc10_read(10, &q_itemp, REFVSEL_0);
     timer_a0_delay(1000);
-    //a2 *= 0.4586; // Vao = a2 * (Vref / 1023) * ((R1+R2) / R2 ) / 10
-                 //   where Vref=1500, R1=2000000, R2=240000
-    //a2 *= 0.00228;
-    vin2 = a2 * vref * 0.9225;
-    adc10_halt();
-    //sprintf(str_temp, "a2=%d.%02dV temp=%d.%01ddC\r\n", a2/100, a2%100, int_temp_c/10, int_temp_c%10);
-    sprintf(str_temp, "a2=%d vin=%d.%02dV\r\n", a2, (uint16_t) vin2/100, (uint16_t) vin2%100);
-            //temp=%d.%01ddC\r\n", a2/100, a2%100, int_temp_c/10, int_temp_c%10);
+    itemp = ((q_itemp * VREF_1_5) / 102.3 - 6.88) * 396.8;
+    // see temperature sensor transfer function
+    // in slau208 datasheet page ~707
+
+    sprintf(str_temp, "temp=%d, %d.%02ddC\r\n", q_itemp,
+            (uint16_t) itemp / 10, (uint16_t) itemp % 10);
     uart_tx_str(str_temp, strlen(str_temp));
 
-    /*
-    //
-    // test of uSD card
-    //
+    adc10_read(0, &q_bat, REFVSEL_2);
+    timer_a0_delay(1000);
+    v_bat = q_bat * VREF_2_5 * DIV_BAT;
+    sprintf(str_temp, "q_bat=%d v_bat=%d.%02dV\r\n", q_bat,
+            (uint16_t) v_bat / 100, (uint16_t) v_bat % 100);
+    uart_tx_str(str_temp, strlen(str_temp));
 
-    FRESULT rc;
-    f_mount(0, &fatfs);
+    adc10_read(2, &q_pv, REFVSEL_2);
+    timer_a0_delay(1000);
+    v_pv = q_pv * VREF_2_5 * DIV_PV;
+    sprintf(str_temp, "q_pv=%d v_pv=%d.%02dV\r\n", q_pv, (uint16_t) v_pv / 100,
+            (uint16_t) v_pv % 100);
+    uart_tx_str(str_temp, strlen(str_temp));
 
-    if (detectCard()) {
-        uint16_t bw;
-        rc = f_open(&f, "20130126.LOG", FA_WRITE | FA_OPEN_ALWAYS);
-        if (!rc) {
-            f_lseek(&f, f_size(&f));
-            f_write(&f, str_temp, strlen(str_temp), &bw);
-            f_close(&f);
-        } else {
-            die(2, rc);
-        }
+    adc10_halt();
+    sprintf(str_temp, "\r\n");
+    uart_tx_str(str_temp, strlen(str_temp));
 
-        DIR dir;
-        FILINFO fno;
-        rc = f_opendir(&dir, "");
-        if (!rc) {
-            for (;;) {
-                rc = f_readdir(&dir, &fno);
-                if (rc || !fno.fname[0])
-                    break;
-                if (fno.fattrib & AM_DIR) {
-                    sprintf(str_temp, "   <dir>  %s\r\n", fno.fname);
-                } else {
-                    sprintf(str_temp, "%8lu  %s\r\n", fno.fsize, fno.fname);
-                }
-                uart_tx_str(str_temp, strlen(str_temp));
-            }
-        } else {
-            die(1, rc);
-        }
+    v_bat /= 100;
+    v_pv /= 100;
+
+    if (v_bat > 14.1) {
+        charge_disable();
+    } else if (v_bat < 12.8) {
+        charge_enable();
     }
-    */
 
     /*
-    //
-    // test of LCD
-    //
+       //
+       // test of uSD card
+       //
 
-    // increase drive strenght of P5.1 (LCD-PWR)
-    //P5DS  = 0x02;
-    //P5OUT |= BIT1;
-    //LCD_Send_STR(1, str_temp);
-    */
+       FRESULT rc;
+       f_mount(0, &fatfs);
+
+       if (detectCard()) {
+       uint16_t bw;
+       rc = f_open(&f, "20130126.LOG", FA_WRITE | FA_OPEN_ALWAYS);
+       if (!rc) {
+       f_lseek(&f, f_size(&f));
+       f_write(&f, str_temp, strlen(str_temp), &bw);
+       f_close(&f);
+       } else {
+       die(2, rc);
+       }
+
+       DIR dir;
+       FILINFO fno;
+       rc = f_opendir(&dir, "");
+       if (!rc) {
+       for (;;) {
+       rc = f_readdir(&dir, &fno);
+       if (rc || !fno.fname[0])
+       break;
+       if (fno.fattrib & AM_DIR) {
+       sprintf(str_temp, "   <dir>  %s\r\n", fno.fname);
+       } else {
+       sprintf(str_temp, "%8lu  %s\r\n", fno.fsize, fno.fname);
+       }
+       uart_tx_str(str_temp, strlen(str_temp));
+       }
+       } else {
+       die(1, rc);
+       }
+       }
+     */
+
+    /*
+       //
+       // test of LCD
+       //
+
+       // increase drive strenght of P5.1 (LCD-PWR)
+       //P5DS  = 0x02;
+       //P5OUT |= BIT1;
+       //LCD_Send_STR(1, str_temp);
+     */
 
     P4OUT ^= BIT7;              // blink led
 
@@ -133,7 +157,8 @@ static void do_smth(enum sys_message msg)
 
     rv1 = ps_get_raw(PS_SLAVE_ADDR, &ps);
     if (rv1 == I2C_ACK) {
-        ps_convert(ps, &p, &t, OUTPUT_MIN, OUTPUT_MAX, PRESSURE_MIN, PRESSURE_MAX);
+        ps_convert(ps, &p, &t, OUTPUT_MIN, OUTPUT_MAX, PRESSURE_MIN,
+                   PRESSURE_MAX);
 
         sprintf(str_temp, "stat %d\r\n", ps.status);
         uart_tx_str(str_temp, strlen(str_temp));
@@ -165,7 +190,7 @@ static void do_smth(enum sys_message msg)
 #ifdef INTERTECHNO
     uint8_t family = 0xb;       // this translates as family 'L' on the rotary switch
     uint8_t device = 0x7;
-    uint8_t prefix = ( family << 4 ) + device;
+    uint8_t prefix = (family << 4) + device;
     // ding dong
     rf_tx_cmd(prefix, INTERTECHNO_CMD_SP);
 #endif
@@ -194,14 +219,14 @@ int main(void)
 
     // oled display
     /*
-    timer_a0_delay(10000);
-    oled_128x64_init();
-    oled_128x64_clear_display();          //clear the screen and set start position to top left corner
-    oled_128x64_set_normal_display();      //Set display to normal mode (i.e non-inverse mode)
-    oled_128x64_set_page_mode();           //Set addressing mode to Page Mode
-    oled_128x64_set_text_xy(0,0);          //Set the cursor to Xth Page, Yth Column
-    oled_128x64_put_string("Hello World!11"); //Print the String
-    */
+       timer_a0_delay(10000);
+       oled_128x64_init();
+       oled_128x64_clear_display();          //clear the screen and set start position to top left corner
+       oled_128x64_set_normal_display();      //Set display to normal mode (i.e non-inverse mode)
+       oled_128x64_set_page_mode();           //Set addressing mode to Page Mode
+       oled_128x64_set_text_xy(0,0);          //Set the cursor to Xth Page, Yth Column
+       oled_128x64_put_string("Hello World!11"); //Print the String
+     */
 
     //disk_initialize(0);
     //LCD_Init();
@@ -210,9 +235,9 @@ int main(void)
     sys_messagebus_register(&do_smth, SYS_MSG_RTC_SECOND);
 
     while (1) {
-        sleep();
+        //sleep();
         __no_operation();
-        wake_up();
+        //wake_up();
         //check_ir();
         //timer0_delay(1000, LPM3_bits);
         //P4OUT ^= BIT7;              // blink led
@@ -253,7 +278,8 @@ void main_init(void)
     UCSCTL6 &= ~(XT2DRIVE0 + XT1DRIVE0);
 
     P1SEL = 0x0;
-    P1DIR = 0xf0;
+    //P1DIR = 0xf0;
+    P1DIR = 0xf8;
     P1OUT = 0x40;
     P1REN = 0x0f;
 
@@ -284,16 +310,21 @@ void main_init(void)
     /*
        __disable_interrupt();
        // get write-access to port mapping registers
-       PMAPPWD = 0x02D52;
+       //PMAPPWD = 0x02D52;
+       PMAPPWD = PMAPKEY;
        PMAPCTL = PMAPRECFG;
        // MCLK set out to 4.6
-       P4MAP6 = PM_MCLK;
+       //P4MAP0 = PM_MCLK;
+       P4MAP0 = PM_RTCCLK;
        PMAPPWD = 0;
        __enable_interrupt();
 
-       P4DIR |= BIT6;
-       P4SEL |= BIT6;
+       P4DIR |= BIT0;
+       P4SEL |= BIT0;
      */
+
+    relay_ch_ena = false;
+    relay_opt_ena = false;
 
     rtca_init();
     timer_a0_init();
@@ -364,4 +395,53 @@ void opt_power_disable()
 {
     P1DIR &= ~BIT6;
     P5DIR &= ~(BIT0 + BIT1);
+}
+
+void charge_enable(void)
+{
+    if ((!relay_ch_ena) && (v_bat > RELAY_MIN_V)) {
+        P1OUT &= ~BIT5;
+        timer_a0_delay(10000);
+        P1OUT |= BIT4;
+        timer_a0_delay(50000);
+        P1OUT &= ~BIT4;
+        relay_ch_ena = true;
+    }
+}
+
+void charge_disable(void)
+{
+    if (relay_ch_ena && (v_bat > RELAY_MIN_V)) {
+        P1OUT &= ~BIT4;
+        timer_a0_delay(10000);
+        P1OUT |= BIT5;
+        timer_a0_delay(50000);
+        P1OUT &= ~BIT5;
+        relay_ch_ena = false;
+    }
+}
+
+void sw_enable(void)
+{
+    if ((!relay_opt_ena) && (v_bat > RELAY_MIN_V)) {
+        P2OUT &= ~BIT0;
+        timer_a0_delay(10000);
+        P1OUT |= BIT7;
+        timer_a0_delay(50000);
+        P1OUT &= ~BIT7;
+        relay_opt_ena = true;
+    }
+}
+
+void sw_disable(void)
+{
+
+    if (relay_opt_ena && (v_bat > RELAY_MIN_V)) {
+        P1OUT &= ~BIT7;
+        timer_a0_delay(10000);
+        P2OUT |= BIT0;
+        timer_a0_delay(50000);
+        P2OUT &= ~BIT0;
+        relay_opt_ena = false;
+    }
 }

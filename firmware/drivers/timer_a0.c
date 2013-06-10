@@ -22,11 +22,19 @@ void timer_a0_init(void)
     __enable_interrupt();
 }
 
-// the delay is between 30.6 microseconds and 2 seconds
-void timer_a0_delay(uint16_t microseconds)
+// microseconds must be a value between 31 and 1999964
+void timer_a0_delay(uint32_t microseconds)
 {
-    // one tick of ACLK is 1/32768 us
-    uint32_t ticks = microseconds * 10 / 305;
+    // one tick of ACLK is 1/32768 s
+    /*
+    if (microseconds < 31) {
+        microseconds = 31;
+    } else if (microseconds > 1999964) {
+        microseconds = 1999964;
+    }
+    */
+
+    uint32_t ticks = microseconds / 30.5175;
     __disable_interrupt();
     TA0CCR4 = TA0R + ticks;
     TA0CCTL4 |= CCIE;

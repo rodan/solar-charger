@@ -13,14 +13,22 @@
 volatile uint16_t *adc10_rv;
 
 // port: 0 = P6.A0, 1 = P6.A1, .., 0xa = P6.A10 = internal temp sensor
-void adc10_read(const uint8_t port, uint16_t *rv)
+// vref is one of:  REFVSEL_0  - 1.5v vref
+//                  REFVSEL_1  - 2.0v vref
+//                  REFVSEL_2  - 2.5v vref
+void adc10_read(const uint8_t port, uint16_t *rv, const uint8_t vref)
 {
     P6SEL |= 1 << port;
     // if ref or adc10 are busy then wait
     while (REFCTL0 & REFGENBUSY);
     while (ADC10CTL1 & ADC10BUSY);
-    // enable 2.5V reference
-    REFCTL0 |= REFMSTR + REFVSEL_2 + REFON;
+    // enable reference
+    if ((REFCTL0 & 0x30) != vref) {
+        // need to change vref
+        adc10_halt();
+        REFCTL0 = REFMSTR + vref;
+    }
+    REFCTL0 |= REFMSTR + REFON;
     ADC10CTL0 &= ~ADC10ENC;
     // enable ADC10_A, single channel single conversion
     ADC10CTL0 = ADC10SHT_2 + ADC10ON;

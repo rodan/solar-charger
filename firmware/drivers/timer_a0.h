@@ -16,7 +16,7 @@ enum timer_a0_event {
 
 volatile enum timer_a0_event timer_a0_last_event;
 
-void timer_a0_delay(uint16_t microseconds);
+void timer_a0_delay(uint32_t microseconds);
 
 
 
