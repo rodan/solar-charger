@@ -11,17 +11,17 @@
 #define IR_IN               P1IN
 #define IR_PIN              BIT0
 
-#define OOK_SEL             P2SEL
-#define OOK_DIR             P2DIR
-#define OOK_OUT             P2OUT
-#define OOK_PIN             BIT0
+#define OOK_SEL             P1SEL
+#define OOK_DIR             P1DIR
+#define OOK_OUT             P1OUT
+#define OOK_PIN             BIT1
 
-#define I2C_MASTER_DIR      P6DIR
-#define I2C_MASTER_OUT      P6OUT
-#define I2C_MASTER_IN       P6IN
+#define I2C_MASTER_DIR      P5DIR
+#define I2C_MASTER_OUT      P5OUT
+#define I2C_MASTER_IN       P5IN
 //port pins
-#define I2C_MASTER_SCL      BIT2
-#define I2C_MASTER_SDA      BIT3
+#define I2C_MASTER_SCL      BIT0
+#define I2C_MASTER_SDA      BIT1
 //Start and Stop delay, most devices need this
 #define I2C_MASTER_SDLY		0x01
 //for long lines or very fast MCLK, unremark and set

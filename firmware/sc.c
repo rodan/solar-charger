@@ -25,6 +25,7 @@
 #include "drivers/diskio.h"
 #include "drivers/mmc.h"
 #include "drivers/adc.h"
+#include "drivers/hal_sdcard.h"
 
 // DIR is defined as "0x0001 - USB Data Response Bit" in msp430 headers
 // but it's also used by fatfs
@@ -33,12 +34,13 @@
 
 char str_temp[64];
 FATFS fatfs;
+DIR dir;
 FIL f;
 
 float v_bat, v_pv, itemp;
 
-uint8_t relay_ch_ena;
-uint8_t relay_opt_ena;
+uint8_t relay_ch_ena, relay_ch_ena_old;
+uint8_t relay_opt_ena, relay_opt_ena_old;
 
 void die(uint8_t loc, FRESULT rc)
 {
@@ -48,152 +50,80 @@ void die(uint8_t loc, FRESULT rc)
 
 static void do_smth(enum sys_message msg)
 {
-    //sprintf(str_temp, "%02d:%02d:%02d ", rtca_time.hour, rtca_time.min, rtca_time.sec);
-    //uart_tx_str(str_temp, strlen(str_temp));
-
-    //
-    // test of ADC
-    //
-
     uint16_t q_bat = 0, q_pv = 0, q_itemp = 0;
 
+    sprintf(str_temp, "%02d:%02d:%02d ", rtca_time.hour, rtca_time.min, rtca_time.sec);
+    uart_tx_str(str_temp, strlen(str_temp));
+
+    relay_ch_ena_old = relay_ch_ena;
+    relay_opt_ena_old = relay_opt_ena;
+
     adc10_read(10, &q_itemp, REFVSEL_0);
-    timer_a0_delay(1000);
     itemp = ((q_itemp * VREF_1_5) / 102.3 - 6.88) * 396.8;
     // see temperature sensor transfer function
     // in slau208 datasheet page ~707
-
-    sprintf(str_temp, "temp=%d, %d.%02ddC\r\n", q_itemp,
-            (uint16_t) itemp / 10, (uint16_t) itemp % 10);
-    uart_tx_str(str_temp, strlen(str_temp));
+    //sprintf(str_temp, "temp=%d, %d.%02ddC\r\n", q_itemp,
+    //        (uint16_t) itemp / 10, (uint16_t) itemp % 10);
+    //uart_tx_str(str_temp, strlen(str_temp));
 
     adc10_read(0, &q_bat, REFVSEL_2);
-    timer_a0_delay(1000);
     v_bat = q_bat * VREF_2_5 * DIV_BAT;
-    sprintf(str_temp, "q_bat=%d v_bat=%d.%02dV\r\n", q_bat,
-            (uint16_t) v_bat / 100, (uint16_t) v_bat % 100);
-    uart_tx_str(str_temp, strlen(str_temp));
+    //sprintf(str_temp, "q_bat=%d v_bat=%d.%02dV\r\n", q_bat,
+    //        (uint16_t) v_bat / 100, (uint16_t) v_bat % 100);
+    //uart_tx_str(str_temp, strlen(str_temp));
 
     adc10_read(2, &q_pv, REFVSEL_2);
-    timer_a0_delay(1000);
     v_pv = q_pv * VREF_2_5 * DIV_PV;
-    sprintf(str_temp, "q_pv=%d v_pv=%d.%02dV\r\n", q_pv, (uint16_t) v_pv / 100,
-            (uint16_t) v_pv % 100);
-    uart_tx_str(str_temp, strlen(str_temp));
-
+    //sprintf(str_temp, "q_pv=%d v_pv=%d.%02dV\r\n", q_pv, (uint16_t) v_pv / 100,
+    //        (uint16_t) v_pv % 100);
+    //uart_tx_str(str_temp, strlen(str_temp));
     adc10_halt();
-    sprintf(str_temp, "\r\n");
-    uart_tx_str(str_temp, strlen(str_temp));
 
-    v_bat /= 100;
-    v_pv /= 100;
-
-    if (v_bat > 14.1) {
+    // values are multiplied by 100 for snprintf
+    if (v_bat > 1410) {
         charge_disable();
-    } else if (v_bat < 12.8) {
+    } else if (v_bat < 1280) {
         charge_enable();
     }
 
-    /*
-       //
-       // test of uSD card
-       //
+    FRESULT rc;
+    f_mount(0, &fatfs);
 
-       FRESULT rc;
-       f_mount(0, &fatfs);
+    opt_power_enable();
+    timer_a0_delay(50000);
+    disk_initialize(0);
 
-       if (detectCard()) {
-       uint16_t bw;
-       rc = f_open(&f, "20130126.LOG", FA_WRITE | FA_OPEN_ALWAYS);
-       if (!rc) {
-       f_lseek(&f, f_size(&f));
-       f_write(&f, str_temp, strlen(str_temp), &bw);
-       f_close(&f);
-       } else {
-       die(2, rc);
-       }
-
-       DIR dir;
-       FILINFO fno;
-       rc = f_opendir(&dir, "");
-       if (!rc) {
-       for (;;) {
-       rc = f_readdir(&dir, &fno);
-       if (rc || !fno.fname[0])
-       break;
-       if (fno.fattrib & AM_DIR) {
-       sprintf(str_temp, "   <dir>  %s\r\n", fno.fname);
-       } else {
-       sprintf(str_temp, "%8lu  %s\r\n", fno.fsize, fno.fname);
-       }
-       uart_tx_str(str_temp, strlen(str_temp));
-       }
-       } else {
-       die(1, rc);
-       }
-       }
-     */
-
-    /*
-       //
-       // test of LCD
-       //
-
-       // increase drive strenght of P5.1 (LCD-PWR)
-       //P5DS  = 0x02;
-       //P5OUT |= BIT1;
-       //LCD_Send_STR(1, str_temp);
-     */
-
-    P4OUT ^= BIT7;              // blink led
-
-    // oled
-
-#ifdef HSC_SSC
-    uint16_t t;
-    uint32_t p;
-    struct cs_raw ps;
-    uint8_t rv1;
-
-    rv1 = ps_get_raw(PS_SLAVE_ADDR, &ps);
-    if (rv1 == I2C_ACK) {
-        ps_convert(ps, &p, &t, OUTPUT_MIN, OUTPUT_MAX, PRESSURE_MIN,
-                   PRESSURE_MAX);
-
-        sprintf(str_temp, "stat %d\r\n", ps.status);
-        uart_tx_str(str_temp, strlen(str_temp));
-        sprintf(str_temp, "%06ld\r\n", p);
-        uart_tx_str(str_temp, strlen(str_temp));
-        sprintf(str_temp, "%02d.%02d\r\n", t / 100, t % 100);
-        uart_tx_str(str_temp, strlen(str_temp));
-    } else {
-        sprintf(str_temp, "p %d\r\n", rv1);
-        uart_tx_str(str_temp, strlen(str_temp));
+    if (detectCard()) {
+        uint16_t bw;
+        f_opendir(&dir, "/");
+        snprintf(str_temp, 5, "%d", rtca_time.year);
+        rc = f_mkdir(str_temp);
+        if (( rc == FR_OK) || ( rc == FR_EXIST)) {
+            snprintf(str_temp, 9, "/%d/%02d", rtca_time.year, rtca_time.mon);
+            rc = f_open(&f, str_temp, FA_WRITE | FA_OPEN_ALWAYS);
+            if (!rc) {
+                f_lseek(&f, f_size(&f));
+                snprintf(str_temp, 37, "%04d%02d%02d %02d:%02d %02d.%02d %02d.%02d %d %d %d %d\r\n",
+                        rtca_time.year, rtca_time.mon, rtca_time.day,
+                        rtca_time.hour, rtca_time.min,
+                        (uint16_t) v_bat / 100, (uint16_t) v_bat % 100, 
+                        (uint16_t) v_pv / 100, (uint16_t) v_pv % 100,
+                        relay_ch_ena_old, relay_ch_ena,
+                        relay_opt_ena_old, relay_opt_ena );
+                f_write(&f, str_temp, strlen(str_temp), &bw);
+                f_close(&f);
+            } else {
+                die(2, rc);
+            }
+        } else {
+                die(3, rc);
+        }
     }
-#endif
+    f_mount(0, NULL);
+    SDCard_end();
+    opt_power_disable();
 
-#ifdef SHT15
-    uint16_t t2, rh;
-    uint8_t rv2;
-    rv2 = sht_get_meas(&t2, &rh);
-    if (rv2 == I2C_ACK) {
-        sprintf(str_temp, "t2 %05d\r\n", t2);
-        uart_tx_str(str_temp, strlen(str_temp));
-        sprintf(str_temp, "rh %05d\r\n", rh);
-        uart_tx_str(str_temp, strlen(str_temp));
-    } else {
-        sprintf(str_temp, "h %d\r\n", rv2);
-        uart_tx_str(str_temp, strlen(str_temp));
-    }
-#endif
-
-#ifdef INTERTECHNO
-    uint8_t family = 0xb;       // this translates as family 'L' on the rotary switch
-    uint8_t device = 0x7;
-    uint8_t prefix = (family << 4) + device;
-    // ding dong
-    rf_tx_cmd(prefix, INTERTECHNO_CMD_SP);
-#endif
+    //P4OUT ^= BIT7;              // blink led
 }
 
 void check_ir(void)
@@ -208,7 +138,6 @@ void check_ir(void)
 int main(void)
 {
     main_init();
-    //opt_power_enable();
     uart_init();
 #ifdef IR_REMOTE
     ir_init();
@@ -228,16 +157,14 @@ int main(void)
        oled_128x64_put_string("Hello World!11"); //Print the String
      */
 
-    //disk_initialize(0);
     //LCD_Init();
-    //sys_messagebus_register(&do_smth, SYS_MSG_RTC_MINUTE);
-
-    sys_messagebus_register(&do_smth, SYS_MSG_RTC_SECOND);
+    sys_messagebus_register(&do_smth, SYS_MSG_RTC_MINUTE);
+    //sys_messagebus_register(&do_smth, SYS_MSG_RTC_SECOND);
 
     while (1) {
-        //sleep();
+        sleep();
         __no_operation();
-        //wake_up();
+        wake_up();
         //check_ir();
         //timer0_delay(1000, LPM3_bits);
         //P4OUT ^= BIT7;              // blink led
@@ -292,9 +219,11 @@ void main_init(void)
     P3OUT = 0x0;
 
     P4SEL = 0x0;
-    P4DIR = 0xfe;
+    //P4DIR = 0xfe;
+    P4DIR = 0xff;
     P4OUT = 0x0;
-    P4REN = 0x1;
+    //P4REN = 0x1;
+    P4REN = 0x0;
 
     //P5SEL is set above
     P5DIR = 0x0;
@@ -313,15 +242,15 @@ void main_init(void)
        //PMAPPWD = 0x02D52;
        PMAPPWD = PMAPKEY;
        PMAPCTL = PMAPRECFG;
-       // MCLK set out to 4.6
-       //P4MAP0 = PM_MCLK;
-       P4MAP0 = PM_RTCCLK;
+       // MCLK set out to 4.0
+       P4MAP0 = PM_MCLK;
+       //P4MAP0 = PM_RTCCLK;
        PMAPPWD = 0;
        __enable_interrupt();
 
        P4DIR |= BIT0;
        P4SEL |= BIT0;
-     */
+    */
 
     relay_ch_ena = false;
     relay_opt_ena = false;
@@ -333,7 +262,6 @@ void main_init(void)
 void sleep(void)
 {
     // turn off internal VREF, XT2, i2c power
-    //REFCTL0 = 0;
     UCSCTL6 |= XT2OFF;
     //opt_power_disable();
     // disable VUSB LDO and SLDO
@@ -351,7 +279,6 @@ void sleep(void)
 void wake_up(void)
 {
     uint16_t timeout = 5000;
-    //opt_power_enable();
     UCSCTL6 &= ~XT2OFF;
     // wait until clocks settle
     do {

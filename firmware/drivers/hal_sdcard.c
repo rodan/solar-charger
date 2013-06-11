@@ -77,6 +77,13 @@ void SDCard_init (void)
     UCB1IFG &= ~UCRXIFG;
 }
 
+void SDCard_end(void)
+{
+    SPI_SEL &= ~(SPI_CLK | SPI_SOMI | SPI_SIMO);
+    SPI_DIR &= ~(SPI_CLK | SPI_SIMO);
+    SPI_REN &= ~(SPI_SOMI | SPI_SIMO);
+}
+
 /***************************************************************************//**
  * @brief   Enable fast SD Card SPI transfers. This function is typically
  *          called after the initial SD Card setup is done to maximize

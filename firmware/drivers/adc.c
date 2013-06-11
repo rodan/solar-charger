@@ -11,6 +11,7 @@
 #include "adc.h"
 
 volatile uint16_t *adc10_rv;
+volatile uint8_t adcready;
 
 // port: 0 = P6.A0, 1 = P6.A1, .., 0xa = P6.A10 = internal temp sensor
 // vref is one of:  REFVSEL_0  - 1.5v vref
@@ -25,26 +26,29 @@ void adc10_read(const uint8_t port, uint16_t *rv, const uint8_t vref)
     // enable reference
     if ((REFCTL0 & 0x30) != vref) {
         // need to change vref
-        adc10_halt();
-        REFCTL0 = REFMSTR + vref;
+        REFCTL0 &= ~0x30 + REFON;
+        REFCTL0 |= REFMSTR + vref + REFON;
+    } else {
+        REFCTL0 |= REFMSTR + REFON;
     }
-    REFCTL0 |= REFMSTR + REFON;
     ADC10CTL0 &= ~ADC10ENC;
     // enable ADC10_A, single channel single conversion
     ADC10CTL0 = ADC10SHT_2 + ADC10ON;
-    ADC10CTL1 = ADC10SHP;
+    ADC10CTL1 = ADC10SHP + ADC10DIV1 + ADC10DIV0;
     // use internal Vref(+) AVss (-)
     ADC10MCTL0 = ADC10SREF_1 + port;
     ADC10CTL2 |= ADC10PDIV_2 + ADC10SR;
+    adcready = 0;
     adc10_rv = rv;
     // trigger conversion
     ADC10IE = ADC10IE0;
     ADC10CTL0 |= ADC10ENC + ADC10SC;
+    while (!adcready);
 }
 
 void adc10_halt(void)
 {
-    ADC10CTL0 = 0;
+    ADC10CTL0 &= ~ADC10ON;
     REFCTL0 &= ~REFON;
 }
 
@@ -54,5 +58,6 @@ void adc10_ISR(void)
     uint16_t iv = ADC10IV;
     if (iv == ADC10IV_ADC10IFG) {
         *adc10_rv = ADC10MEM0;
+        adcready = 1;
     }
 }
