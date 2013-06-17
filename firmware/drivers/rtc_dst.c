@@ -30,7 +30,7 @@
 #define LAST_SUN_OF_MON(mon,days,year) ((days)-rtc_dst_day_of_week((year),(mon),(days)))
 #define DSTNUM(x,y,z) (((uint16_t)(x)*1000)+(uint16_t)(y*10)+(uint16_t)(z))
 
-#include "rtca.h"
+#include "rtc.h"
 
 #include "rtc_dst.h"
 
@@ -172,7 +172,7 @@ uint8_t rtc_dst_day_of_week(uint16_t year, uint8_t month, uint8_t day)
 {
     /* Calculate days since 2000-01-01 */
     uint32_t tmp = (year % 200) * 365;
-    tmp += ((year % 200) / 4);  // leap days
+    tmp += (((year % 200) + 3) / 4); // leap days
 
     switch (month) {            // using lots of drop-through!
     case 12:

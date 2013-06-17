@@ -199,8 +199,7 @@ void main_init(void)
     UCSCTL6 &= ~(XT2DRIVE0 + XT1DRIVE0);
 
     P1SEL = 0x0;
-    //P1DIR = 0xf0;
-    P1DIR = 0xf8;
+    P1DIR = 0xf0;
     P1OUT = 0x40;
     P1REN = 0x0f;
 
@@ -213,7 +212,7 @@ void main_init(void)
     P3OUT = 0x0;
 
     P4SEL = 0x0e;
-    P4DIR = 0xff;
+    P4DIR = 0xfe;
     P4REN = 0x01;
     P4OUT = 0x0;
 
