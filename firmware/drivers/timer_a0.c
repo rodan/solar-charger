@@ -43,7 +43,8 @@ void timer_a0_delay(uint32_t microseconds)
     while (1) {
         __no_operation();
 #ifdef USE_WATCHDOG
-        WDTCTL = WDTPW + WDTIS__512K + WDTSSEL__ACLK + WDTCNTCL;
+        // reset watchdog
+        WDTCTL = (WDTCTL & 0xff) | WDTPW | WDTCNTCL;
 #endif
         if (timer_a0_last_event & TIMER_A0_EVENT_CCR4)
             break;

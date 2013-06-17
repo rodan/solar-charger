@@ -40,7 +40,7 @@
 #define true                1
 #define false               0
 
-#define RELAY_MIN_V         10
+#define RELAY_MIN_V         1000                // 10v * printf multiplier
 
 void main_init(void);
 

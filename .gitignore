@@ -9,6 +9,5 @@ sc.cflags
 *.s
 *.swp
 config.pyc
-config.h
 output.map
 tags

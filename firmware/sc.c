@@ -105,6 +105,7 @@ static void do_smth(enum sys_message msg)
                         relay_opt_ena_old, relay_opt_ena );
                 f_write(&f, str_temp, strlen(str_temp), &bw);
                 f_close(&f);
+                uart_tx_str(str_temp, strlen(str_temp));
             } else {
                 die(2, rc);
             }
@@ -161,8 +162,6 @@ int main(void)
         __no_operation();
         wake_up();
         //check_ir();
-        //timer0_delay(1000, LPM3_bits);
-        //P4OUT ^= BIT7;              // blink led
 #ifdef USE_WATCHDOG
         // reset watchdog counter
         WDTCTL = (WDTCTL & 0xff) | WDTPW | WDTCNTCL;
@@ -175,9 +174,9 @@ void main_init(void)
 {
     uint16_t timeout = 5000;
 
-    // watchdog triggers after 16 seconds when not cleared
+    // watchdog triggers after 4 minutes when not cleared
 #ifdef USE_WATCHDOG
-    WDTCTL = WDTPW + WDTIS__512K + WDTSSEL__ACLK;
+    WDTCTL = WDTPW + WDTIS__8192K + WDTSSEL__ACLK + WDTCNTCL;
 #else
     WDTCTL = WDTPW + WDTHOLD;
 #endif
@@ -230,19 +229,25 @@ void main_init(void)
     PJDIR = 0xFF;
 
     /*
-       __disable_interrupt();
-       // get write-access to port mapping registers
-       //PMAPPWD = 0x02D52;
-       PMAPPWD = PMAPKEY;
-       PMAPCTL = PMAPRECFG;
-       // MCLK set out to 4.0
-       P4MAP0 = PM_MCLK;
-       //P4MAP0 = PM_RTCCLK;
-       PMAPPWD = 0;
-       __enable_interrupt();
+    // send MCLK to P4.0
+    __disable_interrupt();
+    // get write-access to port mapping registers
+    //PMAPPWD = 0x02D52;
+    PMAPPWD = PMAPKEY;
+    PMAPCTL = PMAPRECFG;
+    // MCLK set out to 4.0
+    P4MAP0 = PM_MCLK;
+    //P4MAP0 = PM_RTCCLK;
+    PMAPPWD = 0;
+    __enable_interrupt();
+    P4DIR |= BIT0;
+    P4SEL |= BIT0;
+    */
 
-       P4DIR |= BIT0;
-       P4SEL |= BIT0;
+    /*
+    // send ACLK to P1.0
+    P1DIR |= BIT0;
+    P1SEL |= BIT0;
     */
 
     relay_ch_ena = false;
@@ -307,14 +312,11 @@ void check_events(void)
 
 void opt_power_enable()
 {
-    //P1DIR |= BIT6;
     P1OUT &= ~BIT6;
 }
 
 void opt_power_disable()
 {
-    //P1DIR &= ~BIT6;
-    //P1DIR |= BIT6;
     P1OUT |= BIT6;
     P5DIR &= ~(BIT0 + BIT1);
 }
