@@ -52,36 +52,26 @@ static void do_smth(enum sys_message msg)
 {
     uint16_t q_bat = 0, q_pv = 0, q_itemp = 0;
 
-    sprintf(str_temp, "%02d:%02d:%02d ", rtca_time.hour, rtca_time.min, rtca_time.sec);
-    uart_tx_str(str_temp, strlen(str_temp));
-
+    //sprintf(str_temp, "%02d:%02d:%02d\r\n", rtca_time.hour, rtca_time.min, rtca_time.sec);
+    //uart_tx_str(str_temp, strlen(str_temp));
     relay_ch_ena_old = relay_ch_ena;
     relay_opt_ena_old = relay_opt_ena;
-
-    adc10_read(10, &q_itemp, REFVSEL_0);
-    itemp = ((q_itemp * VREF_1_5) / 102.3 - 6.88) * 396.8;
     // see temperature sensor transfer function
     // in slau208 datasheet page ~707
-    //sprintf(str_temp, "temp=%d, %d.%02ddC\r\n", q_itemp,
-    //        (uint16_t) itemp / 10, (uint16_t) itemp % 10);
-    //uart_tx_str(str_temp, strlen(str_temp));
-
+    adc10_read(10, &q_itemp, REFVSEL_0);
+    itemp = ((q_itemp * VREF_1_5) / 102.3 - 6.88) * 396.8;
     adc10_read(0, &q_bat, REFVSEL_2);
     v_bat = q_bat * VREF_2_5 * DIV_BAT;
-    //sprintf(str_temp, "q_bat=%d v_bat=%d.%02dV\r\n", q_bat,
-    //        (uint16_t) v_bat / 100, (uint16_t) v_bat % 100);
-    //uart_tx_str(str_temp, strlen(str_temp));
-
     adc10_read(2, &q_pv, REFVSEL_2);
     v_pv = q_pv * VREF_2_5 * DIV_PV;
-    //sprintf(str_temp, "q_pv=%d v_pv=%d.%02dV\r\n", q_pv, (uint16_t) v_pv / 100,
-    //        (uint16_t) v_pv % 100);
-    //uart_tx_str(str_temp, strlen(str_temp));
     adc10_halt();
 
     // values are multiplied by 100 for snprintf
     if (v_bat > 1410) {
         charge_disable();
+    } else if (v_bat < 300) {
+        // do nothing since we run on the 3v Li cell
+        return;
     } else if (v_bat < 1280) {
         charge_enable();
     }
@@ -93,7 +83,9 @@ static void do_smth(enum sys_message msg)
     timer_a0_delay(50000);
     disk_initialize(0);
 
-    if (detectCard()) {
+    rc = detectCard();
+
+    if (rc) {
         uint16_t bw;
         f_opendir(&dir, "/");
         snprintf(str_temp, 5, "%d", rtca_time.year);
@@ -103,9 +95,10 @@ static void do_smth(enum sys_message msg)
             rc = f_open(&f, str_temp, FA_WRITE | FA_OPEN_ALWAYS);
             if (!rc) {
                 f_lseek(&f, f_size(&f));
-                snprintf(str_temp, 37, "%04d%02d%02d %02d:%02d %02d.%02d %02d.%02d %d %d %d %d\r\n",
+                snprintf(str_temp, 43, "%04d%02d%02d %02d:%02d % 2d.%1d %02d.%02d %02d.%02d %d %d %d %d\r\n",
                         rtca_time.year, rtca_time.mon, rtca_time.day,
                         rtca_time.hour, rtca_time.min,
+                        (uint16_t) itemp / 10, (uint16_t) itemp % 10,
                         (uint16_t) v_bat / 100, (uint16_t) v_bat % 100, 
                         (uint16_t) v_pv / 100, (uint16_t) v_pv % 100,
                         relay_ch_ena_old, relay_ch_ena,
@@ -118,6 +111,8 @@ static void do_smth(enum sys_message msg)
         } else {
                 die(3, rc);
         }
+    } else {
+        die(1, rc);
     }
     f_mount(0, NULL);
     SDCard_end();
@@ -218,12 +213,10 @@ void main_init(void)
     P3DIR = 0x1f;
     P3OUT = 0x0;
 
-    P4SEL = 0x0;
-    //P4DIR = 0xfe;
+    P4SEL = 0x0e;
     P4DIR = 0xff;
+    P4REN = 0x01;
     P4OUT = 0x0;
-    //P4REN = 0x1;
-    P4REN = 0x0;
 
     //P5SEL is set above
     P5DIR = 0x0;
@@ -314,13 +307,15 @@ void check_events(void)
 
 void opt_power_enable()
 {
-    P1DIR |= BIT6;
+    //P1DIR |= BIT6;
     P1OUT &= ~BIT6;
 }
 
 void opt_power_disable()
 {
-    P1DIR &= ~BIT6;
+    //P1DIR &= ~BIT6;
+    //P1DIR |= BIT6;
+    P1OUT |= BIT6;
     P5DIR &= ~(BIT0 + BIT1);
 }
 

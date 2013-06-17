@@ -80,8 +80,9 @@ void SDCard_init (void)
 void SDCard_end(void)
 {
     SPI_SEL &= ~(SPI_CLK | SPI_SOMI | SPI_SIMO);
-    SPI_DIR &= ~(SPI_CLK | SPI_SIMO);
+    SPI_DIR &= ~(SPI_CLK | SPI_SIMO | SPI_SOMI);
     SPI_REN &= ~(SPI_SOMI | SPI_SIMO);
+    SD_CS_DIR &= ~SD_CS;
 }
 
 /***************************************************************************//**
