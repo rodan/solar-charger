@@ -50,31 +50,34 @@ void die(uint8_t loc, FRESULT rc)
 
 static void do_smth(enum sys_message msg)
 {
-    uint16_t q_bat = 0, q_pv = 0, q_itemp = 0;
+    uint16_t q_bat = 0;
 
-    //sprintf(str_temp, "%02d:%02d:%02d\r\n", rtca_time.hour, rtca_time.min, rtca_time.sec);
-    //uart_tx_str(str_temp, strlen(str_temp));
-    relay_ch_ena_old = relay_ch_ena;
-    relay_opt_ena_old = relay_opt_ena;
+    adc10_read(0, &q_bat, REFVSEL_2);
+    v_bat = q_bat * VREF_2_5 * DIV_BAT;
+
+    // values are multiplied by 100 for snprintf
+    if (v_bat < 300) {
+        // do nothing since we run on the 3v Li cell
+        adc10_halt();
+        return;
+    } else if (v_bat > 1410) {
+        charge_disable();
+    } else if (v_bat < 1280) {
+        charge_enable();
+    }
+
+    uint16_t q_pv = 0, q_itemp = 0;
+
+    adc10_read(2, &q_pv, REFVSEL_2);
+    v_pv = q_pv * VREF_2_5 * DIV_PV;
     // see temperature sensor transfer function
     // in slau208 datasheet page ~707
     adc10_read(10, &q_itemp, REFVSEL_0);
     itemp = ((q_itemp * VREF_1_5) / 102.3 - 6.88) * 396.8;
-    adc10_read(0, &q_bat, REFVSEL_2);
-    v_bat = q_bat * VREF_2_5 * DIV_BAT;
-    adc10_read(2, &q_pv, REFVSEL_2);
-    v_pv = q_pv * VREF_2_5 * DIV_PV;
     adc10_halt();
 
-    // values are multiplied by 100 for snprintf
-    if (v_bat > 1410) {
-        charge_disable();
-    } else if (v_bat < 300) {
-        // do nothing since we run on the 3v Li cell
-        return;
-    } else if (v_bat < 1280) {
-        charge_enable();
-    }
+    relay_ch_ena_old = relay_ch_ena;
+    relay_opt_ena_old = relay_opt_ena;
 
     FRESULT rc;
     f_mount(0, &fatfs);
