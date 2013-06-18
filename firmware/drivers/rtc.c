@@ -42,7 +42,11 @@ void rtca_init(void)
        and enable read ready interrupts
        and set time event interrupts at each minute
        also enable alarm interrupts */
-    RTCCTL01 |= RTCMODE | RTCRDYIE | RTCAIE;
+#ifdef CALIBRATION
+    RTCCTL01 |= RTCMODE | RTCRDYIE | RTCAIE | RTCTEVIE;
+#else
+    RTCCTL01 |= RTCMODE | RTCAIE | RTCTEVIE;
+#endif
 
     RTCSEC = rtca_time.sec;
     RTCMIN = rtca_time.min;
@@ -55,9 +59,6 @@ void rtca_init(void)
 
     /* Enable the RTC */
     rtca_start();
-
-    /* Enable minutes interrupts */
-    RTCCTL01 |= RTCTEVIE;
 
 #ifdef CONFIG_RTC_DST
     /* initialize DST module */

@@ -37,8 +37,9 @@ FATFS fatfs;
 DIR dir;
 FIL f;
 
-float v_bat, v_pv, itemp;
+float v_bat, v_bat_old, v_pv, itemp;
 
+uint8_t first_start, last_ch_ena;
 uint8_t relay_ch_ena, relay_ch_ena_old;
 uint8_t relay_opt_ena, relay_opt_ena_old;
 
@@ -48,12 +49,49 @@ void die(uint8_t loc, FRESULT rc)
     uart_tx_str(str_temp, strlen(str_temp));
 }
 
-static void do_smth(enum sys_message msg)
+#ifdef CALIBRATION
+static void do_calib(enum sys_message msg)
 {
-    uint16_t q_bat = 0;
+    uint16_t q_bat = 0, q_pv = 0, q_itemp = 0;
 
     adc10_read(0, &q_bat, REFVSEL_2);
     v_bat = q_bat * VREF_2_5 * DIV_BAT;
+    adc10_read(2, &q_pv, REFVSEL_2);
+    v_pv = q_pv * VREF_2_5 * DIV_PV;
+    adc10_read(10, &q_itemp, REFVSEL_0);
+    itemp = ((q_itemp * VREF_1_5) / 102.3 - 6.88) * 396.8;
+    adc10_halt();
+
+/*
+-21.3 | bat 1023 22.22 | pv 1023 22.22DA0
+*/
+    snprintf(str_temp, 42, "% 2d.%1d | bat % 4d %02d.%02d | pv % 4d %02d.%02d\r\n",
+                        (uint16_t) itemp / 10, (uint16_t) itemp % 10,
+                        q_bat,
+                        (uint16_t) v_bat / 100, (uint16_t) v_bat % 100, 
+                        q_pv,
+                        (uint16_t) v_pv / 100, (uint16_t) v_pv % 100);
+    uart_tx_str(str_temp, strlen(str_temp));
+
+}
+#else
+static void do_smth(enum sys_message msg)
+{
+    uint16_t q_bat = 0;
+    uint16_t q_pv = 0, q_itemp = 0;
+
+    v_bat_old = v_bat;
+    adc10_read(0, &q_bat, REFVSEL_2);
+    v_bat = q_bat * VREF_2_5 * DIV_BAT;
+
+    // this has to be done periodically because 
+    // v_bat could be < RELAY_MIN_V during main_init()
+    if (first_start) {
+        relay_ch_ena = true;
+        relay_opt_ena = true;
+        sw_disable();
+        charge_disable();
+    }
 
     // values are multiplied by 100 for snprintf
     if (v_bat < 300) {
@@ -62,11 +100,19 @@ static void do_smth(enum sys_message msg)
         return;
     } else if (v_bat > 1410) {
         charge_disable();
-    } else if (v_bat < 1280) {
+    } else if (!relay_ch_ena && (last_ch_ena != rtca_time.hour) && !first_start) {
+        // once an hour give some juice to the charge controller
         charge_enable();
+        timer_a0_delay(50000);
+        charge_disable();
     }
 
-    uint16_t q_pv = 0, q_itemp = 0;
+    // once a while switch off the charge relay so we can read the PV voltage
+    if (relay_ch_ena && ((rtca_time.min == 0) || (v_bat_old - v_bat > 10))) {
+        charge_disable();
+        // wait for cap to charge
+        timer_a0_delay(5000);
+    }
 
     adc10_read(2, &q_pv, REFVSEL_2);
     v_pv = q_pv * VREF_2_5 * DIV_PV;
@@ -75,6 +121,12 @@ static void do_smth(enum sys_message msg)
     adc10_read(10, &q_itemp, REFVSEL_0);
     itemp = ((q_itemp * VREF_1_5) / 102.3 - 6.88) * 396.8;
     adc10_halt();
+
+    if (!relay_ch_ena) {
+        if ((v_pv > v_bat) && (v_bat < 1410)) {
+            charge_enable();
+        }
+    }
 
     relay_ch_ena_old = relay_ch_ena;
     relay_opt_ena_old = relay_opt_ena;
@@ -124,6 +176,7 @@ static void do_smth(enum sys_message msg)
 
     //P4OUT ^= BIT7;              // blink led
 }
+#endif // !CALIBRATION
 
 void check_ir(void)
 {
@@ -157,8 +210,11 @@ int main(void)
      */
 
     //LCD_Init();
+#ifdef CALIBRATION
+    sys_messagebus_register(&do_calib, SYS_MSG_RTC_SECOND);
+#else
     sys_messagebus_register(&do_smth, SYS_MSG_RTC_MINUTE);
-    //sys_messagebus_register(&do_smth, SYS_MSG_RTC_SECOND);
+#endif
 
     while (1) {
         sleep();
@@ -254,6 +310,8 @@ void main_init(void)
 
     relay_ch_ena = false;
     relay_opt_ena = false;
+    first_start = true;
+    last_ch_ena = 0;
 
     rtca_init();
     timer_a0_init();
@@ -263,7 +321,6 @@ void sleep(void)
 {
     // turn off internal VREF, XT2, i2c power
     UCSCTL6 |= XT2OFF;
-    //opt_power_disable();
     // disable VUSB LDO and SLDO
     USBKEYPID = 0x9628;
     USBPWRCTL &= ~(SLDOEN + VUSBEN);
@@ -332,6 +389,7 @@ void charge_enable(void)
         timer_a0_delay(50000);
         P1OUT &= ~BIT4;
         relay_ch_ena = true;
+        last_ch_ena = rtca_time.hour;
     }
 }
 
@@ -344,6 +402,7 @@ void charge_disable(void)
         timer_a0_delay(50000);
         P1OUT &= ~BIT5;
         relay_ch_ena = false;
+        first_start = false;
     }
 }
 
@@ -369,5 +428,6 @@ void sw_disable(void)
         timer_a0_delay(50000);
         P2OUT &= ~BIT0;
         relay_opt_ena = false;
+        first_start = false;
     }
 }
