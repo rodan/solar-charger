@@ -40,8 +40,25 @@ FIL f;
 float v_bat, v_bat_old, v_pv, itemp;
 
 uint8_t first_start, last_ch_ena;
-uint8_t relay_ch_ena, relay_ch_ena_old;
-uint8_t relay_opt_ena, relay_opt_ena_old;
+uint8_t relay_ch_ena, relay_opt_ena;
+
+// acts register
+// 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
+//                                   |  |  |  |  |
+//                                   |  |  |  |   --> first start
+//                                   |  |  |   -----> charge stopped, batt overcharged
+//                                   |  |   --------> start up the charge controller
+//                                   |   -----------> stop the charge to read v_pv
+//                                    --------------> enable charging
+// relay_acts register
+// 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
+//  opt deact |  opt act  | ch deact  | ch act
+// bits[0-3]   - number of charging relay activations per 1min cycle
+// bits[4-7]   - number of charging relay deactivations per 1min cycle
+// bits[8-11]  - number of opt relay activations per 1min cycle
+// bits[12-15] - number of opt relay deactivations per 1min cycle
+
+uint16_t relay_acts, acts;
 
 void die(uint8_t loc, FRESULT rc)
 {
@@ -80,6 +97,9 @@ static void do_smth(enum sys_message msg)
     uint16_t q_bat = 0;
     uint16_t q_pv = 0, q_itemp = 0;
 
+    relay_acts = 0;
+    acts = 0;
+
     v_bat_old = v_bat;
     adc10_read(0, &q_bat, REFVSEL_2);
     v_bat = q_bat * VREF_2_5 * DIV_BAT;
@@ -91,6 +111,7 @@ static void do_smth(enum sys_message msg)
         relay_opt_ena = true;
         sw_disable();
         charge_disable();
+        acts |= BIT0;
     }
 
     // values are multiplied by 100 for snprintf
@@ -100,11 +121,13 @@ static void do_smth(enum sys_message msg)
         return;
     } else if (v_bat > 1410) {
         charge_disable();
-    } else if (!relay_ch_ena && (last_ch_ena != rtca_time.hour) && !first_start) {
+        acts |= BIT1;
+    } else if ((!relay_ch_ena) && (last_ch_ena != rtca_time.hour) && (!first_start)) {
         // once an hour give some juice to the charge controller
         charge_enable();
         timer_a0_delay(50000);
         charge_disable();
+        acts |= BIT2;
     }
 
     // once a while switch off the charge relay so we can read the PV voltage
@@ -112,6 +135,7 @@ static void do_smth(enum sys_message msg)
         charge_disable();
         // wait for cap to charge
         timer_a0_delay(5000);
+        acts |= BIT3;
     }
 
     adc10_read(2, &q_pv, REFVSEL_2);
@@ -123,13 +147,11 @@ static void do_smth(enum sys_message msg)
     adc10_halt();
 
     if (!relay_ch_ena) {
-        if ((v_pv > v_bat) && (v_bat < 1410)) {
+        if ((v_pv > v_bat) && (v_pv < 1900) && (v_bat < 1410)) {
             charge_enable();
+            acts |= BIT4;
         }
     }
-
-    relay_ch_ena_old = relay_ch_ena;
-    relay_opt_ena_old = relay_opt_ena;
 
     FRESULT rc;
     f_mount(0, &fatfs);
@@ -150,14 +172,14 @@ static void do_smth(enum sys_message msg)
             rc = f_open(&f, str_temp, FA_WRITE | FA_OPEN_ALWAYS);
             if (!rc) {
                 f_lseek(&f, f_size(&f));
-                snprintf(str_temp, 43, "%04d%02d%02d %02d:%02d % 2d.%1d %02d.%02d %02d.%02d %d %d %d %d\r\n",
+                //20130620 07:12 -34.5 12.30 13.40 1 1 0xffff 0xffff__0
+                snprintf(str_temp, 53, "%04d%02d%02d %02d:%02d % 2d.%1d %02d.%02d %02d.%02d %d %d 0x%04x 0x%04x\r\n",
                         rtca_time.year, rtca_time.mon, rtca_time.day,
                         rtca_time.hour, rtca_time.min,
                         (uint16_t) itemp / 10, (uint16_t) itemp % 10,
                         (uint16_t) v_bat / 100, (uint16_t) v_bat % 100, 
                         (uint16_t) v_pv / 100, (uint16_t) v_pv % 100,
-                        relay_ch_ena_old, relay_ch_ena,
-                        relay_opt_ena_old, relay_opt_ena );
+                        relay_ch_ena, relay_opt_ena, relay_acts, acts);
                 f_write(&f, str_temp, strlen(str_temp), &bw);
                 f_close(&f);
                 uart_tx_str(str_temp, strlen(str_temp));
@@ -312,6 +334,7 @@ void main_init(void)
     relay_opt_ena = false;
     first_start = true;
     last_ch_ena = 0;
+    v_bat = 0;
 
     rtca_init();
     timer_a0_init();
@@ -389,6 +412,7 @@ void charge_enable(void)
         timer_a0_delay(50000);
         P1OUT &= ~BIT4;
         relay_ch_ena = true;
+        relay_acts += 1;
         last_ch_ena = rtca_time.hour;
     }
 }
@@ -402,6 +426,7 @@ void charge_disable(void)
         timer_a0_delay(50000);
         P1OUT &= ~BIT5;
         relay_ch_ena = false;
+        relay_acts += 16;
         first_start = false;
     }
 }
@@ -415,6 +440,7 @@ void sw_enable(void)
         timer_a0_delay(50000);
         P1OUT &= ~BIT7;
         relay_opt_ena = true;
+        relay_acts += 256;
     }
 }
 
@@ -429,5 +455,6 @@ void sw_disable(void)
         P2OUT &= ~BIT0;
         relay_opt_ena = false;
         first_start = false;
+        relay_acts += 4096;
     }
 }
