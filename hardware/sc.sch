@@ -16721,12 +16721,12 @@ Source: http://www.diodes.com/datasheets/ds23001.pdf</description>
 <part name="R14" library="rcl" deviceset="R-EU_" device="R0805W" value="1M"/>
 <part name="GND37" library="SparkFun" deviceset="GND" device=""/>
 <part name="GND47" library="SparkFun" deviceset="GND" device=""/>
-<part name="Q4" library="Simplex-DiscreteSemi" deviceset="MOSFET-PCHANNEL" device="SMD_POWER" value="si2305cd"/>
+<part name="Q4" library="Simplex-DiscreteSemi" deviceset="MOSFET-PCHANNEL" device="SMD_POWER" value="IRLML9301"/>
 <part name="T1" library="transistor" deviceset="BC846" device=""/>
 <part name="R16" library="rcl" deviceset="R-EU_" device="R0805W" value="100k"/>
 <part name="GND48" library="SparkFun" deviceset="GND" device=""/>
 <part name="R19" library="rcl" deviceset="R-EU_" device="R0805W" value="10k"/>
-<part name="Q7" library="Simplex-DiscreteSemi" deviceset="MOSFET-PCHANNEL" device="SMD_POWER" value="si2305cd"/>
+<part name="Q7" library="Simplex-DiscreteSemi" deviceset="MOSFET-PCHANNEL" device="SMD_POWER" value="IRLML9301"/>
 <part name="T3" library="transistor" deviceset="BC846" device=""/>
 <part name="R20" library="rcl" deviceset="R-EU_" device="R0805W" value="100k"/>
 <part name="GND49" library="SparkFun" deviceset="GND" device=""/>
@@ -16747,12 +16747,12 @@ Source: http://www.diodes.com/datasheets/ds23001.pdf</description>
 <part name="R10" library="rcl" deviceset="R-EU_" device="R0805W" value="1K"/>
 <part name="GND1" library="SparkFun" deviceset="GND" device=""/>
 <part name="K2" library="relay" deviceset="RT424F*" device="4" technology="12"/>
-<part name="Q3" library="Simplex-DiscreteSemi" deviceset="MOSFET-PCHANNEL" device="SMD_POWER" value="si2305cd"/>
+<part name="Q3" library="Simplex-DiscreteSemi" deviceset="MOSFET-PCHANNEL" device="SMD_POWER" value="IRLML9301"/>
 <part name="T2" library="transistor" deviceset="BC846" device=""/>
 <part name="R1" library="rcl" deviceset="R-EU_" device="R0805W" value="100k"/>
 <part name="GND7" library="SparkFun" deviceset="GND" device=""/>
 <part name="R2" library="rcl" deviceset="R-EU_" device="R0805W" value="10k"/>
-<part name="Q5" library="Simplex-DiscreteSemi" deviceset="MOSFET-PCHANNEL" device="SMD_POWER" value="si2305cd"/>
+<part name="Q5" library="Simplex-DiscreteSemi" deviceset="MOSFET-PCHANNEL" device="SMD_POWER" value="IRLML9301"/>
 <part name="T4" library="transistor" deviceset="BC846" device=""/>
 <part name="R11" library="rcl" deviceset="R-EU_" device="R0805W" value="100k"/>
 <part name="GND8" library="SparkFun" deviceset="GND" device=""/>
