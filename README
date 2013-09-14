@@ -1,0 +1,22 @@
+
+12v lead-acid battery charger for 15-36V photovoltaic cells
+
+
+ source:       https://github.com/rodan/solar-charger 
+ author:       Petre Rodan <petre.rodan@simplex.ro>
+ license:      GNU GPLv3
+
+Features:
+ - an MSP430F5510 uC controls all aspects of charging a 12v Pb battery
+ - programming either via spy-bi-wire or usb (untested)
+ - logging capability to a uSd card
+ - backup 3v Li cell for keeping the RTC up-to-date
+ - analog readout of battery voltage, input voltage, charge current, thermistor temperature, internal temperature
+ - possibility to stop the charge if a condition is met
+ - 8 status leds for verbose blinkiness
+ - very low quiescent current
+
+rev1 used a LandStar charge controller that got replaced in rev3 with a PB137ACV ic
+
+
+
