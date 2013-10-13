@@ -6,6 +6,8 @@
 #define CONFIG_RTC_DST
 #define CONFIG_RTC_DST_ZONE 4
 
+//#define USE_LANDSTAR
+
 //#define CALIBRATION
 
 //#define DATALOGGER

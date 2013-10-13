@@ -121,15 +121,17 @@ static void do_smth(enum sys_message msg)
     } else if (v_bat > 1410) {
         charge_disable();
         acts |= BIT1;
+#ifdef USE_LANDSTAR
     } else if ((!relay_ch_ena) && (last_ch_ena != rtca_time.hour)) {
         // once an hour give some juice to the charge controller
         charge_enable();
         timer_a0_delay(50000);
         charge_disable();
         acts |= BIT2;
+#endif
     }
     // once a while switch off the charge relay so we can read the PV voltage
-    if (relay_ch_ena && ((rtca_time.min % 10 == 1) || (v_bat_old - v_bat > 10))) {
+    if (relay_ch_ena && ((rtca_time.min % 10 == 1) || (v_bat_old - v_bat > 10) || (v_pv + 2 < v_bat))) {
         charge_disable();
         // wait for cap to discharge
         timer_a0_delay(1000000);
@@ -145,7 +147,7 @@ static void do_smth(enum sys_message msg)
     adc10_halt();
 
     if (!relay_ch_ena) {
-        if ((v_pv > v_bat) && (v_pv < 1900) && (v_bat < 1410)) {
+        if ((v_pv + 2 > v_bat) && (v_pv < 1900) && (v_bat < 1410)) {
             charge_enable();
             acts |= BIT4;
         }
