@@ -1449,7 +1449,7 @@ design rules under a new name.</description>
 <element name="R22" library="rcl" package="R0805W" value="2M" x="78.4" y="25.2" rot="R90"/>
 <element name="R24" library="rcl" package="R0805W" value="240k" x="78.4" y="29.3" rot="R90"/>
 <element name="R25" library="rcl" package="R0805W" value="2M" x="75.6" y="25.2" rot="R90"/>
-<element name="R26" library="rcl" package="R0805W" value="240k" x="73.5" y="29.3" rot="R90"/>
+<element name="R26" library="rcl" package="R0805W" value="470k" x="73.5" y="29.3" rot="R90"/>
 <element name="R3" library="rcl" package="R0805W" value="100k" x="48.5" y="40.2" rot="R90"/>
 <element name="Q1" library="Simplex-DiscreteSemi" package="SOT23-3_POWER" value="si2305cd" x="45.2" y="40.2" rot="R90"/>
 <element name="R8" library="rcl" package="R0805W" value="10k" x="50.7" y="40.2" rot="R270"/>
@@ -1483,8 +1483,8 @@ design rules under a new name.</description>
 <element name="G1" library="Simplex-Battery" package="HU2032-LF" value="HU2032-LF" x="40.1" y="25.2" rot="MR90"/>
 <element name="C15" library="rcl" package="C1206" value="10uF" x="40.1" y="14.1"/>
 <element name="U$8" library="Simplex-Switches" package="6X3.5_TACTILE_SW" value="USB_BSL" x="63.5" y="17"/>
-<element name="C18" library="rcl" package="C0805" value="10nF" x="80.5" y="29.3" rot="R90"/>
-<element name="C19" library="rcl" package="C0805" value="10nF" x="75.6" y="29.3" rot="R90"/>
+<element name="C18" library="rcl" package="C0805" value="100nF" x="80.5" y="29.3" rot="R90"/>
+<element name="C19" library="rcl" package="C0805" value="100nF" x="75.6" y="29.3" rot="R90"/>
 <element name="JP1" library="SparkFun-Connectors" package="1X04" value="i2c" x="80.6" y="53.2" rot="R180"/>
 <element name="X3" library="con-phoenix-508" package="MKDSN1,5/4-5,08" value="MKDSN1,5/4-5,08" x="10.5" y="5.7" rot="R180">
 <attribute name="OC_NEWARK" value="70R0300" x="10.5" y="5.7" size="1.778" layer="27" rot="R180" display="off"/>
@@ -1520,14 +1520,14 @@ design rules under a new name.</description>
 <element name="LED4" library="led" package="CHIP-LED0805" value="green" x="34.2" y="28" rot="R270"/>
 <element name="R20" library="rcl" package="R0805W" value="1K" x="34.2" y="21.4"/>
 <element name="LED5" library="led" package="CHIP-LED0805" value="green" x="34.2" y="23.6" rot="R270"/>
-<element name="R21" library="rcl" package="R0805W" value="1K" x="34.2" y="43.4" rot="R180"/>
+<element name="R21" library="rcl" package="R0805W" value="220k" x="34.2" y="43.4" rot="R180"/>
 <element name="LED6" library="led" package="CHIP-LED0805" value="green" x="34.2" y="45.6" rot="R90"/>
-<element name="R28" library="rcl" package="R0805W" value="1K" x="34.2" y="34.6" rot="R180"/>
+<element name="R28" library="rcl" package="R0805W" value="220k" x="34.2" y="34.6" rot="R180"/>
 <element name="LED7" library="led" package="CHIP-LED0805" value="green" x="34.2" y="36.8" rot="R90"/>
-<element name="R36" library="rcl" package="R0805W" value="1K" x="34.2" y="39" rot="R180"/>
+<element name="R36" library="rcl" package="R0805W" value="220k" x="34.2" y="39" rot="R180"/>
 <element name="LED8" library="led" package="CHIP-LED0805" value="green" x="34.2" y="41.2" rot="R90"/>
 <element name="D2" library="diode" package="C1702-05" value="SB560" x="14.1" y="32.7" rot="R180"/>
-<element name="RL" library="rcl" package="R0805W" value="150k" x="27.9" y="30.4"/>
+<element name="RL" library="rcl" package="R0805W" value="150k" x="27.9" y="30.2"/>
 <element name="C28" library="rcl" package="C0805" value="100nF" x="75" y="12.9" rot="R270"/>
 </elements>
 <signals>
@@ -2317,7 +2317,7 @@ design rules under a new name.</description>
 <wire x1="11.8" y1="37.2" x2="11.8" y2="37.9" width="0.6096" layer="1"/>
 <wire x1="18.1" y1="15.1" x2="22.9" y2="20" width="5" layer="16"/>
 <contactref element="RL" pad="2"/>
-<wire x1="28.9525" y1="30.4" x2="28.9525" y2="33.6525" width="0.4064" layer="1"/>
+<wire x1="28.9525" y1="30.2" x2="28.9525" y2="33.6525" width="0.4064" layer="1"/>
 <wire x1="28.9525" y1="33.6525" x2="29.8" y2="34.5" width="0.4064" layer="1"/>
 <polygon width="0.254" layer="1" isolate="0.3048" thermals="no">
 <vertex x="0.9" y="0.9"/>
@@ -2914,7 +2914,7 @@ design rules under a new name.</description>
 <wire x1="76.5" y1="8.9" x2="75.4" y2="8.9" width="0.254" layer="16"/>
 <contactref element="RL" pad="1"/>
 <wire x1="26.7" y1="31.7" x2="26.8475" y2="31.7" width="0.4064" layer="1"/>
-<wire x1="26.8475" y1="31.7" x2="26.8475" y2="30.4" width="0.4064" layer="1"/>
+<wire x1="26.8475" y1="31.7" x2="26.8475" y2="30.2" width="0.4064" layer="1"/>
 <contactref element="C28" pad="2"/>
 <wire x1="75" y1="11.95" x2="75" y2="10.8" width="0.4064" layer="1"/>
 <wire x1="75" y1="10.8" x2="75.5" y2="10.3" width="0.4064" layer="1"/>
