@@ -17373,7 +17373,7 @@ Source: http://www.diodes.com/datasheets/ds23001.pdf</description>
 <part name="R36" library="rcl" deviceset="R-EU_" device="R0805W" value="220k"/>
 <part name="LED8" library="led" deviceset="LED" device="CHIP-LED0805" value="green"/>
 <part name="D2" library="diode" deviceset="DIODE-" device="C1702-05" value="SB560"/>
-<part name="RL" library="rcl" deviceset="R-EU_" device="R0805W" value="150k"/>
+<part name="RL" library="rcl" deviceset="R-EU_" device="R0805W" value="110k"/>
 <part name="C28" library="rcl" deviceset="C-EU" device="C0805" value="100nF"/>
 <part name="GND49" library="SparkFun" deviceset="GND" device=""/>
 </parts>
