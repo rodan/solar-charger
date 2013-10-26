@@ -45,7 +45,8 @@ void rtca_init(void)
 #ifdef CALIBRATION
     RTCCTL01 |= RTCMODE | RTCRDYIE | RTCAIE | RTCTEVIE;
 #else
-    RTCCTL01 |= RTCMODE | RTCAIE | RTCTEVIE;
+    RTCCTL01 |= RTCMODE | RTCRDYIE | RTCAIE | RTCTEVIE;
+//    RTCCTL01 |= RTCMODE | RTCAIE | RTCTEVIE;
 #endif
 
     RTCSEC = rtca_time.sec;
