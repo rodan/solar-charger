@@ -17255,16 +17255,16 @@ Source: http://www.diodes.com/datasheets/ds23001.pdf</description>
 <part name="R16" library="rcl" deviceset="R-EU_" device="R0805W" value="100k"/>
 <part name="R19" library="rcl" deviceset="R-EU_" device="R0805W" value="10k"/>
 <part name="R22" library="rcl" deviceset="R-EU_" device="R0805W" value="2M"/>
-<part name="R24" library="rcl" deviceset="R-EU_" device="R0805W" value="240k"/>
+<part name="R24" library="rcl" deviceset="R-EU_" device="R0805W" value="220k"/>
 <part name="R25" library="rcl" deviceset="R-EU_" device="R0805W" value="2M"/>
-<part name="R26" library="rcl" deviceset="R-EU_" device="R0805W" value="470k"/>
+<part name="R26" library="rcl" deviceset="R-EU_" device="R0805W" value="330k"/>
 <part name="GND34" library="SparkFun" deviceset="GND" device=""/>
 <part name="R3" library="rcl" deviceset="R-EU_" device="R0805W" value="100k"/>
 <part name="Q1" library="Simplex-DiscreteSemi" deviceset="MOSFET-PCHANNEL" device="SMD_POWER" value="si2305cd"/>
 <part name="SUPPLY7" library="supply2" deviceset="VCC" device=""/>
 <part name="R8" library="rcl" deviceset="R-EU_" device="R0805W" value="10k"/>
 <part name="LED1" library="led" deviceset="LED" device="CHIP-LED0805" value="green"/>
-<part name="R10" library="rcl" deviceset="R-EU_" device="R0805W" value="1K"/>
+<part name="R10" library="rcl" deviceset="R-EU_" device="R0805W" value="2k2"/>
 <part name="GND1" library="SparkFun" deviceset="GND" device=""/>
 <part name="U$5" library="Simplex-ICs" deviceset="TPS3613" device=""/>
 <part name="GND12" library="SparkFun" deviceset="GND" device=""/>
