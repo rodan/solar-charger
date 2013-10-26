@@ -112,6 +112,7 @@ static void do_smth(enum sys_message msg)
 
     adc10_read(1, &q_pv, REFVSEL_2);
     v_pv = q_pv * VREF_2_5_6_1 * DIV_PV;
+
     // see temperature sensor transfer function
     // in slau208 datasheet page ~707
     adc10_read(10, &q_itemp, REFVSEL_0);
