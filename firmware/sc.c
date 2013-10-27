@@ -110,6 +110,7 @@ static void do_smth(enum sys_message msg)
         acts |= BIT1;
     }
 
+
     adc10_read(1, &q_pv, REFVSEL_2);
     v_pv = q_pv * VREF_2_5_6_1 * DIV_PV;
 
@@ -117,13 +118,17 @@ static void do_smth(enum sys_message msg)
     // in slau208 datasheet page ~707
     adc10_read(10, &q_itemp, REFVSEL_0);
     itemp = ((q_itemp * VREF_1_5) / 102.3 - 6.88) * 396.8;
-    adc10_halt();
-
-    adc10_read(8, &q_th, REFVSEL_2);
-    v_th = q_th * VREF_2_5_5_0 / 10.23;
 
     adc10_read(9, &q_ch, REFVSEL_2);
     i_ch = 100.0 * ((q_ch * VREF_2_5_5_1 / 1023) * INA168_B + INA168_A);
+
+    opt_power_enable();
+    timer_a0_delay(100000);
+
+    adc10_read(8, &q_th, REFVSEL_2);
+    v_th = 10.0 * ((q_th * VREF_2_5_5_0 / 1023) * TH_B + TH_A);
+
+    adc10_halt();
 
     /*
     if (v_pv < 1400) {
@@ -146,13 +151,12 @@ static void do_smth(enum sys_message msg)
     uart_tx_str(str_temp, strlen(str_temp));
 
     snprintf(str_temp, 35,
-             "i_ch % 4d %01d.%02d | v_th % 4d %02d.%02d\r\n",
+             "i_ch % 4d %01d.%02d | v_th % 4d %03d.%01d\r\n",
              q_ch, (uint16_t) i_ch / 100, (uint16_t) i_ch % 100,
-             q_th, (uint16_t) v_th / 100, (uint16_t) v_th % 100);
+             q_th, (uint16_t) v_th / 10, (uint16_t) v_th % 10);
     uart_tx_str(str_temp, strlen(str_temp));
 
 
-    opt_power_enable();
 
 
 
