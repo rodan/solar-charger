@@ -17338,7 +17338,7 @@ Source: http://www.diodes.com/datasheets/ds23001.pdf</description>
 <part name="R5" library="rcl" deviceset="R-EU_" device="R0805W" value="4.7k"/>
 <part name="SUPPLY13" library="Simplex-Power" deviceset="VCC_EN" device=""/>
 <part name="LED2" library="led" deviceset="LED" device="CHIP-LED0805" value="orange"/>
-<part name="R27" library="rcl" deviceset="R-EU_" device="R0805W" value="1K"/>
+<part name="R27" library="rcl" deviceset="R-EU_" device="R0805W" value="2k2"/>
 <part name="GND36" library="SparkFun" deviceset="GND" device=""/>
 <part name="U$2" library="Simplex-Fuses" deviceset="RESETTABLE" device=""/>
 <part name="GND38" library="SparkFun" deviceset="GND" device=""/>
@@ -17357,13 +17357,13 @@ Source: http://www.diodes.com/datasheets/ds23001.pdf</description>
 <part name="JP2" library="SparkFun-Connectors" deviceset="M02" device="PTH" value="thermistor"/>
 <part name="C27" library="SparkFun-Capacitors" deviceset="CAP_POL" device="D" value="10uF"/>
 <part name="C26" library="SparkFun-Capacitors" deviceset="CAP_POL" device="D" value="1uF"/>
-<part name="R12" library="rcl" deviceset="R-EU_" device="R0805W" value="1K"/>
+<part name="R12" library="rcl" deviceset="R-EU_" device="R0805W" value="2k2"/>
 <part name="LED3" library="led" deviceset="LED" device="CHIP-LED0805" value="green"/>
 <part name="GND7" library="SparkFun" deviceset="GND" device=""/>
-<part name="R17" library="rcl" deviceset="R-EU_" device="R0805W" value="1K"/>
+<part name="R17" library="rcl" deviceset="R-EU_" device="R0805W" value="2k2"/>
 <part name="LED4" library="led" deviceset="LED" device="CHIP-LED0805" value="green"/>
 <part name="GND43" library="SparkFun" deviceset="GND" device=""/>
-<part name="R20" library="rcl" deviceset="R-EU_" device="R0805W" value="1K"/>
+<part name="R20" library="rcl" deviceset="R-EU_" device="R0805W" value="2k2"/>
 <part name="LED5" library="led" deviceset="LED" device="CHIP-LED0805" value="green"/>
 <part name="GND48" library="SparkFun" deviceset="GND" device=""/>
 <part name="R21" library="rcl" deviceset="R-EU_" device="R0805W" value="220k"/>

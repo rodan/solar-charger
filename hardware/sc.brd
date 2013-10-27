@@ -1497,7 +1497,7 @@ design rules under a new name.</description>
 <element name="R4" library="rcl" package="R0805W" value="4.7k" x="77.3" y="47.8"/>
 <element name="R5" library="rcl" package="R0805W" value="4.7k" x="77.3" y="45.6"/>
 <element name="LED2" library="led" package="CHIP-LED0805" value="orange" x="54.5" y="28.3" rot="R180"/>
-<element name="R27" library="rcl" package="R0805W" value="1K" x="54.5" y="23.3" rot="R90"/>
+<element name="R27" library="rcl" package="R0805W" value="2k2" x="54.5" y="23.3" rot="R90"/>
 <element name="U$2" library="Simplex-Fuses" package="1210" value="RESETTABLE" x="24.1" y="14.3" rot="R270"/>
 <element name="IC1" library="linear" package="TO220V" value="PB137ACV" x="0.5" y="41.9" rot="R90"/>
 <element name="Q3" library="transistor-power" package="D-PAK_TO252AA" value="IRFR5305" x="5.2" y="28.5"/>
@@ -1514,11 +1514,11 @@ design rules under a new name.</description>
 <element name="JP2" library="SparkFun-Connectors" package="1X02" value="thermistor" x="1.8" y="17" rot="R270"/>
 <element name="C27" library="SparkFun-Capacitors" package="PANASONIC_D" value="10uF" x="11.8" y="51" rot="R270"/>
 <element name="C26" library="SparkFun-Capacitors" package="PANASONIC_D" value="1uF" x="11.8" y="40.3" rot="R90"/>
-<element name="R12" library="rcl" package="R0805W" value="1K" x="34.2" y="30.2"/>
+<element name="R12" library="rcl" package="R0805W" value="2k2" x="34.2" y="30.2"/>
 <element name="LED3" library="led" package="CHIP-LED0805" value="green" x="34.2" y="32.4" rot="R270"/>
-<element name="R17" library="rcl" package="R0805W" value="1K" x="34.2" y="25.8"/>
+<element name="R17" library="rcl" package="R0805W" value="2k2" x="34.2" y="25.8"/>
 <element name="LED4" library="led" package="CHIP-LED0805" value="green" x="34.2" y="28" rot="R270"/>
-<element name="R20" library="rcl" package="R0805W" value="1K" x="34.2" y="21.4"/>
+<element name="R20" library="rcl" package="R0805W" value="2k2" x="34.2" y="21.4"/>
 <element name="LED5" library="led" package="CHIP-LED0805" value="green" x="34.2" y="23.6" rot="R270"/>
 <element name="R21" library="rcl" package="R0805W" value="220k" x="34.2" y="43.4" rot="R180"/>
 <element name="LED6" library="led" package="CHIP-LED0805" value="green" x="34.2" y="45.6" rot="R90"/>
