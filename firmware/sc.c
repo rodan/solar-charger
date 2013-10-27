@@ -39,7 +39,7 @@ FATFS fatfs;
 DIR dir;
 FIL f;
 
-float v_bat, v_bat_old, v_pv, v_th, i_ch, itemp;
+float v_bat, v_bat_old, v_pv, i_ch, t_th, t_int;
 
 uint8_t last_ch_ena;
 uint32_t status_last;
@@ -49,8 +49,8 @@ uint32_t status_last;
 //                                   |  |  |  |  |
 //                                   |  |  |  |   --> first start
 //                                   |  |  |   -----> charge stopped, batt overcharged
-//                                   |  |   --------> start up the charge controller
-//                                   |   -----------> stop the charge to read v_pv
+//                                   |  |   --------> charge stopped, pv too low
+//                                   |   -----------> 
 //                                    --------------> enable charging
 
 uint16_t acts;
@@ -64,22 +64,29 @@ void die(uint8_t loc, FRESULT rc)
 #ifdef CALIBRATION
 static void do_calib(enum sys_message msg)
 {
-    uint16_t q_bat = 0, q_pv = 0, q_itemp = 0;
+    uint16_t q_bat = 0, q_pv = 0, q_t_int = 0;
 
     adc10_read(0, &q_bat, REFVSEL_2);
-    v_bat = q_bat * VREF_2_5 * DIV_BAT;
+    v_bat = q_bat * VREF_2_5_6_0 * DIV_BAT;
     adc10_read(1, &q_pv, REFVSEL_2);
-    v_pv = q_pv * VREF_2_5 * DIV_PV;
-    adc10_read(10, &q_itemp, REFVSEL_0);
-    itemp = ((q_itemp * VREF_1_5) / 102.3 - 6.88) * 396.8;
+    v_pv = q_pv * VREF_2_5_6_1 * DIV_PV;
+    adc10_read(10, &q_t_int, REFVSEL_0);
+    //t_int = ((q_t_int * VREF_1_5) / 102.3 - 6.88) * 396.8;
+    t_int = 10.0 * ( q_t_int * T_INT_B + T_INT_A );
     adc10_halt();
 
     //-21.3 | bat 1023 22.22 | pv 1023 22.22DA0
     snprintf(str_temp, 42,
              "% 2d.%1d | bat % 4d %02d.%02d | pv % 4d %02d.%02d\r\n",
-             (uint16_t) itemp / 10, (uint16_t) itemp % 10, q_bat,
+             (uint16_t) t_int / 10, (uint16_t) t_int % 10, q_bat,
              (uint16_t) v_bat / 100, (uint16_t) v_bat % 100, q_pv,
              (uint16_t) v_pv / 100, (uint16_t) v_pv % 100);
+    uart_tx_str(str_temp, strlen(str_temp));
+
+    snprintf(str_temp, 35,
+             "t: % 4d 30: %d, 85: %d \r\n",
+             q_t_int,
+             *(uint16_t *)0x1a1a, *(uint16_t *)0x1a1c);
     uart_tx_str(str_temp, strlen(str_temp));
 
     // blinky
@@ -89,7 +96,7 @@ static void do_calib(enum sys_message msg)
 static void do_smth(enum sys_message msg)
 {
     uint16_t q_bat = 0;
-    uint16_t q_pv = 0, q_itemp = 0;
+    uint16_t q_pv = 0, q_t_int = 0;
     uint16_t q_ch = 0, q_th = 0;
     uint32_t status;
 
@@ -100,74 +107,54 @@ static void do_smth(enum sys_message msg)
     v_bat = q_bat * VREF_2_5_6_0 * DIV_BAT;
 
     // values are multiplied by 100 for snprintf
-    //if (v_bat < 300) {
+    if (v_bat < 350) {
         // do nothing since we run on the 3v Li cell
-    //    adc10_halt();
-    //    return;
-    //} else 
-    if (v_bat > 1400) {
+        adc10_halt();
+        return;
+    } else if (v_bat > 1400) {
         charge_disable();
         acts |= BIT1;
     }
-
 
     adc10_read(1, &q_pv, REFVSEL_2);
     v_pv = q_pv * VREF_2_5_6_1 * DIV_PV;
 
     // see temperature sensor transfer function
     // in slau208 datasheet page ~707
-    adc10_read(10, &q_itemp, REFVSEL_0);
-    itemp = ((q_itemp * VREF_1_5) / 102.3 - 6.88) * 396.8;
-
-    adc10_read(9, &q_ch, REFVSEL_2);
-    i_ch = 100.0 * ((q_ch * VREF_2_5_5_1 / 1023) * INA168_B + INA168_A);
+    adc10_read(10, &q_t_int, REFVSEL_0);
+    //t_int = ((q_t_int * VREF_1_5) / 102.3 - 6.88) * 396.8;
+    t_int = 10.0 * ( q_t_int * T_INT_B + T_INT_A );
 
     opt_power_enable();
     timer_a0_delay(100000);
 
     adc10_read(8, &q_th, REFVSEL_2);
-    v_th = 10.0 * ((q_th * VREF_2_5_5_0 / 1023) * TH_B + TH_A);
+    t_th = 10.0 * ((q_th * VREF_2_5_5_0 / 1023) * TH_B + TH_A);
 
-    adc10_halt();
-
-    /*
     if (v_pv < 1400) {
         charge_disable();
+        acts |= BIT2;
     }
-    */
 
     if ((v_pv > 1400) && (v_pv < 2100) && (v_bat < 1400)) {
         charge_enable();
         acts |= BIT4;
     }
 
-    status = ((uint32_t) acts << 16);// + ((uint32_t) relay_ch_ena << 24);
+    adc10_read(9, &q_ch, REFVSEL_2);
+    i_ch = 100.0 * ((q_ch * VREF_2_5_5_1 / 1023) * INA168_B + INA168_A);
 
-    snprintf(str_temp, 42,
-             "% 2d.%1d | bat % 4d %02d.%02d | pv % 4d %02d.%02d\r\n",
-             (uint16_t) itemp / 10, (uint16_t) itemp % 10, q_bat,
-             (uint16_t) v_bat / 100, (uint16_t) v_bat % 100, q_pv,
-             (uint16_t) v_pv / 100, (uint16_t) v_pv % 100);
-    uart_tx_str(str_temp, strlen(str_temp));
+    adc10_halt();
+    status = ((uint32_t) acts << 16);
 
-    snprintf(str_temp, 35,
-             "i_ch % 4d %01d.%02d | v_th % 4d %03d.%01d\r\n",
-             q_ch, (uint16_t) i_ch / 100, (uint16_t) i_ch % 100,
-             q_th, (uint16_t) v_th / 10, (uint16_t) v_th % 10);
-    uart_tx_str(str_temp, strlen(str_temp));
-
-
-
-
-
-    /*
-    if (status != status_last) {
+    if ((status != status_last) || (rtca_time.min % 10 == 0)) {
+    //if (true) {
 
         FRESULT rc;
         f_mount(0, &fatfs);
 
-        opt_power_enable();
-        timer_a0_delay(50000);
+        //opt_power_enable();
+        //timer_a0_delay(50000);
         disk_initialize(0);
 
         rc = detectCard();
@@ -182,15 +169,18 @@ static void do_smth(enum sys_message msg)
                 rc = f_open(&f, str_temp, FA_WRITE | FA_OPEN_ALWAYS);
                 if (!rc) {
                     f_lseek(&f, f_size(&f));
-                    //20130620 07:12 -34.5 12.30 13.40 1 1 0xffff 0xffffDA0
+                    //20130620 07:12 -34.5 12.30 13.40 1 1 0xffff 0xffffDA0//53
+                    //20130620 07:12 -12.2 -34.5 12.30 13.40 1.22 0xffffDA0//53
                     snprintf(str_temp, 53,
-                             "%04d%02d%02d %02d:%02d % 2d.%1d %02d.%02d %02d.%02d %d %d 0x%04x 0x%04x\r\n",
+                             "%04d%02d%02d %02d:%02d % 2d.%1d % 2d.%1d %02d.%02d %02d.%02d %01d.%02d 0x%04x\r\n",
                              rtca_time.year, rtca_time.mon, rtca_time.day,
                              rtca_time.hour, rtca_time.min,
-                             (uint16_t) itemp / 10, (uint16_t) itemp % 10,
+                             (uint16_t) t_int / 10, (uint16_t) t_int % 10,
+                             (uint16_t) t_th / 10, (uint16_t) t_th % 10,
                              (uint16_t) v_bat / 100, (uint16_t) v_bat % 100,
                              (uint16_t) v_pv / 100, (uint16_t) v_pv % 100,
-                             relay_ch_ena, relay_opt_ena, relay_acts, acts);
+                             (uint16_t) i_ch / 100, (uint16_t) i_ch % 100, 
+                             acts);
                     f_write(&f, str_temp, strlen(str_temp), &bw);
                     f_close(&f);
                     uart_tx_str(str_temp, strlen(str_temp));
@@ -208,7 +198,6 @@ static void do_smth(enum sys_message msg)
         opt_power_disable();
         status_last = status;
     }
-    */
     //P4OUT ^= BIT7;              // blink led
 }
 #endif                          // !CALIBRATION
@@ -250,8 +239,7 @@ int main(void)
 #ifdef CALIBRATION
     sys_messagebus_register(&do_calib, SYS_MSG_RTC_SECOND);
 #else
-    //sys_messagebus_register(&do_smth, SYS_MSG_RTC_MINUTE);
-    sys_messagebus_register(&do_smth, SYS_MSG_RTC_SECOND);
+    sys_messagebus_register(&do_smth, SYS_MSG_RTC_MINUTE);
 #endif
 
     while (1) {

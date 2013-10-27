@@ -3,8 +3,10 @@
 
 // see calibration equations in adc_calibration.ods (OpenOffice spreadsheet)
 
-// internal temperature voltage reference
-#define VREF_1_5        1.4662
+// internal temperature voltage
+//#define VREF_1_5        1.5
+#define T_INT_A         -288.8764
+#define T_INT_B         0.6180
 
 // 12V battery
 #define VREF_2_5_6_0    2.4343
