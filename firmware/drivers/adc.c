@@ -19,7 +19,7 @@ volatile uint8_t adcready;
 //                  REFVSEL_2  - 2.5v vref
 void adc10_read(const uint8_t port, uint16_t *rv, const uint8_t vref)
 {
-    P6SEL |= 1 << port;
+    //*((uint16_t *)portreg) |= 1 << port;
     // if ref or adc10 are busy then wait
     while (REFCTL0 & REFGENBUSY);
     while (ADC10CTL1 & ADC10BUSY);

@@ -16,12 +16,12 @@
 #define OOK_OUT             P1OUT
 #define OOK_PIN             BIT1
 
-#define I2C_MASTER_DIR      P5DIR
-#define I2C_MASTER_OUT      P5OUT
-#define I2C_MASTER_IN       P5IN
+#define I2C_MASTER_DIR      P6DIR
+#define I2C_MASTER_OUT      P6OUT
+#define I2C_MASTER_IN       P6IN
 //port pins
-#define I2C_MASTER_SCL      BIT0
-#define I2C_MASTER_SDA      BIT1
+#define I2C_MASTER_SCL      BIT2
+#define I2C_MASTER_SDA      BIT3
 //Start and Stop delay, most devices need this
 #define I2C_MASTER_SDLY		0x01
 //for long lines or very fast MCLK, unremark and set
@@ -39,8 +39,6 @@
 
 #define true                1
 #define false               0
-
-#define RELAY_MIN_V         1000                // 10v * printf multiplier
 
 void main_init(void);
 
