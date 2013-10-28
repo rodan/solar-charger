@@ -6,17 +6,8 @@
 #define CONFIG_RTC_DST
 #define CONFIG_RTC_DST_ZONE 4
 
-//#define USE_LANDSTAR
-
 //#define CALIBRATION
-
-//#define DATALOGGER
 //#define IR_REMOTE
-//#define SHT15
-//#define HSC_SSC
-//#define MAX6675
 //#define INTERTECHNO
-//#define VFAT
-
 
 #endif

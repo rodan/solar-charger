@@ -37,7 +37,7 @@ void timer_a0_delay(uint32_t microseconds)
     uint32_t ticks = microseconds / 30.5175;
     __disable_interrupt();
     TA0CCR4 = TA0R + ticks;
-    TA0CCTL4 |= CCIE;
+    TA0CCTL4 = CCIE;
     __enable_interrupt();
     timer_a0_last_event &= ~TIMER_A0_EVENT_CCR4;
     while (1) {
@@ -49,7 +49,10 @@ void timer_a0_delay(uint32_t microseconds)
         if (timer_a0_last_event & TIMER_A0_EVENT_CCR4)
             break;
     }
-    TA0CCTL4 &= ~CCIE;
+    __disable_interrupt();
+    //TA0CCTL4 &= ~CCIE;
+    TA0CCTL4 = 0;
+    __enable_interrupt();
     timer_a0_last_event &= ~TIMER_A0_EVENT_CCR4;
 }
 

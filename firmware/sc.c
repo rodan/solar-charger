@@ -39,7 +39,7 @@ FATFS fatfs;
 DIR dir;
 FIL f;
 
-float v_bat, v_bat_old, v_pv, i_ch, t_th, t_int;
+float v_bat, v_pv, i_ch, t_th, t_int;
 
 uint8_t last_ch_ena;
 uint32_t status_last;
@@ -64,16 +64,27 @@ void die(uint8_t loc, FRESULT rc)
 #ifdef CALIBRATION
 static void do_calib(enum sys_message msg)
 {
-    uint16_t q_bat = 0, q_pv = 0, q_t_int = 0;
+    uint16_t q_bat = 0, q_pv = 0, q_t_int = 0, q_ch = 0, q_th = 0;
+
+    opt_power_enable();
+    timer_a0_delay(300000);
 
     adc10_read(0, &q_bat, REFVSEL_2);
     v_bat = q_bat * VREF_2_5_6_0 * DIV_BAT;
     adc10_read(1, &q_pv, REFVSEL_2);
     v_pv = q_pv * VREF_2_5_6_1 * DIV_PV;
+    
     adc10_read(10, &q_t_int, REFVSEL_0);
     //t_int = ((q_t_int * VREF_1_5) / 102.3 - 6.88) * 396.8;
     t_int = 10.0 * ( q_t_int * T_INT_B + T_INT_A );
+
+    adc10_read(9, &q_ch, REFVSEL_2);
+    i_ch = 100.0 * ((q_ch * VREF_2_5_5_1 / 1023) * INA168_B + INA168_A);
+    adc10_read(8, &q_th, REFVSEL_2);
+    t_th = 10.0 * ((q_th * VREF_2_5_5_0 / 1023) * TH_B + TH_A);
+
     adc10_halt();
+    opt_power_disable();
 
     //-21.3 | bat 1023 22.22 | pv 1023 22.22DA0
     snprintf(str_temp, 42,
@@ -83,8 +94,14 @@ static void do_calib(enum sys_message msg)
              (uint16_t) v_pv / 100, (uint16_t) v_pv % 100);
     uart_tx_str(str_temp, strlen(str_temp));
 
+    snprintf(str_temp, 42,
+             "ch: % 4d %01d.%02d | th % 4d  %01d.%02d\r\n",
+             q_ch, (uint16_t) i_ch / 100, (uint16_t) i_ch % 100,
+             q_th, (uint16_t) t_th / 10, (uint16_t) t_th % 10);
+    uart_tx_str(str_temp, strlen(str_temp));
+
     snprintf(str_temp, 35,
-             "t: % 4d 30: %d, 85: %d \r\n",
+             "t_int: % 4d 30: %d, 85: %d \r\n",
              q_t_int,
              *(uint16_t *)0x1a1a, *(uint16_t *)0x1a1c);
     uart_tx_str(str_temp, strlen(str_temp));
@@ -102,7 +119,6 @@ static void do_smth(enum sys_message msg)
 
     acts = 0;
 
-    v_bat_old = v_bat;
     adc10_read(0, &q_bat, REFVSEL_2);
     v_bat = q_bat * VREF_2_5_6_0 * DIV_BAT;
 
@@ -119,17 +135,14 @@ static void do_smth(enum sys_message msg)
     adc10_read(1, &q_pv, REFVSEL_2);
     v_pv = q_pv * VREF_2_5_6_1 * DIV_PV;
 
+    adc10_read(9, &q_ch, REFVSEL_2);
+    i_ch = 100.0 * ((q_ch * VREF_2_5_5_1 / 1023) * INA168_B + INA168_A);
+
     // see temperature sensor transfer function
     // in slau208 datasheet page ~707
     adc10_read(10, &q_t_int, REFVSEL_0);
     //t_int = ((q_t_int * VREF_1_5) / 102.3 - 6.88) * 396.8;
     t_int = 10.0 * ( q_t_int * T_INT_B + T_INT_A );
-
-    opt_power_enable();
-    timer_a0_delay(100000);
-
-    adc10_read(8, &q_th, REFVSEL_2);
-    t_th = 10.0 * ((q_th * VREF_2_5_5_0 / 1023) * TH_B + TH_A);
 
     if (v_pv < 1400) {
         charge_disable();
@@ -141,8 +154,11 @@ static void do_smth(enum sys_message msg)
         acts |= BIT4;
     }
 
-    adc10_read(9, &q_ch, REFVSEL_2);
-    i_ch = 100.0 * ((q_ch * VREF_2_5_5_1 / 1023) * INA168_B + INA168_A);
+    opt_power_enable();
+    timer_a0_delay(100000);
+
+    adc10_read(8, &q_th, REFVSEL_2);
+    t_th = 10.0 * ((q_th * VREF_2_5_5_0 / 1023) * TH_B + TH_A);
 
     adc10_halt();
     status = ((uint32_t) acts << 16);
@@ -169,7 +185,6 @@ static void do_smth(enum sys_message msg)
                 rc = f_open(&f, str_temp, FA_WRITE | FA_OPEN_ALWAYS);
                 if (!rc) {
                     f_lseek(&f, f_size(&f));
-                    //20130620 07:12 -34.5 12.30 13.40 1 1 0xffff 0xffffDA0//53
                     //20130620 07:12 -12.2 -34.5 12.30 13.40 1.22 0xffffDA0//53
                     snprintf(str_temp, 53,
                              "%04d%02d%02d %02d:%02d % 2d.%1d % 2d.%1d %02d.%02d %02d.%02d %01d.%02d 0x%04x\r\n",
@@ -198,7 +213,6 @@ static void do_smth(enum sys_message msg)
         opt_power_disable();
         status_last = status;
     }
-    //P4OUT ^= BIT7;              // blink led
 }
 #endif                          // !CALIBRATION
 
@@ -237,7 +251,8 @@ int main(void)
 
     //LCD_Init();
 #ifdef CALIBRATION
-    sys_messagebus_register(&do_calib, SYS_MSG_RTC_SECOND);
+    //sys_messagebus_register(&do_calib, SYS_MSG_RTC_SECOND);
+    sys_messagebus_register(&do_calib, SYS_MSG_RTC_MINUTE);
 #else
     sys_messagebus_register(&do_smth, SYS_MSG_RTC_MINUTE);
 #endif
@@ -245,7 +260,7 @@ int main(void)
     while (1) {
         sleep();
         __no_operation();
-        wake_up();
+        //wake_up();
         //check_ir();
 #ifdef USE_WATCHDOG
         // reset watchdog counter
@@ -257,7 +272,6 @@ int main(void)
 
 void main_init(void)
 {
-    uint16_t timeout = 5000;
 
     // watchdog triggers after 4 minutes when not cleared
 #ifdef USE_WATCHDOG
@@ -269,7 +283,13 @@ void main_init(void)
 
     // select XT1 and XT2 ports
     // select 12pF, enable both crystals
-    P5SEL |= BIT5 + BIT4 + BIT3 + BIT2;
+    P5SEL |= BIT5 + BIT4;
+    
+    // hf crystal
+    /*
+    uint16_t timeout = 5000;
+
+    P5SEL |= BIT3 + BIT2;
     //UCSCTL6 |= XCAP0 | XCAP1;
     UCSCTL6 &= ~(XT1OFF + XT2OFF);
     UCSCTL3 = SELREF__XT2CLK;
@@ -281,7 +301,9 @@ void main_init(void)
         timeout--;
     } while ((SFRIFG1 & OFIFG) && timeout);
     // decrease power
-    UCSCTL6 &= ~(XT2DRIVE0 + XT1DRIVE0);
+    //UCSCTL6 &= ~(XT2DRIVE0 + XT1DRIVE0);
+    */
+    UCSCTL6 &= ~(XT1OFF | XT1DRIVE0);
 
     P1SEL = 0x0;
     P1DIR = 0xf0;
@@ -333,6 +355,11 @@ void main_init(void)
     P1SEL |= BIT0;
 #endif
 
+    // disable VUSB LDO and SLDO
+    USBKEYPID = 0x9628;
+    USBPWRCTL &= ~(SLDOEN + VUSBEN);
+    USBKEYPID = 0x9600;
+
     last_ch_ena = 0;
     status_last = -1L;
     v_bat = 0;
@@ -343,12 +370,9 @@ void main_init(void)
 
 void sleep(void)
 {
+    opt_power_disable();
     // turn off internal VREF, XT2, i2c power
-    UCSCTL6 |= XT2OFF;
-    // disable VUSB LDO and SLDO
-    USBKEYPID = 0x9628;
-    USBPWRCTL &= ~(SLDOEN + VUSBEN);
-    USBKEYPID = 0x9600;
+    //UCSCTL6 |= XT2OFF;
     //PMMCTL0_H = 0xA5;
     //SVSMHCTL &= ~SVMHE;
     //SVSMLCTL &= ~(SVSLE+SVMLE);
@@ -357,17 +381,20 @@ void sleep(void)
     __no_operation();
 }
 
+/*
 void wake_up(void)
 {
     uint16_t timeout = 5000;
     UCSCTL6 &= ~XT2OFF;
     // wait until clocks settle
     do {
-        UCSCTL7 &= ~(XT2OFFG + XT1LFOFFG + DCOFFG);
+        //UCSCTL7 &= ~(XT2OFFG + XT1LFOFFG + DCOFFG);
+        UCSCTL7 &= ~(XT1LFOFFG + DCOFFG);
         SFRIFG1 &= ~OFIFG;
         timeout--;
     } while ((SFRIFG1 & OFIFG) && timeout);
 }
+*/
 
 void check_events(void)
 {
@@ -401,7 +428,7 @@ void opt_power_enable()
 void opt_power_disable()
 {
     P1OUT |= BIT6;
-    P5DIR &= ~(BIT0 + BIT1);
+    I2C_MASTER_DIR &= ~(I2C_MASTER_SCL + I2C_MASTER_SDA);
 }
 
 void charge_enable(void)
