@@ -17366,11 +17366,11 @@ Source: http://www.diodes.com/datasheets/ds23001.pdf</description>
 <part name="R20" library="rcl" deviceset="R-EU_" device="R0805W" value="2k2"/>
 <part name="LED5" library="led" deviceset="LED" device="CHIP-LED0805" value="green"/>
 <part name="GND48" library="SparkFun" deviceset="GND" device=""/>
-<part name="R21" library="rcl" deviceset="R-EU_" device="R0805W" value="220k"/>
+<part name="R21" library="rcl" deviceset="R-EU_" device="R0805W" value="1M"/>
 <part name="LED6" library="led" deviceset="LED" device="CHIP-LED0805" value="green"/>
-<part name="R28" library="rcl" deviceset="R-EU_" device="R0805W" value="220k"/>
+<part name="R28" library="rcl" deviceset="R-EU_" device="R0805W" value="1M"/>
 <part name="LED7" library="led" deviceset="LED" device="CHIP-LED0805" value="green"/>
-<part name="R36" library="rcl" deviceset="R-EU_" device="R0805W" value="220k"/>
+<part name="R36" library="rcl" deviceset="R-EU_" device="R0805W" value="1M"/>
 <part name="LED8" library="led" deviceset="LED" device="CHIP-LED0805" value="green"/>
 <part name="D2" library="diode" deviceset="DIODE-" device="C1702-05" value="SB560"/>
 <part name="RL" library="rcl" deviceset="R-EU_" device="R0805W" value="110k"/>
