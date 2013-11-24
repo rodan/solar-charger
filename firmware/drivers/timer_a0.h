@@ -1,10 +1,7 @@
 #ifndef __TIMER_A0_H__
 #define __TIMER_A0_H__
 
-#include "sc.h"
-
-void timer_a0_init(void);
-void timer_a0_halt(void);
+#include "proj.h"
 
 enum timer_a0_event {
     TIMER_A0_EVENT_CCR0 = BIT0,
@@ -16,9 +13,9 @@ enum timer_a0_event {
 
 volatile enum timer_a0_event timer_a0_last_event;
 
+void timer_a0_init(void);
+void timer_a0_halt(void);
 void timer_a0_delay(uint32_t microseconds);
-
-
-
+void timer_a0_delay_noblk(uint32_t microseconds);
 
 #endif

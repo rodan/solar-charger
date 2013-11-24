@@ -1,7 +1,7 @@
 #ifndef __SYS_MESSAGEBUS_H__
 #define __SYS_MESSAGEBUS_H__
 
-#include "sc.h"
+#include "proj.h"
 
 /*!
 	\brief List of possible message types for the message bus.

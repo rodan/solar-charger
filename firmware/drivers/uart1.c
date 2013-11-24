@@ -16,9 +16,9 @@
 //         |  |                 | 32kHz
 //         ---|RST          XOUT|-
 //            |                 |
-//            |     P3.3/UCA0TXD|------------>
+//            |     P4.4/UCA0TXD|------------>
 //            |                 | 9600 - 8N1
-//            |     P3.4/UCA0RXD|<------------
+//            |     P4.5/UCA0RXD|<------------
 //
 //   D. Archbold
 //   Texas Instruments Inc.
@@ -26,11 +26,9 @@
 //   Built with CCSv4 and IAR Embedded Workbench Version: 4.21
 //******************************************************************************
 
+#include "uart1.h"
 
-
-#include "uart.h"
-
-void uart_init(void)
+void uart1_init(void)
 {
     // hardware UART
     P4SEL |= BIT4 + BIT5;       // P4.4,5 = USCI_A0 TXD/RXD
@@ -43,7 +41,7 @@ void uart_init(void)
     UCA1IE |= UCRXIE;           // enable USCI_A0 RX interrupt
 }
 
-uint16_t uart_tx_str(char *str, uint16_t size)
+uint16_t uart1_tx_str(char *str, uint16_t size)
 {
     uint16_t p = 0;
     while (p < size) {
@@ -59,19 +57,20 @@ void USCI_A1_ISR(void)
 {
     uint16_t iv = UCA1IV;
 
-    enum uart_tevent ev = 0;
+    enum uart1_tevent ev = 0;
 
     // iv is 2 for RXIFG, 4 for TXIFG
     switch (iv) {
     case 2:
-        ev = UART_EV_RX;
+        ev = UART1_EV_RX;
+        uart1_rx_buf = UCA1RXBUF;
+        _BIC_SR_IRQ(LPM3_bits);
         break;
     case 4:
-        ev = UART_EV_TX;
+        ev = UART1_EV_TX;
         break;
     default:
         break;
     }
-    uart_last_event |= ev;
+    uart1_last_event |= ev;
 }
-

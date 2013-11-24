@@ -42,11 +42,7 @@ void rtca_init(void)
        and enable read ready interrupts
        and set time event interrupts at each minute
        also enable alarm interrupts */
-#ifdef CALIBRATION
     RTCCTL01 |= RTCMODE | RTCRDYIE | RTCAIE | RTCTEVIE;
-#else
-    RTCCTL01 |= RTCMODE | RTCAIE | RTCTEVIE;
-#endif
 
     RTCSEC = rtca_time.sec;
     RTCMIN = rtca_time.min;

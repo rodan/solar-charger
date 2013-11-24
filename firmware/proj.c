@@ -9,21 +9,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "sc.h"
+#include "proj.h"
 #include "calib.h"
 #include "drivers/sys_messagebus.h"
 #include "drivers/pmm.h"
 #include "drivers/rtc.h"
-#include "drivers/timer_a1.h"
 #include "drivers/timer_a0.h"
-#include "drivers/lcd.h"
-#include "drivers/uart.h"
-#include "drivers/ir_remote.h"
-#include "drivers/intertechno.h"
-#include "drivers/serial_bitbang.h"
-#include "drivers/hsc_ssc_i2c.h"
-#include "drivers/sensirion.h"
-#include "drivers/oled_128x64.h"
+#include "drivers/uart1.h"
 #include "drivers/diskio.h"
 #include "drivers/mmc.h"
 #include "drivers/adc.h"
@@ -58,7 +50,7 @@ uint16_t acts;
 void die(uint8_t loc, FRESULT rc)
 {
     sprintf(str_temp, "l=%d rc=%u\r\n", loc, rc);
-    uart_tx_str(str_temp, strlen(str_temp));
+    uart1_tx_str(str_temp, strlen(str_temp));
 }
 
 #ifdef CALIBRATION
@@ -92,19 +84,19 @@ static void do_calib(enum sys_message msg)
              (uint16_t) t_int / 10, (uint16_t) t_int % 10, q_bat,
              (uint16_t) v_bat / 100, (uint16_t) v_bat % 100, q_pv,
              (uint16_t) v_pv / 100, (uint16_t) v_pv % 100);
-    uart_tx_str(str_temp, strlen(str_temp));
+    uart1_tx_str(str_temp, strlen(str_temp));
 
     snprintf(str_temp, 42,
              "ch: % 4d %01d.%02d | th % 4d  %01d.%02d\r\n",
              q_ch, (uint16_t) i_ch / 100, (uint16_t) i_ch % 100,
              q_th, (uint16_t) t_th / 10, (uint16_t) t_th % 10);
-    uart_tx_str(str_temp, strlen(str_temp));
+    uart1_tx_str(str_temp, strlen(str_temp));
 
     snprintf(str_temp, 35,
              "t_int: % 4d 30: %d, 85: %d \r\n",
              q_t_int,
              *(uint16_t *)0x1a1a, *(uint16_t *)0x1a1c);
-    uart_tx_str(str_temp, strlen(str_temp));
+    uart1_tx_str(str_temp, strlen(str_temp));
 
     // blinky
     //P4OUT ^= BIT7;
@@ -198,7 +190,7 @@ static void do_smth(enum sys_message msg)
                              acts);
                     f_write(&f, str_temp, strlen(str_temp), &bw);
                     f_close(&f);
-                    uart_tx_str(str_temp, strlen(str_temp));
+                    uart1_tx_str(str_temp, strlen(str_temp));
                 } else {
                     die(2, rc);
                 }
@@ -216,19 +208,10 @@ static void do_smth(enum sys_message msg)
 }
 #endif                          // !CALIBRATION
 
-void check_ir(void)
-{
-    if (ir_decode(&results)) {
-        sprintf(str_temp, "%ld\r\n", results.value);
-        uart_tx_str(str_temp, strlen(str_temp));
-        ir_resume();            // Receive the next value
-    }
-}
-
 int main(void)
 {
     main_init();
-    uart_init();
+    uart1_init();
 #ifdef IR_REMOTE
     ir_init();
 #endif
@@ -405,11 +388,6 @@ void check_events(void)
     if (rtca_last_event) {
         msg |= rtca_last_event;
         rtca_last_event = 0;
-    }
-    // drivers/timer1a
-    if (timer_a1_last_event) {
-        msg |= timer_a1_last_event << 7;
-        timer_a1_last_event = 0;
     }
     while (p) {
         // notify listener if he registered for any of these messages

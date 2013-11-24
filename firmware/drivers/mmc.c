@@ -15,7 +15,7 @@
 #include "diskio.h"             /* Common include file for FatFs and disk I/O layer */
 #include "hal_sdcard.h"         /* MSP-EXP430F5529 specific SD Card driver */
 #include "rtc.h"
-//#include "sc.h"
+//#include "proj.h"
 
 /*
  *-------------------------------------------------------------------------
