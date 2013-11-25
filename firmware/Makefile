@@ -1,6 +1,6 @@
 
 SUBDIRS = drivers fatfs
-PROJ = sc
+PROJ = proj
 
 ### Machine flags
 #

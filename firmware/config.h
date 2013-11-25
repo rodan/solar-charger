@@ -7,7 +7,5 @@
 #define CONFIG_RTC_DST_ZONE 4
 
 //#define CALIBRATION
-//#define IR_REMOTE
-//#define INTERTECHNO
 
 #endif

@@ -100,7 +100,7 @@ void SDCard_fastMode(void)
     UCB1CTL1 &= ~UCSWRST;       //Release USCI state machine
 }
 
-                                                                             /***************************************************************************//**
+/***************************************************************************//**
  * @brief   Read a frame of bytes via SPI
  * @param   pBuffer Place to store the received bytes
  * @param   size Indicator of how many bytes to receive
@@ -125,7 +125,7 @@ void SDCard_readFrame(uint8_t * pBuffer, uint16_t size)
     __bis_SR_register(gie);     //Restore original GIE state
 }
 
-                                                                             /***************************************************************************//**
+/***************************************************************************//**
  * @brief   Send a frame of bytes via SPI
  * @param   pBuffer Place that holds the bytes to send
  * @param   size Indicator of how many bytes to send
@@ -153,7 +153,7 @@ void SDCard_sendFrame(uint8_t * pBuffer, uint16_t size)
     __bis_SR_register(gie);     //Restore original GIE state
 }
 
-                                                                             /***************************************************************************//**
+/***************************************************************************//**
  * @brief   Set the SD Card's chip-select signal to high
  * @param   None
  * @return  None
@@ -163,7 +163,7 @@ void SDCard_setCSHigh(void)
     SD_CS_OUT |= SD_CS;
 }
 
-                                                                             /***************************************************************************//**
+/***************************************************************************//**
  * @brief   Set the SD Card's chip-select signal to low
  * @param   None
  * @return  None
@@ -173,6 +173,6 @@ void SDCard_setCSLow(void)
     SD_CS_OUT &= ~SD_CS;
 }
 
-                                                                             /***************************************************************************//**
+/***************************************************************************//**
  * @}
  ******************************************************************************/

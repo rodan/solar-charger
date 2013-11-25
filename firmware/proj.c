@@ -159,7 +159,7 @@ static void do_smth(enum sys_message msg)
     //if (true) {
 
         FRESULT rc;
-        f_mount(0, &fatfs);
+        f_mount(&fatfs, "", 0);
 
         //opt_power_enable();
         //timer_a0_delay(50000);
@@ -200,7 +200,7 @@ static void do_smth(enum sys_message msg)
         } else {
             die(1, rc);
         }
-        f_mount(0, NULL);
+        f_mount(NULL, "", 0);
         SDCard_end();
         opt_power_disable();
         status_last = status;

@@ -2,6 +2,6 @@
 #define __MMC_H__
 
 uint8_t detectCard(void);
-DRESULT disk_ioctl(BYTE drv, BYTE ctrl, DWORD * buff);
+DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void *buff);
 
 #endif

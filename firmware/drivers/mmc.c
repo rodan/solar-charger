@@ -1,21 +1,21 @@
 /*------------------------------------------------------------------------/
- * /  Bitbanging MMCv3/SDv1/SDv2 (in SPI mode) control module
- * /-------------------------------------------------------------------------/
- * /
- * /  Copyright (C) 2010, ChaN, all right reserved.
- * /
- * / * This software is a free software and there is NO WARRANTY.
- * / * No restriction on use. You can use, modify and redistribute it for
- * /   personal, non-profit or commercial products UNDER YOUR RESPONSIBILITY.
- * / * Redistributions of source code must retain the above copyright notice.
- * /
- * ---------------------------------------------------------------------------*/
+/  Bitbanging MMCv3/SDv1/SDv2 (in SPI mode) control module
+/-------------------------------------------------------------------------/
+/
+/  Copyright (C) 2012, ChaN, all right reserved.
+/
+/ * This software is a free software and there is NO WARRANTY.
+/ * No restriction on use. You can use, modify and redistribute it for
+/   personal, non-profit or commercial products UNDER YOUR RESPONSIBILITY.
+/ * Redistributions of source code must retain the above copyright notice.
+/
+/--------------------------------------------------------------------------/
+*/
 
 #include <intrinsics.h>         /* Include MSP430-specific intrincs */
 #include "diskio.h"             /* Common include file for FatFs and disk I/O layer */
 #include "hal_sdcard.h"         /* MSP-EXP430F5529 specific SD Card driver */
 #include "rtc.h"
-//#include "proj.h"
 
 /*
  *-------------------------------------------------------------------------
@@ -61,24 +61,27 @@ DWORD get_fattime(void)
  * ---------------------------------------------------------------------------*/
 
 /* MMC/SD command (SPI mode) */
-#define CMD0    (0)             /* GO_IDLE_STATE */
-#define CMD1    (1)             /* SEND_OP_COND */
-#define ACMD41  (0x80 + 41)     /* SEND_OP_COND (SDC) */
-#define CMD8    (8)             /* SEND_IF_COND */
-#define CMD9    (9)             /* SEND_CSD */
-#define CMD10   (10)            /* SEND_CID */
-#define CMD12   (12)            /* STOP_TRANSMISSION */
-#define ACMD13  (0x80 + 13)     /* SD_STATUS (SDC) */
-#define CMD16   (16)            /* SET_BLOCKLEN */
-#define CMD17   (17)            /* READ_SINGLE_BLOCK */
-#define CMD18   (18)            /* READ_MULTIPLE_BLOCK */
-#define CMD23   (23)            /* SET_BLOCK_COUNT */
-#define ACMD23  (0x80 + 23)     /* SET_WR_BLK_ERASE_COUNT (SDC) */
-#define CMD24   (24)            /* WRITE_BLOCK */
-#define CMD25   (25)            /* WRITE_MULTIPLE_BLOCK */
-#define CMD41   (41)            /* SEND_OP_COND (ACMD) */
-#define CMD55   (55)            /* APP_CMD */
-#define CMD58   (58)            /* READ_OCR */
+#define CMD0	(0)             /* GO_IDLE_STATE */
+#define CMD1	(1)             /* SEND_OP_COND */
+#define ACMD41	(0x80+41)       /* SEND_OP_COND (SDC) */
+#define CMD8	(8)             /* SEND_IF_COND */
+#define CMD9	(9)             /* SEND_CSD */
+#define CMD10	(10)            /* SEND_CID */
+#define CMD12	(12)            /* STOP_TRANSMISSION */
+#define CMD13	(13)            /* SEND_STATUS */
+#define ACMD13	(0x80+13)       /* SD_STATUS (SDC) */
+#define CMD16	(16)            /* SET_BLOCKLEN */
+#define CMD17	(17)            /* READ_SINGLE_BLOCK */
+#define CMD18	(18)            /* READ_MULTIPLE_BLOCK */
+#define CMD23	(23)            /* SET_BLOCK_COUNT */
+#define ACMD23	(0x80+23)       /* SET_WR_BLK_ERASE_COUNT (SDC) */
+#define CMD24	(24)            /* WRITE_BLOCK */
+#define CMD25	(25)            /* WRITE_MULTIPLE_BLOCK */
+#define CMD32	(32)            /* ERASE_ER_BLK_START */
+#define CMD33	(33)            /* ERASE_ER_BLK_END */
+#define CMD38	(38)            /* ERASE */
+#define CMD55	(55)            /* APP_CMD */
+#define CMD58	(58)            /* READ_OCR */
 
 /* Card type flags (CardType) */
 #define CT_MMC      0x01        /* MMC ver 3 */
@@ -261,10 +264,11 @@ BYTE send_cmd(                  /* Returns command response (bit7==1:Send failed
         }
     }
 
-    /* Select the card and wait for ready */
-    deselect();
-    if (!select()) {
-        return (0xFF);
+    /* Select the card and wait for ready except to stop multiple block read */
+    if (cmd != CMD12) {
+        deselect();
+        if (!select())
+            return 0xFF;
     }
 
     /* Send a command packet */
@@ -311,21 +315,23 @@ BYTE send_cmd(                  /* Returns command response (bit7==1:Send failed
 DSTATUS disk_status(BYTE drv    /* Drive number (0) */
     )
 {
-    DSTATUS s = Stat;
+    DSTATUS s;
+    BYTE d;
 
-    if (drv || !INS) {
-        s = STA_NODISK | STA_NOINIT;
-    } else {
-        s &= ~STA_NODISK;
-        if (WP) {
-            s |= STA_PROTECT;
-        } else {
-            s &= ~STA_PROTECT;
-        }
+    if (drv)
+        return STA_NOINIT;
+
+    /* Check if the card is kept initialized */
+    s = Stat;
+    if (!(s & STA_NOINIT)) {
+        if (send_cmd(CMD13, 0)) /* Read card status */
+            s = STA_NOINIT;
+        rcvr_mmc(&d, 1);        /* Receive following half of R2 */
+        deselect();
     }
     Stat = s;
 
-    return (s);
+    return s;
 }
 
 /*
@@ -337,44 +343,25 @@ DSTATUS disk_status(BYTE drv    /* Drive number (0) */
 DSTATUS disk_initialize(BYTE drv        /* Physical drive nmuber (0) */
     )
 {
-/* TI: Inserted pragma to supress IAR compiler warning incicating 'cmd'
- * is not used. If removed however the compile fails */
-#ifdef __IAR_SYSTEMS_ICC__
-#pragma diag_suppress=Pe550
-#endif
-#ifdef __TI_COMPILER_VERSION__
-#pragma diag_suppress 552
-#endif
-    BYTE n, ty, buf[4];         //cmd
-#ifdef __IAR_SYSTEMS_ICC__
-#pragma diag_default=Pe550
-#endif
-//#ifdef __TI_COMPILER_VERSION__
-//#pragma diag_default 552
-//#endif
+    BYTE n, ty, cmd, buf[4];
     UINT tmr;
     DSTATUS s;
 
+    if (drv)
+        return RES_NOTRDY;
+
     INIT_PORT();                /* Initialize control port */
-
-    s = disk_status(drv);       /* Check if card is in the socket */
-    if (s & STA_NODISK) {
-        return (s);
-    }
-
-    CS_H();
-    for (n = 10; n; n--) {
+    for (n = 10; n; n--)
         rcvr_mmc(buf, 1);       /* 80 dummy clocks */
-    }
+
     ty = 0;
     if (send_cmd(CMD0, 0) == 1) {       /* Enter Idle state */
         if (send_cmd(CMD8, 0x1AA) == 1) {       /* SDv2? */
             rcvr_mmc(buf, 4);   /* Get trailing return value of R7 resp */
             if (buf[2] == 0x01 && buf[3] == 0xAA) {     /* The card can work at vdd range of 2.7-3.6V */
                 for (tmr = 1000; tmr; tmr--) {  /* Wait for leaving idle state (ACMD41 with HCS bit) */
-                    if (send_cmd(ACMD41, 1UL << 30) == 0) {
+                    if (send_cmd(ACMD41, 1UL << 30) == 0)
                         break;
-                    }
                     DLY_US(1000);
                 }
                 if (tmr && send_cmd(CMD58, 0) == 0) {   /* Check CCS bit in the OCR */
@@ -384,34 +371,28 @@ DSTATUS disk_initialize(BYTE drv        /* Physical drive nmuber (0) */
             }
         } else {                /* SDv1 or MMCv3 */
             if (send_cmd(ACMD41, 0) <= 1) {
-                ty = CT_SD1;    //cmd = ACMD41;                              /* SDv1 */
+                ty = CT_SD1;
+                cmd = ACMD41;   /* SDv1 */
             } else {
-                ty = CT_MMC;    //cmd = CMD1;                                /* MMCv3 */
+                ty = CT_MMC;
+                cmd = CMD1;     /* MMCv3 */
             }
             for (tmr = 1000; tmr; tmr--) {      /* Wait for leaving idle state */
-                if (send_cmd(ACMD41, 0) == 0) {
+                if (send_cmd(cmd, 0) == 0)
                     break;
-                }
                 DLY_US(1000);
             }
-            if (!tmr || send_cmd(CMD16, 512) != 0) {    /* Set R/W block length to 512 */
+            if (!tmr || send_cmd(CMD16, 512) != 0)      /* Set R/W block length to 512 */
                 ty = 0;
-            }
         }
     }
     CardType = ty;
-    deselect();
-
-    if (ty) {                   /* Initialization succeded */
-        FAST_MODE();
-        s &= ~STA_NOINIT;
-    } else {                    /* Initialization failed */
-        s |= STA_NOINIT;
-    }
-
+    s = ty ? 0 : STA_NOINIT;
     Stat = s;
 
-    return (s);
+    deselect();
+
+    return s;
 }
 
 /*
@@ -423,32 +404,25 @@ DSTATUS disk_initialize(BYTE drv        /* Physical drive nmuber (0) */
 DRESULT disk_read(BYTE drv,     /* Physical drive nmuber (0) */
                   BYTE * buff,  /* Pointer to the data buffer to store read data */
                   DWORD sector, /* Start sector number (LBA) */
-                  BYTE count    /* Sector count (1..128) */
+                  UINT count    /* Sector count (1..128) */
     )
 {
-    DSTATUS s;
-
-    s = disk_status(drv);
-    if (s & STA_NOINIT) {
-        return (RES_NOTRDY);
-    }
-    if (!count) {
-        return (RES_PARERR);
-    }
-    if (!(CardType & CT_BLOCK)) {
+    if (disk_status(drv) & STA_NOINIT)
+        return RES_NOTRDY;
+    if (!count)
+        return RES_PARERR;
+    if (!(CardType & CT_BLOCK))
         sector *= 512;          /* Convert LBA to byte address if needed */
-    }
+
     if (count == 1) {           /* Single block read */
         if ((send_cmd(CMD17, sector) == 0)      /* READ_SINGLE_BLOCK */
-            &&rcvr_datablock(buff, 512)) {
+            &&rcvr_datablock(buff, 512))
             count = 0;
-        }
     } else {                    /* Multiple block read */
         if (send_cmd(CMD18, sector) == 0) {     /* READ_MULTIPLE_BLOCK */
             do {
-                if (!rcvr_datablock(buff, 512)) {
+                if (!rcvr_datablock(buff, 512))
                     break;
-                }
                 buff += 512;
             } while (--count);
             send_cmd(CMD12, 0); /* STOP_TRANSMISSION */
@@ -456,7 +430,7 @@ DRESULT disk_read(BYTE drv,     /* Physical drive nmuber (0) */
     }
     deselect();
 
-    return (count ? RES_ERROR : RES_OK);
+    return count ? RES_ERROR : RES_OK;
 }
 
 /*
@@ -465,52 +439,42 @@ DRESULT disk_read(BYTE drv,     /* Physical drive nmuber (0) */
  *-----------------------------------------------------------------------
  */
 
+#if _USE_WRITE
 DRESULT disk_write(BYTE drv,    /* Physical drive nmuber (0) */
                    const BYTE * buff,   /* Pointer to the data to be written */
                    DWORD sector,        /* Start sector number (LBA) */
-                   BYTE count   /* Sector count (1..128) */
+                   UINT count   /* Sector count (1..128) */
     )
 {
-    DSTATUS s;
-
-    s = disk_status(drv);
-    if (s & STA_NOINIT) {
-        return (RES_NOTRDY);
-    }
-    if (s & STA_PROTECT) {
-        return (RES_WRPRT);
-    }
-    if (!count) {
-        return (RES_PARERR);
-    }
-    if (!(CardType & CT_BLOCK)) {
+    if (disk_status(drv) & STA_NOINIT)
+        return RES_NOTRDY;
+    if (!count)
+        return RES_PARERR;
+    if (!(CardType & CT_BLOCK))
         sector *= 512;          /* Convert LBA to byte address if needed */
-    }
+
     if (count == 1) {           /* Single block write */
         if ((send_cmd(CMD24, sector) == 0)      /* WRITE_BLOCK */
-            &&xmit_datablock(buff, 0xFE)) {
+            &&xmit_datablock(buff, 0xFE))
             count = 0;
-        }
     } else {                    /* Multiple block write */
-        if (CardType & CT_SDC) {
+        if (CardType & CT_SDC)
             send_cmd(ACMD23, count);
-        }
         if (send_cmd(CMD25, sector) == 0) {     /* WRITE_MULTIPLE_BLOCK */
             do {
-                if (!xmit_datablock(buff, 0xFC)) {
+                if (!xmit_datablock(buff, 0xFC))
                     break;
-                }
                 buff += 512;
             } while (--count);
-            if (!xmit_datablock(0, 0xFD)) {     /* STOP_TRAN token */
+            if (!xmit_datablock(0, 0xFD))       /* STOP_TRAN token */
                 count = 1;
-            }
         }
     }
     deselect();
 
-    return (count ? RES_ERROR : RES_OK);
+    return count ? RES_ERROR : RES_OK;
 }
+#endif
 
 /*
  *-----------------------------------------------------------------------
@@ -518,40 +482,38 @@ DRESULT disk_write(BYTE drv,    /* Physical drive nmuber (0) */
  *-----------------------------------------------------------------------
  */
 
+#if _USE_IOCTL
 DRESULT disk_ioctl(BYTE drv,    /* Physical drive nmuber (0) */
                    BYTE ctrl,   /* Control code */
-                   DWORD * buff /* Buffer to send/receive control data *///KLQ  Changed from void* to DWORD*
+                   void *buff   /* Buffer to send/receive control data */
     )
 {
     DRESULT res;
     BYTE n, csd[16];
-    WORD cs;
+    DWORD cs;
 
-    if (disk_status(drv) & STA_NOINIT) {        /* Check if card is in the socket */
-        return (RES_NOTRDY);
-    }
+    if (disk_status(drv) & STA_NOINIT)
+        return RES_NOTRDY;      /* Check if card is in the socket */
 
     res = RES_ERROR;
     switch (ctrl) {
     case CTRL_SYNC:            /* Make sure that no pending write process */
-        if (select()) {
-            deselect();
+        if (select())
             res = RES_OK;
-        }
         break;
 
     case GET_SECTOR_COUNT:     /* Get number of sectors on the disk (DWORD) */
         if ((send_cmd(CMD9, 0) == 0) && rcvr_datablock(csd, 16)) {
             if ((csd[0] >> 6) == 1) {   /* SDC ver 2.00 */
-                cs = csd[9] + ((WORD) csd[8] << 8) + 1;
-                *buff = ((DWORD) cs) << 10;
+                cs = csd[9] + ((WORD) csd[8] << 8) +
+                    ((DWORD) (csd[7] & 63) << 16) + 1;
+                *(DWORD *) buff = cs << 10;
             } else {            /* SDC ver 1.XX or MMC */
-                n = (csd[5] &
-                     15) + ((csd[10] & 128) >> 7) + ((csd[9] & 3) << 1) + 2;
-                cs = (csd[8] >>
-                      6) +
-                    ((WORD) csd[7] << 2) + ((WORD) (csd[6] & 3) << 10) + 1;
-                *(DWORD *) buff = (DWORD) cs << (n - 9);
+                n = (csd[5] & 15) + ((csd[10] & 128) >> 7) +
+                    ((csd[9] & 3) << 1) + 2;
+                cs = (csd[8] >> 6) + ((WORD) csd[7] << 2) +
+                    ((WORD) (csd[6] & 3) << 10) + 1;
+                *(DWORD *) buff = cs << (n - 9);
             }
             res = RES_OK;
         }
@@ -568,8 +530,9 @@ DRESULT disk_ioctl(BYTE drv,    /* Physical drive nmuber (0) */
 
     deselect();
 
-    return (res);
+    return res;
 }
+#endif
 
 //KLQ
 
