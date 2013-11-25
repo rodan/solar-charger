@@ -84,5 +84,5 @@ plot "< sqlite3 pv_charge.db 'select time, i_ch, status from sensors order by ti
 
 set style fill transparent solid 0.1 noborder
 plot "< sqlite3 pv_charge.db 'select time, status from sensors order by time desc limit 0, 1200;'" \
-   using 1:2 title "" axes x1y2 with filledcurve y1=4
+   using 1:2 title "" axes x1y2 with filledcurve y2=4
 
