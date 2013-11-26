@@ -220,7 +220,6 @@ int main(void)
         sleep();
         __no_operation();
         //wake_up();
-        //check_ir();
 #ifdef USE_WATCHDOG
         // reset watchdog counter
         WDTCTL = (WDTCTL & 0xff) | WDTPW | WDTCNTCL;
