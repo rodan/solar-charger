@@ -58,7 +58,7 @@ static void do_calib(enum sys_message msg)
 {
     uint16_t q_bat = 0, q_pv = 0, q_t_int = 0, q_ch = 0, q_th = 0;
 
-    opt_power_enable();
+    opt_power_enable;
     timer_a0_delay(300000);
 
     adc10_read(0, &q_bat, REFVSEL_2);
@@ -76,7 +76,7 @@ static void do_calib(enum sys_message msg)
     t_th = 10.0 * ((q_th * VREF_2_5_5_0 / 1023) * TH_B + TH_A);
 
     adc10_halt();
-    opt_power_disable();
+    opt_power_disable;
 
     //-21.3 | bat 1023 22.22 | pv 1023 22.22DA0
     snprintf(str_temp, 42,
@@ -102,7 +102,7 @@ static void do_calib(enum sys_message msg)
     //P4OUT ^= BIT7;
 }
 #else
-static void do_smth(enum sys_message msg)
+static void main_loop(enum sys_message msg)
 {
     uint16_t q_bat = 0;
     uint16_t q_pv = 0, q_t_int = 0;
@@ -120,51 +120,46 @@ static void do_smth(enum sys_message msg)
         adc10_halt();
         return;
     } else if (v_bat > 1400) {
-        charge_disable();
+        charge_disable;
         acts |= BIT1;
     }
 
     adc10_read(1, &q_pv, REFVSEL_2);
     v_pv = q_pv * VREF_2_5_6_1 * DIV_PV;
-
     adc10_read(9, &q_ch, REFVSEL_2);
     i_ch = 100.0 * ((q_ch * VREF_2_5_5_1 / 1023) * INA168_B + INA168_A);
-
-    // see temperature sensor transfer function
-    // in slau208 datasheet page ~707
     adc10_read(10, &q_t_int, REFVSEL_0);
     //t_int = ((q_t_int * VREF_1_5) / 102.3 - 6.88) * 396.8;
     t_int = 10.0 * ( q_t_int * T_INT_B + T_INT_A );
 
-    if (v_pv < 1400) {
-        charge_disable();
+    if (v_pv + 100 < v_bat) {
+        charge_disable;
         acts |= BIT2;
     }
 
-    if ((v_pv > 1400) && (v_pv < 2100) && (v_bat < 1400)) {
-        charge_enable();
+    if ((v_pv > 1550) && (v_pv < 3000) && (v_bat < 1400)) {
+        charge_enable;
         acts |= BIT4;
     }
 
-    opt_power_enable();
+    opt_power_enable;
     timer_a0_delay(100000);
-
     adc10_read(8, &q_th, REFVSEL_2);
     t_th = 10.0 * ((q_th * VREF_2_5_5_0 / 1023) * TH_B + TH_A);
-
     adc10_halt();
-    status = ((uint32_t) acts << 16);
+
+    if (acts == 0) {
+        status = status_last;
+    } else {
+        status = ((uint32_t) acts << 16);
+    }
 
     if ((status != status_last) || (rtca_time.min % 10 == 0)) {
     //if (true) {
 
         FRESULT rc;
         f_mount(&fatfs, "", 0);
-
-        //opt_power_enable();
-        //timer_a0_delay(50000);
         disk_initialize(0);
-
         rc = detectCard();
 
         if (rc) {
@@ -202,7 +197,7 @@ static void do_smth(enum sys_message msg)
         }
         f_mount(NULL, "", 0);
         SDCard_end();
-        opt_power_disable();
+        opt_power_disable;
         status_last = status;
     }
 }
@@ -219,25 +214,12 @@ int main(void)
     it_init();
 #endif
 
-    charge_disable();
+    charge_disable;
 
-    // oled display
-    /*
-       timer_a0_delay(10000);
-       oled_128x64_init();
-       oled_128x64_clear_display();          //clear the screen and set start position to top left corner
-       oled_128x64_set_normal_display();      //Set display to normal mode (i.e non-inverse mode)
-       oled_128x64_set_page_mode();           //Set addressing mode to Page Mode
-       oled_128x64_set_text_xy(0,0);          //Set the cursor to Xth Page, Yth Column
-       oled_128x64_put_string("Hello World!11"); //Print the String
-     */
-
-    //LCD_Init();
 #ifdef CALIBRATION
-    //sys_messagebus_register(&do_calib, SYS_MSG_RTC_SECOND);
     sys_messagebus_register(&do_calib, SYS_MSG_RTC_MINUTE);
 #else
-    sys_messagebus_register(&do_smth, SYS_MSG_RTC_MINUTE);
+    sys_messagebus_register(&main_loop, SYS_MSG_RTC_MINUTE);
 #endif
 
     while (1) {
@@ -353,7 +335,7 @@ void main_init(void)
 
 void sleep(void)
 {
-    opt_power_disable();
+    opt_power_disable;
     // turn off internal VREF, XT2, i2c power
     //UCSCTL6 |= XT2OFF;
     //PMMCTL0_H = 0xA5;
@@ -396,26 +378,5 @@ void check_events(void)
         }
         p = p->next;
     }
-}
-
-void opt_power_enable()
-{
-    P1OUT &= ~BIT6;
-}
-
-void opt_power_disable()
-{
-    P1OUT |= BIT6;
-    I2C_MASTER_DIR &= ~(I2C_MASTER_SCL + I2C_MASTER_SDA);
-}
-
-void charge_enable(void)
-{
-    P2OUT |= BIT0;
-}
-
-void charge_disable(void)
-{
-    P2OUT &= ~BIT0;
 }
 
