@@ -33,9 +33,6 @@ FIL f;
 
 float v_bat, v_pv, i_ch, t_th, t_int;
 
-uint8_t last_ch_ena;
-uint32_t status_last;
-
 // acts register
 // 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
 //                                   |  |  |  |  |
@@ -46,6 +43,7 @@ uint32_t status_last;
 //                                    --------------> enable charging
 
 uint16_t acts;
+uint16_t acts_last;
 
 void die(uint8_t loc, FRESULT rc)
 {
@@ -107,7 +105,6 @@ static void main_loop(enum sys_message msg)
     uint16_t q_bat = 0;
     uint16_t q_pv = 0, q_t_int = 0;
     uint16_t q_ch = 0, q_th = 0;
-    uint32_t status;
 
     acts = 0;
 
@@ -131,30 +128,27 @@ static void main_loop(enum sys_message msg)
     adc10_read(10, &q_t_int, REFVSEL_0);
     //t_int = ((q_t_int * VREF_1_5) / 102.3 - 6.88) * 396.8;
     t_int = 10.0 * ( q_t_int * T_INT_B + T_INT_A );
-
-    if (v_pv + 100 < v_bat) {
-        charge_disable;
-        acts |= BIT2;
-    }
-
-    if ((v_pv > 1550) && (v_pv < 3000) && (v_bat < 1400)) {
-        charge_enable;
-        acts |= BIT4;
-    }
-
     opt_power_enable;
     timer_a0_delay(100000);
     adc10_read(8, &q_th, REFVSEL_2);
     t_th = 10.0 * ((q_th * VREF_2_5_5_0 / 1023) * TH_B + TH_A);
     adc10_halt();
 
-    if (acts == 0) {
-        status = status_last;
-    } else {
-        status = ((uint32_t) acts << 16);
+    if (v_pv < v_bat + 1000) {
+        charge_disable;
+        acts |= BIT2;
     }
 
-    if ((status != status_last) || (rtca_time.min % 10 == 0)) {
+    if ((v_pv > 1570) && (v_pv < 3000) && (v_bat < 1400)) {
+        charge_enable;
+        acts |= BIT4;
+    }
+
+    if (acts == 0) {
+        acts = acts_last;
+    }
+
+    if ((acts != acts_last) || (rtca_time.min % 10 == 0)) {
     //if (true) {
 
         FRESULT rc;
@@ -198,7 +192,7 @@ static void main_loop(enum sys_message msg)
         f_mount(NULL, "", 0);
         SDCard_end();
         opt_power_disable;
-        status_last = status;
+        acts_last = acts;
     }
 }
 #endif                          // !CALIBRATION
@@ -325,8 +319,7 @@ void main_init(void)
     USBPWRCTL &= ~(SLDOEN + VUSBEN);
     USBKEYPID = 0x9600;
 
-    last_ch_ena = 0;
-    status_last = -1L;
+    acts_last = -1L;
     v_bat = 0;
 
     rtca_init();
