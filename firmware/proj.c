@@ -78,16 +78,16 @@ static void do_calib(enum sys_message msg)
 
     //-21.3 | bat 1023 22.22 | pv 1023 22.22DA0
     snprintf(str_temp, 42,
-             "% 2d.%1d | bat % 4d %02d.%02d | pv % 4d %02d.%02d\r\n",
-             (int16_t) t_int / 10, (int16_t) t_int % 10, q_bat,
-             (uint16_t) v_bat / 100, (uint16_t) v_bat % 100, q_pv,
+             "%s%d.%1d | bat % 4d %02d.%02d | pv % 4d %02d.%02d\r\n",
+             t_int < 0 ? "-": "", abs((int16_t) t_int / 10), abs((int16_t) t_int % 10),
+             q_bat, (uint16_t) v_bat / 100, (uint16_t) v_bat % 100, q_pv,
              (uint16_t) v_pv / 100, (uint16_t) v_pv % 100);
     uart1_tx_str(str_temp, strlen(str_temp));
 
     snprintf(str_temp, 42,
-             "ch: % 4d %01d.%02d | th % 4d  %01d.%02d\r\n",
+             "ch: % 4d %01d.%02d | th % 4d  %s%d.%02d\r\n",
              q_ch, (uint16_t) i_ch / 100, (uint16_t) i_ch % 100,
-             q_th, (int16_t) t_th / 10, (int16_t) t_th % 10);
+             q_th, t_th < 0 ? "-": "", abs((int16_t) t_th / 10), abs((int16_t) t_th % 10),
     uart1_tx_str(str_temp, strlen(str_temp));
 
     snprintf(str_temp, 35,
@@ -168,11 +168,11 @@ static void main_loop(enum sys_message msg)
                     f_lseek(&f, f_size(&f));
                     //20130620 07:12 -12.2 -34.5 12.30 13.40 1.22 0xffffDA0//53
                     snprintf(str_temp, 63,
-                             "%04d%02d%02d %02d:%02d % 2d.%1d % 2d.%1d %02d.%02d %02d.%02d %01d.%02d 0x%04x\r\n",
+                             "%04d%02d%02d %02d:%02d %s%d.%1d %s%d.%1d %02d.%02d %02d.%02d %01d.%02d 0x%04x\r\n",
                              rtca_time.year, rtca_time.mon, rtca_time.day,
                              rtca_time.hour, rtca_time.min,
-                             (int16_t) t_int / 10, (int16_t) t_int % 10,
-                             (int16_t) t_th / 10, (int16_t) t_th % 10,
+                             t_int < 0 ? "-": "", abs((int16_t) t_int / 10), abs((int16_t) t_int % 10),
+                             t_th < 0 ? "-": "", abs((int16_t) t_th / 10), abs((int16_t) t_th % 10),
                              (uint16_t) v_bat / 100, (uint16_t) v_bat % 100,
                              (uint16_t) v_pv / 100, (uint16_t) v_pv % 100,
                              (uint16_t) i_ch / 100, (uint16_t) i_ch % 100, 
