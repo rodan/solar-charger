@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="6.5.0">
+<eagle version="7.3.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -17380,7 +17380,7 @@ Source: http://www.diodes.com/datasheets/ds23001.pdf</description>
 <sheets>
 <sheet>
 <plain>
-<text x="416.56" y="10.16" size="3.81" layer="97">03</text>
+<text x="416.56" y="10.16" size="3.81" layer="97">01</text>
 <text x="264.16" y="177.8" size="1.778" layer="97">uC pins: 7 11 28</text>
 </plain>
 <instances>
