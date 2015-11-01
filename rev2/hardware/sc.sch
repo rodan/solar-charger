@@ -22522,13 +22522,13 @@ chip, wave soldering</description>
 <part name="GND47" library="SparkFun" deviceset="GND" device=""/>
 <part name="T1" library="transistor" deviceset="BC846" device=""/>
 <part name="R16" library="rcl" deviceset="R-EU_" device="R0805W" value="100k"/>
-<part name="R19" library="rcl" deviceset="R-EU_" device="R0805W" value="10k"/>
+<part name="R19" library="rcl" deviceset="R-EU_" device="R0805W" value="220k"/>
 <part name="R22" library="rcl" deviceset="R-EU_" device="R0805W" value="2M"/>
 <part name="R24" library="rcl" deviceset="R-EU_" device="R0805W" value="220k"/>
 <part name="R25" library="rcl" deviceset="R-EU_" device="R0805W" value="2M"/>
 <part name="R26" library="rcl" deviceset="R-EU_" device="R0805W" value="330k"/>
 <part name="GND34" library="SparkFun" deviceset="GND" device=""/>
-<part name="R3" library="rcl" deviceset="R-EU_" device="R0805W" value="100k"/>
+<part name="R3" library="rcl" deviceset="R-EU_" device="R0805W" value="220k"/>
 <part name="Q1" library="Simplex-DiscreteSemi" deviceset="MOSFET-PCHANNEL" device="SMD_POWER" value="si2305cd"/>
 <part name="R8" library="rcl" deviceset="R-EU_" device="R0805W" value="10k"/>
 <part name="C17" library="rcl" deviceset="C-EU" device="C0805" value="100nF"/>
@@ -22585,8 +22585,6 @@ chip, wave soldering</description>
 <part name="GND58" library="SparkFun" deviceset="GND" device=""/>
 <part name="R20" library="rcl" deviceset="R-EU_" device="R0805W" value="1k1"/>
 <part name="GND59" library="SparkFun" deviceset="GND" device=""/>
-<part name="R30" library="rcl" deviceset="R-EU_" device="R0805W" value="1M"/>
-<part name="R31" library="rcl" deviceset="R-EU_" device="R0805W" value="10k"/>
 <part name="C38" library="rcl" deviceset="C-EU" device="C1206" value="4u7"/>
 <part name="GND68" library="SparkFun" deviceset="GND" device=""/>
 <part name="C39" library="rcl" deviceset="C-EU" device="C1206" value="4u7"/>
@@ -22607,7 +22605,6 @@ chip, wave soldering</description>
 <part name="+3V3" library="supply1" deviceset="+3V3" device=""/>
 <part name="+3V5" library="supply1" deviceset="+3V3" device=""/>
 <part name="Q2" library="transistor-power" deviceset="IRF?5305" device="R"/>
-<part name="C11" library="rcl" deviceset="C-EU" device="C0805" value="1uF"/>
 <part name="GND15" library="SparkFun" deviceset="GND" device=""/>
 <part name="C16" library="rcl" deviceset="C-EU" device="C0805" value="1uF"/>
 <part name="R23" library="rcl" deviceset="R-EU_" device="R0805W" value="4.7k"/>
@@ -22621,8 +22618,8 @@ chip, wave soldering</description>
 <part name="+3V6" library="supply1" deviceset="+3V3" device=""/>
 <part name="+3V7" library="supply1" deviceset="+3V3" device=""/>
 <part name="+3V8" library="supply1" deviceset="+3V3" device=""/>
-<part name="SJ1" library="SparkFun-Passives" deviceset="JUMPER-PAD-3-2OF3_NC_BY_PASTE" device=""/>
-<part name="SJ2" library="SparkFun-Passives" deviceset="JUMPER-PAD-2-NC_BY_PASTE" device=""/>
+<part name="SJ1" library="SparkFun-Passives" deviceset="JUMPER-PAD-3-2OF3_NC_BY_PASTE" device="" value="sel_in"/>
+<part name="SJ2" library="SparkFun-Passives" deviceset="JUMPER-PAD-2-NC_BY_PASTE" device="" value="i2c_pwr"/>
 <part name="JP1" library="SparkFun-Connectors" deviceset="M02" device="PTH" value="bat"/>
 <part name="GND18" library="SparkFun" deviceset="GND" device=""/>
 <part name="X1" library="Simplex-Connectors" deviceset="MOLEX_6" device="HORIZONTAL" value="prog"/>
@@ -22632,11 +22629,20 @@ chip, wave soldering</description>
 <part name="R13" library="Simplex-Jumpers" deviceset="0R" device="_0805"/>
 <part name="GND23" library="SparkFun" deviceset="GND" device=""/>
 <part name="GND24" library="SparkFun" deviceset="GND" device=""/>
+<part name="R29" library="rcl" deviceset="R-EU_" device="R0805W" value="470"/>
+<part name="T2" library="transistor" deviceset="BC846" device=""/>
+<part name="R30" library="rcl" deviceset="R-EU_" device="R0805W" value="220k"/>
+<part name="C11" library="rcl" deviceset="C-EU" device="C0805" value="10nF"/>
+<part name="T3" library="transistor" deviceset="BC846" device=""/>
+<part name="R31" library="rcl" deviceset="R-EU_" device="R0805W" value="1M"/>
+<part name="R32" library="rcl" deviceset="R-EU_" device="R0805W" value="100k"/>
+<part name="C14" library="rcl" deviceset="C-EU" device="C0805" value="100nF"/>
+<part name="GND25" library="SparkFun" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
 <plain>
-<text x="416.56" y="10.16" size="3.81" layer="97">03</text>
+<text x="416.56" y="10.16" size="3.81" layer="97">02</text>
 <text x="241.3" y="177.8" size="1.778" layer="97">uC pins: 7 11 28</text>
 <text x="322.58" y="304.8" size="1.778" layer="97">ILIM=1610/R15</text>
 <text x="322.58" y="299.72" size="1.778" layer="97">ISET=890/R11</text>
@@ -22669,9 +22675,9 @@ chip, wave soldering</description>
 <instance part="GND33" gate="1" x="287.02" y="165.1"/>
 <instance part="GND35" gate="1" x="393.7" y="127"/>
 <instance part="GND47" gate="1" x="302.26" y="154.94"/>
-<instance part="T1" gate="G$1" x="20.32" y="254"/>
-<instance part="R16" gate="G$1" x="12.7" y="254" rot="R180"/>
-<instance part="R19" gate="G$1" x="22.86" y="269.24" rot="R270"/>
+<instance part="T1" gate="G$1" x="40.64" y="236.22"/>
+<instance part="R16" gate="G$1" x="33.02" y="236.22" rot="R180"/>
+<instance part="R19" gate="G$1" x="43.18" y="251.46" rot="R270"/>
 <instance part="R22" gate="G$1" x="30.48" y="203.2" rot="R270"/>
 <instance part="R24" gate="G$1" x="30.48" y="187.96" rot="R270"/>
 <instance part="R25" gate="G$1" x="68.58" y="203.2" rot="R270"/>
@@ -22698,22 +22704,22 @@ chip, wave soldering</description>
 <instance part="GND39" gate="1" x="38.1" y="177.8"/>
 <instance part="GND40" gate="1" x="68.58" y="177.8"/>
 <instance part="GND41" gate="1" x="76.2" y="177.8"/>
-<instance part="IC1" gate="A1" x="81.28" y="279.4"/>
-<instance part="Q3" gate="G$1" x="40.64" y="276.86" rot="R90"/>
-<instance part="R2" gate="G$1" x="30.48" y="261.62"/>
+<instance part="IC1" gate="A1" x="101.6" y="261.62"/>
+<instance part="Q3" gate="G$1" x="60.96" y="259.08" rot="R90"/>
+<instance part="R2" gate="G$1" x="50.8" y="243.84"/>
 <instance part="R11" gate="G$1" x="193.04" y="195.58"/>
 <instance part="C25" gate="G$1" x="203.2" y="187.96"/>
 <instance part="GND8" gate="1" x="203.2" y="177.8"/>
 <instance part="JP2" gate="G$1" x="269.24" y="88.9"/>
-<instance part="C27" gate="G$1" x="101.6" y="271.78"/>
-<instance part="C26" gate="G$1" x="66.04" y="271.78"/>
+<instance part="C27" gate="G$1" x="119.38" y="254"/>
+<instance part="C26" gate="G$1" x="86.36" y="254"/>
 <instance part="R21" gate="G$1" x="78.74" y="142.24" rot="R90"/>
 <instance part="LED6" gate="G$1" x="78.74" y="132.08" rot="MR0"/>
 <instance part="R28" gate="G$1" x="93.98" y="142.24" rot="R90"/>
 <instance part="LED7" gate="G$1" x="93.98" y="132.08" rot="MR0"/>
 <instance part="R36" gate="G$1" x="109.22" y="142.24" rot="R90"/>
 <instance part="LED8" gate="G$1" x="109.22" y="132.08" rot="MR0"/>
-<instance part="D2" gate="G$1" x="53.34" y="279.4"/>
+<instance part="D2" gate="G$1" x="73.66" y="261.62"/>
 <instance part="IC2" gate="G$1" x="264.16" y="266.7"/>
 <instance part="GND7" gate="1" x="269.24" y="246.38"/>
 <instance part="R1" gate="G$1" x="256.54" y="284.48"/>
@@ -22737,8 +22743,6 @@ chip, wave soldering</description>
 <instance part="GND58" gate="1" x="368.3" y="246.38"/>
 <instance part="R20" gate="G$1" x="350.52" y="256.54" rot="R270"/>
 <instance part="GND59" gate="1" x="350.52" y="246.38"/>
-<instance part="R30" gate="G$1" x="228.6" y="246.38" rot="MR90"/>
-<instance part="R31" gate="G$1" x="215.9" y="254" rot="MR180"/>
 <instance part="C38" gate="G$1" x="381" y="256.54"/>
 <instance part="GND68" gate="1" x="381" y="246.38"/>
 <instance part="C39" gate="G$1" x="391.16" y="274.32"/>
@@ -22750,7 +22754,7 @@ chip, wave soldering</description>
 <instance part="R37" gate="G$1" x="190.5" y="73.66" rot="R270"/>
 <instance part="GND80" gate="1" x="190.5" y="63.5"/>
 <instance part="LED3" gate="G$1" x="190.5" y="88.9"/>
-<instance part="GND86" gate="1" x="228.6" y="236.22"/>
+<instance part="GND86" gate="1" x="223.52" y="218.44"/>
 <instance part="GND90" gate="1" x="312.42" y="40.64"/>
 <instance part="X4" gate="G$1" x="320.04" y="53.34"/>
 <instance part="TP6" gate="G$1" x="200.66" y="101.6" rot="R270"/>
@@ -22759,9 +22763,8 @@ chip, wave soldering</description>
 <instance part="+3V4" gate="G$1" x="401.32" y="116.84"/>
 <instance part="+3V3" gate="G$1" x="312.42" y="86.36"/>
 <instance part="+3V5" gate="G$1" x="330.2" y="86.36"/>
-<instance part="Q2" gate="G$1" x="231.14" y="261.62" rot="R90"/>
-<instance part="C11" gate="G$1" x="236.22" y="243.84" rot="R180"/>
-<instance part="GND15" gate="1" x="236.22" y="236.22"/>
+<instance part="Q2" gate="G$1" x="226.06" y="261.62" rot="R90"/>
+<instance part="GND15" gate="1" x="203.2" y="218.44"/>
 <instance part="C16" gate="G$1" x="182.88" y="187.96"/>
 <instance part="R23" gate="G$1" x="419.1" y="88.9" rot="R270"/>
 <instance part="R27" gate="G$1" x="414.02" y="88.9" rot="R270"/>
@@ -22785,6 +22788,15 @@ chip, wave soldering</description>
 <instance part="R13" gate="G$1" x="228.6" y="147.32"/>
 <instance part="GND23" gate="1" x="218.44" y="137.16"/>
 <instance part="GND24" gate="1" x="238.76" y="137.16"/>
+<instance part="R29" gate="G$1" x="325.12" y="190.5"/>
+<instance part="T2" gate="G$1" x="220.98" y="238.76"/>
+<instance part="R30" gate="G$1" x="213.36" y="256.54" rot="MR90"/>
+<instance part="C11" gate="G$1" x="236.22" y="256.54"/>
+<instance part="T3" gate="G$1" x="200.66" y="228.6"/>
+<instance part="R31" gate="G$1" x="203.2" y="251.46" rot="MR90"/>
+<instance part="R32" gate="G$1" x="187.96" y="228.6" rot="MR0"/>
+<instance part="C14" gate="G$1" x="213.36" y="228.6"/>
+<instance part="GND25" gate="1" x="213.36" y="218.44"/>
 </instances>
 <busses>
 </busses>
@@ -23016,8 +23028,8 @@ chip, wave soldering</description>
 </segment>
 <segment>
 <pinref part="GND86" gate="1" pin="GND"/>
-<wire x1="228.6" y1="241.3" x2="228.6" y2="238.76" width="0.1524" layer="91"/>
-<pinref part="R30" gate="G$1" pin="1"/>
+<wire x1="223.52" y1="233.68" x2="223.52" y2="220.98" width="0.1524" layer="91"/>
+<pinref part="T2" gate="G$1" pin="E"/>
 </segment>
 <segment>
 <wire x1="342.9" y1="83.82" x2="340.36" y2="83.82" width="0.1524" layer="91"/>
@@ -23038,9 +23050,9 @@ chip, wave soldering</description>
 <pinref part="GND93" gate="1" pin="GND"/>
 </segment>
 <segment>
-<pinref part="C11" gate="G$1" pin="1"/>
 <pinref part="GND15" gate="1" pin="GND"/>
-<wire x1="236.22" y1="241.3" x2="236.22" y2="238.76" width="0.1524" layer="91"/>
+<wire x1="203.2" y1="223.52" x2="203.2" y2="220.98" width="0.1524" layer="91"/>
+<pinref part="T3" gate="G$1" pin="E"/>
 </segment>
 <segment>
 <pinref part="GND11" gate="1" pin="GND"/>
@@ -23086,6 +23098,11 @@ chip, wave soldering</description>
 <pinref part="GND24" gate="1" pin="GND"/>
 <wire x1="233.68" y1="147.32" x2="238.76" y2="147.32" width="0.1524" layer="91"/>
 <wire x1="238.76" y1="147.32" x2="238.76" y2="139.7" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="C14" gate="G$1" pin="2"/>
+<pinref part="GND25" gate="1" pin="GND"/>
+<wire x1="213.36" y1="223.52" x2="213.36" y2="220.98" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="VIN" class="0">
@@ -23281,9 +23298,9 @@ chip, wave soldering</description>
 <net name="N$28" class="0">
 <segment>
 <pinref part="Q3" gate="G$1" pin="G"/>
-<wire x1="38.1" y1="261.62" x2="38.1" y2="274.32" width="0.1524" layer="91"/>
+<wire x1="58.42" y1="243.84" x2="58.42" y2="256.54" width="0.1524" layer="91"/>
 <pinref part="R2" gate="G$1" pin="2"/>
-<wire x1="35.56" y1="261.62" x2="38.1" y2="261.62" width="0.1524" layer="91"/>
+<wire x1="55.88" y1="243.84" x2="58.42" y2="243.84" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="VBAT" class="0">
@@ -23299,12 +23316,12 @@ chip, wave soldering</description>
 <label x="281.94" y="73.66" size="1.778" layer="95"/>
 </segment>
 <segment>
-<wire x1="101.6" y1="274.32" x2="101.6" y2="279.4" width="0.1524" layer="91"/>
+<wire x1="119.38" y1="256.54" x2="119.38" y2="261.62" width="0.1524" layer="91"/>
 <pinref part="IC1" gate="A1" pin="VO"/>
-<wire x1="91.44" y1="279.4" x2="101.6" y2="279.4" width="0.1524" layer="91"/>
-<wire x1="101.6" y1="279.4" x2="106.68" y2="279.4" width="0.1524" layer="91"/>
-<label x="106.68" y="279.4" size="1.778" layer="95"/>
-<junction x="101.6" y="279.4"/>
+<wire x1="111.76" y1="261.62" x2="119.38" y2="261.62" width="0.1524" layer="91"/>
+<wire x1="119.38" y1="261.62" x2="124.46" y2="261.62" width="0.1524" layer="91"/>
+<label x="124.46" y="261.62" size="1.778" layer="95"/>
+<junction x="119.38" y="261.62"/>
 <pinref part="C27" gate="G$1" pin="+"/>
 </segment>
 <segment>
@@ -23314,9 +23331,17 @@ chip, wave soldering</description>
 <label x="96.52" y="152.4" size="1.778" layer="95"/>
 </segment>
 <segment>
-<wire x1="226.06" y1="264.16" x2="218.44" y2="264.16" width="0.1524" layer="91"/>
-<label x="218.44" y="264.16" size="1.778" layer="95"/>
+<wire x1="220.98" y1="264.16" x2="213.36" y2="264.16" width="0.1524" layer="91"/>
+<label x="193.04" y="264.16" size="1.778" layer="95"/>
 <pinref part="Q2" gate="G$1" pin="S"/>
+<pinref part="R30" gate="G$1" pin="2"/>
+<wire x1="213.36" y1="264.16" x2="203.2" y2="264.16" width="0.1524" layer="91"/>
+<wire x1="203.2" y1="264.16" x2="190.5" y2="264.16" width="0.1524" layer="91"/>
+<wire x1="213.36" y1="261.62" x2="213.36" y2="264.16" width="0.1524" layer="91"/>
+<junction x="213.36" y="264.16"/>
+<pinref part="R31" gate="G$1" pin="2"/>
+<wire x1="203.2" y1="256.54" x2="203.2" y2="264.16" width="0.1524" layer="91"/>
+<junction x="203.2" y="264.16"/>
 </segment>
 <segment>
 <pinref part="SJ1" gate="G$1" pin="1"/>
@@ -23327,8 +23352,8 @@ chip, wave soldering</description>
 <net name="PV_EN" class="0">
 <segment>
 <pinref part="R16" gate="G$1" pin="2"/>
-<wire x1="7.62" y1="254" x2="2.54" y2="254" width="0.1524" layer="91"/>
-<label x="2.54" y="254" size="1.778" layer="95"/>
+<wire x1="27.94" y1="236.22" x2="22.86" y2="236.22" width="0.1524" layer="91"/>
+<label x="22.86" y="236.22" size="1.778" layer="95"/>
 </segment>
 <segment>
 <pinref part="U$1" gate="G$1" pin="15"/>
@@ -23349,12 +23374,12 @@ chip, wave soldering</description>
 </segment>
 <segment>
 <pinref part="IC1" gate="A1" pin="GND"/>
-<wire x1="81.28" y1="271.78" x2="81.28" y2="261.62" width="0.1524" layer="91"/>
-<label x="81.28" y="261.62" size="1.778" layer="95"/>
+<wire x1="101.6" y1="254" x2="101.6" y2="243.84" width="0.1524" layer="91"/>
+<label x="101.6" y="243.84" size="1.778" layer="95"/>
 </segment>
 <segment>
-<wire x1="101.6" y1="266.7" x2="101.6" y2="261.62" width="0.1524" layer="91"/>
-<label x="101.6" y="261.62" size="1.778" layer="95"/>
+<wire x1="119.38" y1="248.92" x2="119.38" y2="243.84" width="0.1524" layer="91"/>
+<label x="119.38" y="243.84" size="1.778" layer="95"/>
 <pinref part="C27" gate="G$1" pin="-"/>
 </segment>
 <segment>
@@ -23364,8 +23389,8 @@ chip, wave soldering</description>
 </segment>
 <segment>
 <pinref part="T1" gate="G$1" pin="E"/>
-<wire x1="22.86" y1="248.92" x2="22.86" y2="233.68" width="0.1524" layer="91"/>
-<label x="22.86" y="233.68" size="1.778" layer="95"/>
+<wire x1="43.18" y1="231.14" x2="43.18" y2="223.52" width="0.1524" layer="91"/>
+<label x="43.18" y="226.06" size="1.778" layer="95"/>
 </segment>
 <segment>
 <pinref part="JP2" gate="G$1" pin="1"/>
@@ -23374,8 +23399,8 @@ chip, wave soldering</description>
 </segment>
 <segment>
 <pinref part="C26" gate="G$1" pin="-"/>
-<wire x1="66.04" y1="266.7" x2="66.04" y2="261.62" width="0.1524" layer="91"/>
-<label x="66.04" y="261.62" size="1.778" layer="95"/>
+<wire x1="86.36" y1="248.92" x2="86.36" y2="243.84" width="0.1524" layer="91"/>
+<label x="86.36" y="243.84" size="1.778" layer="95"/>
 </segment>
 <segment>
 <label x="167.64" y="147.32" size="1.778" layer="95"/>
@@ -23402,13 +23427,13 @@ chip, wave soldering</description>
 <label x="81.28" y="152.4" size="1.778" layer="95"/>
 </segment>
 <segment>
-<wire x1="22.86" y1="279.4" x2="2.54" y2="279.4" width="0.1524" layer="91"/>
-<label x="2.54" y="279.4" size="1.778" layer="95"/>
+<wire x1="43.18" y1="261.62" x2="22.86" y2="261.62" width="0.1524" layer="91"/>
+<label x="22.86" y="261.62" size="1.778" layer="95"/>
 <pinref part="R19" gate="G$1" pin="1"/>
-<wire x1="22.86" y1="274.32" x2="22.86" y2="279.4" width="0.1524" layer="91"/>
+<wire x1="43.18" y1="256.54" x2="43.18" y2="261.62" width="0.1524" layer="91"/>
 <pinref part="Q3" gate="G$1" pin="S"/>
-<wire x1="22.86" y1="279.4" x2="35.56" y2="279.4" width="0.1524" layer="91"/>
-<junction x="22.86" y="279.4"/>
+<wire x1="43.18" y1="261.62" x2="55.88" y2="261.62" width="0.1524" layer="91"/>
+<junction x="43.18" y="261.62"/>
 </segment>
 </net>
 <net name="N$14" class="0">
@@ -23499,23 +23524,23 @@ chip, wave soldering</description>
 <segment>
 <pinref part="Q3" gate="G$1" pin="D"/>
 <pinref part="D2" gate="G$1" pin="A"/>
-<wire x1="45.72" y1="279.4" x2="48.26" y2="279.4" width="0.1524" layer="91"/>
-<wire x1="48.26" y1="279.4" x2="50.8" y2="279.4" width="0.1524" layer="91"/>
-<wire x1="48.26" y1="279.4" x2="48.26" y2="287.02" width="0.1524" layer="91"/>
-<wire x1="48.26" y1="287.02" x2="55.88" y2="287.02" width="0.1524" layer="91"/>
-<junction x="48.26" y="279.4"/>
-<label x="53.34" y="287.02" size="1.778" layer="95"/>
+<wire x1="66.04" y1="261.62" x2="68.58" y2="261.62" width="0.1524" layer="91"/>
+<wire x1="68.58" y1="261.62" x2="71.12" y2="261.62" width="0.1524" layer="91"/>
+<wire x1="68.58" y1="261.62" x2="68.58" y2="269.24" width="0.1524" layer="91"/>
+<wire x1="68.58" y1="269.24" x2="76.2" y2="269.24" width="0.1524" layer="91"/>
+<junction x="68.58" y="261.62"/>
+<label x="73.66" y="269.24" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="N$5" class="0">
 <segment>
 <pinref part="T1" gate="G$1" pin="C"/>
 <pinref part="R19" gate="G$1" pin="2"/>
-<wire x1="22.86" y1="264.16" x2="22.86" y2="261.62" width="0.1524" layer="91"/>
+<wire x1="43.18" y1="246.38" x2="43.18" y2="243.84" width="0.1524" layer="91"/>
 <pinref part="R2" gate="G$1" pin="1"/>
-<wire x1="22.86" y1="261.62" x2="22.86" y2="259.08" width="0.1524" layer="91"/>
-<wire x1="25.4" y1="261.62" x2="22.86" y2="261.62" width="0.1524" layer="91"/>
-<junction x="22.86" y="261.62"/>
+<wire x1="43.18" y1="243.84" x2="43.18" y2="241.3" width="0.1524" layer="91"/>
+<wire x1="45.72" y1="243.84" x2="43.18" y2="243.84" width="0.1524" layer="91"/>
+<junction x="43.18" y="243.84"/>
 </segment>
 </net>
 <net name="THERM" class="0">
@@ -23564,12 +23589,12 @@ chip, wave soldering</description>
 <net name="N$8" class="0">
 <segment>
 <pinref part="IC1" gate="A1" pin="VI"/>
-<wire x1="66.04" y1="279.4" x2="71.12" y2="279.4" width="0.1524" layer="91"/>
+<wire x1="86.36" y1="261.62" x2="91.44" y2="261.62" width="0.1524" layer="91"/>
 <pinref part="C26" gate="G$1" pin="+"/>
-<wire x1="66.04" y1="274.32" x2="66.04" y2="279.4" width="0.1524" layer="91"/>
+<wire x1="86.36" y1="256.54" x2="86.36" y2="261.62" width="0.1524" layer="91"/>
 <pinref part="D2" gate="G$1" pin="C"/>
-<wire x1="55.88" y1="279.4" x2="66.04" y2="279.4" width="0.1524" layer="91"/>
-<junction x="66.04" y="279.4"/>
+<wire x1="76.2" y1="261.62" x2="86.36" y2="261.62" width="0.1524" layer="91"/>
+<junction x="86.36" y="261.62"/>
 </segment>
 </net>
 <net name="N$4" class="0">
@@ -23654,14 +23679,14 @@ chip, wave soldering</description>
 <wire x1="342.9" y1="266.7" x2="342.9" y2="254" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="R31" gate="G$1" pin="1"/>
-<wire x1="210.82" y1="254" x2="203.2" y2="254" width="0.1524" layer="91"/>
-<label x="203.2" y="254" size="1.778" layer="95"/>
+<label x="175.26" y="228.6" size="1.778" layer="95"/>
+<pinref part="R32" gate="G$1" pin="2"/>
+<wire x1="182.88" y1="228.6" x2="172.72" y2="228.6" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="U$1" gate="G$1" pin="1"/>
-<wire x1="332.74" y1="190.5" x2="325.12" y2="190.5" width="0.1524" layer="91"/>
-<label x="325.12" y="190.5" size="1.778" layer="95"/>
+<pinref part="R29" gate="G$1" pin="1"/>
+<wire x1="320.04" y1="190.5" x2="312.42" y2="190.5" width="0.1524" layer="91"/>
+<label x="314.96" y="190.5" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="BAT" class="0">
@@ -23687,12 +23712,16 @@ chip, wave soldering</description>
 <net name="N$49" class="0">
 <segment>
 <pinref part="IC2" gate="G$1" pin="VIN"/>
-<wire x1="236.22" y1="264.16" x2="248.92" y2="264.16" width="0.1524" layer="91"/>
+<wire x1="231.14" y1="264.16" x2="236.22" y2="264.16" width="0.1524" layer="91"/>
 <pinref part="Q2" gate="G$1" pin="D"/>
 <pinref part="C7" gate="G$1" pin="+"/>
+<wire x1="236.22" y1="264.16" x2="248.92" y2="264.16" width="0.1524" layer="91"/>
 <wire x1="248.92" y1="264.16" x2="254" y2="264.16" width="0.1524" layer="91"/>
 <wire x1="248.92" y1="259.08" x2="248.92" y2="264.16" width="0.1524" layer="91"/>
 <junction x="248.92" y="264.16"/>
+<pinref part="C11" gate="G$1" pin="1"/>
+<wire x1="236.22" y1="259.08" x2="236.22" y2="264.16" width="0.1524" layer="91"/>
+<junction x="236.22" y="264.16"/>
 </segment>
 </net>
 <net name="STATUS" class="0">
@@ -23733,16 +23762,17 @@ chip, wave soldering</description>
 </net>
 <net name="N$16" class="0">
 <segment>
-<pinref part="R30" gate="G$1" pin="2"/>
 <pinref part="Q2" gate="G$1" pin="G"/>
-<wire x1="228.6" y1="251.46" x2="228.6" y2="254" width="0.1524" layer="91"/>
-<pinref part="R31" gate="G$1" pin="2"/>
-<wire x1="228.6" y1="254" x2="228.6" y2="259.08" width="0.1524" layer="91"/>
-<wire x1="220.98" y1="254" x2="228.6" y2="254" width="0.1524" layer="91"/>
-<junction x="228.6" y="254"/>
+<wire x1="223.52" y1="248.92" x2="223.52" y2="259.08" width="0.1524" layer="91"/>
+<pinref part="R30" gate="G$1" pin="1"/>
+<wire x1="213.36" y1="251.46" x2="213.36" y2="248.92" width="0.1524" layer="91"/>
+<pinref part="T2" gate="G$1" pin="C"/>
+<wire x1="213.36" y1="248.92" x2="223.52" y2="248.92" width="0.1524" layer="91"/>
+<wire x1="223.52" y1="248.92" x2="223.52" y2="243.84" width="0.1524" layer="91"/>
 <pinref part="C11" gate="G$1" pin="2"/>
-<wire x1="228.6" y1="254" x2="236.22" y2="254" width="0.1524" layer="91"/>
-<wire x1="236.22" y1="254" x2="236.22" y2="248.92" width="0.1524" layer="91"/>
+<wire x1="236.22" y1="251.46" x2="236.22" y2="248.92" width="0.1524" layer="91"/>
+<wire x1="236.22" y1="248.92" x2="223.52" y2="248.92" width="0.1524" layer="91"/>
+<junction x="223.52" y="248.92"/>
 </segment>
 </net>
 <net name="BAT_DIV" class="0">
@@ -23824,6 +23854,35 @@ chip, wave soldering</description>
 <pinref part="SJ2" gate="G$1" pin="1"/>
 <wire x1="401.32" y1="99.06" x2="401.32" y2="101.6" width="0.1524" layer="91"/>
 <junction x="401.32" y="99.06"/>
+</segment>
+</net>
+<net name="N$20" class="0">
+<segment>
+<pinref part="U$1" gate="G$1" pin="1"/>
+<pinref part="R29" gate="G$1" pin="2"/>
+<wire x1="332.74" y1="190.5" x2="330.2" y2="190.5" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$22" class="0">
+<segment>
+<wire x1="203.2" y1="246.38" x2="203.2" y2="238.76" width="0.1524" layer="91"/>
+<pinref part="R31" gate="G$1" pin="1"/>
+<pinref part="T3" gate="G$1" pin="C"/>
+<pinref part="T2" gate="G$1" pin="B"/>
+<wire x1="203.2" y1="238.76" x2="203.2" y2="233.68" width="0.1524" layer="91"/>
+<wire x1="218.44" y1="238.76" x2="213.36" y2="238.76" width="0.1524" layer="91"/>
+<junction x="203.2" y="238.76"/>
+<pinref part="C14" gate="G$1" pin="1"/>
+<wire x1="213.36" y1="238.76" x2="203.2" y2="238.76" width="0.1524" layer="91"/>
+<wire x1="213.36" y1="238.76" x2="213.36" y2="231.14" width="0.1524" layer="91"/>
+<junction x="213.36" y="238.76"/>
+</segment>
+</net>
+<net name="N$23" class="0">
+<segment>
+<pinref part="T3" gate="G$1" pin="B"/>
+<pinref part="R32" gate="G$1" pin="1"/>
+<wire x1="198.12" y1="228.6" x2="193.04" y2="228.6" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
