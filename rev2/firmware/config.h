@@ -3,8 +3,6 @@
 
 // #define CONFIG_DEBUG
 #define USE_WATCHDOG
-#define CONFIG_RTC_DST
-#define CONFIG_RTC_DST_ZONE 4
 
 //#define CALIBRATION
 

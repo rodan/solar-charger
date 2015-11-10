@@ -16,20 +16,9 @@
 #include "drivers/rtc.h"
 #include "drivers/timer_a0.h"
 #include "drivers/uart1.h"
-#include "drivers/diskio.h"
-#include "drivers/mmc.h"
 #include "drivers/adc.h"
-#include "drivers/hal_sdcard.h"
-
-// DIR is defined as "0x0001 - USB Data Response Bit" in msp430 headers
-// but it's also used by fatfs
-#undef DIR
-#include "fatfs/ff.h"
 
 char str_temp[64];
-FATFS fatfs;
-DIR dir;
-FIL f;
 
 float v_bat, v_pv, i_ch, t_th, t_int;
 
@@ -45,16 +34,10 @@ float v_bat, v_pv, i_ch, t_th, t_int;
 uint16_t acts;
 uint16_t acts_last;
 
-void die(uint8_t loc, FRESULT rc)
-{
-    sprintf(str_temp, "l=%d rc=%u\r\n", loc, rc);
-    uart1_tx_str(str_temp, strlen(str_temp));
-}
-
 #ifdef CALIBRATION
 static void do_calib(enum sys_message msg)
 {
-    uint16_t q_bat = 0, q_pv = 0, q_t_int = 0, q_ch = 0, q_th = 0;
+    uint16_t q_bat = 0, q_pv = 0, q_t_int = 0, q_th = 0;
 
     opt_power_enable;
     timer_a0_delay(300000);
@@ -68,8 +51,6 @@ static void do_calib(enum sys_message msg)
     //t_int = ((q_t_int * VREF_1_5) / 102.3 - 6.88) * 396.8;
     t_int = 10.0 * ( q_t_int * T_INT_B + T_INT_A );
 
-    adc10_read(9, &q_ch, REFVSEL_2);
-    i_ch = 100.0 * ((q_ch * VREF_2_5_5_1 / 1023) * INA168_B + INA168_A);
     adc10_read(8, &q_th, REFVSEL_2);
     t_th = 10.0 * ((q_th * VREF_2_5_5_0 / 1023) * TH_B + TH_A);
 
@@ -85,8 +66,7 @@ static void do_calib(enum sys_message msg)
     uart1_tx_str(str_temp, strlen(str_temp));
 
     snprintf(str_temp, 42,
-             "ch: % 4d %01d.%02d | th % 4d  %s%d.%02d\r\n",
-             q_ch, (uint16_t) i_ch / 100, (uint16_t) i_ch % 100,
+             "th % 4d  %s%d.%02d\r\n",
              q_th, t_th < 0 ? "-": "", abs((int16_t) t_th / 10), abs((int16_t) t_th % 10),
     uart1_tx_str(str_temp, strlen(str_temp));
 
@@ -104,7 +84,7 @@ static void main_loop(enum sys_message msg)
 {
     uint16_t q_bat = 0;
     uint16_t q_pv = 0, q_t_int = 0;
-    uint16_t q_ch = 0, q_th = 0;
+    uint16_t q_th = 0;
 
     acts = 0;
 
@@ -123,15 +103,13 @@ static void main_loop(enum sys_message msg)
 
     adc10_read(1, &q_pv, REFVSEL_2);
     v_pv = q_pv * VREF_2_5_6_1 * DIV_PV;
-    adc10_read(9, &q_ch, REFVSEL_2);
-    i_ch = 100.0 * ((q_ch * VREF_2_5_5_1 / 1023) * INA168_B + INA168_A);
     adc10_read(10, &q_t_int, REFVSEL_0);
     //t_int = ((q_t_int * VREF_1_5) / 102.3 - 6.88) * 396.8;
     t_int = 10.0 * ( q_t_int * T_INT_B + T_INT_A );
     opt_power_enable;
     timer_a0_delay(100000);
     adc10_read(8, &q_th, REFVSEL_2);
-    t_th = ((q_th * VREF_2_5_5_0 / 1023) * TH_B + TH_A) * 10.0;
+    t_th = ((q_th * VREF_2_5_5_1 / 1023) * TH_B + TH_A) * 10.0;
     adc10_halt();
 
     if (v_pv < v_bat + 100) {
@@ -149,48 +127,7 @@ static void main_loop(enum sys_message msg)
     }
 
     if ((acts != acts_last) || (rtca_time.min % 10 == 0)) {
-    //if (true) {
-
-        FRESULT rc;
-        f_mount(&fatfs, "", 0);
-        disk_initialize(0);
-        rc = detectCard();
-
-        if (rc) {
-            uint16_t bw;
-            f_opendir(&dir, "/");
-            snprintf(str_temp, 5, "%d", rtca_time.year);
-            rc = f_mkdir(str_temp);
-            if ((rc == FR_OK) || (rc == FR_EXIST)) {
-                snprintf(str_temp, 9, "/%d/%02d", rtca_time.year, rtca_time.mon);
-                rc = f_open(&f, str_temp, FA_WRITE | FA_OPEN_ALWAYS);
-                if (!rc) {
-                    f_lseek(&f, f_size(&f));
-                    //20130620 07:12 -12.2 -34.5 12.30 13.40 1.22 0xffffDA0//53
-                    snprintf(str_temp, 63,
-                             "%04d%02d%02d %02d:%02d %s%d.%1d %s%d.%1d %02d.%02d %02d.%02d %01d.%02d 0x%04x\r\n",
-                             rtca_time.year, rtca_time.mon, rtca_time.day,
-                             rtca_time.hour, rtca_time.min,
-                             t_int < 0 ? "-": "", abs((int16_t) t_int / 10), abs((int16_t) t_int % 10),
-                             t_th < 0 ? "-": "", abs((int16_t) t_th / 10), abs((int16_t) t_th % 10),
-                             (uint16_t) v_bat / 100, (uint16_t) v_bat % 100,
-                             (uint16_t) v_pv / 100, (uint16_t) v_pv % 100,
-                             (uint16_t) i_ch / 100, (uint16_t) i_ch % 100, 
-                             acts);
-                    f_write(&f, str_temp, strlen(str_temp), &bw);
-                    f_close(&f);
-                    uart1_tx_str(str_temp, strlen(str_temp));
-                } else {
-                    die(2, rc);
-                }
-            } else {
-                die(3, rc);
-            }
-        } else {
-            die(1, rc);
-        }
-        f_mount(NULL, "", 0);
-        SDCard_end();
+        // removed
         opt_power_disable;
         acts_last = acts;
     }
@@ -201,13 +138,6 @@ int main(void)
 {
     main_init();
     uart1_init();
-#ifdef IR_REMOTE
-    ir_init();
-#endif
-#ifdef INTERTECHNO
-    it_init();
-#endif
-
     charge_disable;
 
 #ifdef CALIBRATION

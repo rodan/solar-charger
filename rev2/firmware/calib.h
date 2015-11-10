@@ -16,11 +16,6 @@
 #define VREF_2_5_6_1    2.4518
 #define DIV_PV          1.0040
 
-// current sense ic
-#define VREF_2_5_5_0    2.4991
-#define INA168_A        0.0167
-#define INA168_B        0.9037
-
 // thermistor
 #define VREF_2_5_5_1    2.4983
 #define TH_A            94.2421
