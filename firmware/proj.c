@@ -2,7 +2,7 @@
 //  sensor control board based on a MSP430F5510 uC
 //   - compatible with hardware rev 03 -
 //
-//  author:          Petre Rodan <petre.rodan@simplex.ro>
+//  author:          Petre Rodan <2b4eda@subdimension.ro>
 //  available from:  https://github.com/rodan/
 //  license:         GNU GPLv3
 
@@ -40,7 +40,7 @@ static void do_calib(enum sys_message msg)
     uint16_t q_bat = 0, q_pv = 0, q_t_int = 0, q_th = 0;
 
     opt_power_enable;
-    timer_a0_delay(300000);
+    //timer_a0_delay(300000);
 
     adc10_read(0, &q_bat, REFVSEL_2);
     v_bat = q_bat * VREF_2_5_6_0 * DIV_BAT;
@@ -107,7 +107,7 @@ static void main_loop(enum sys_message msg)
     //t_int = ((q_t_int * VREF_1_5) / 102.3 - 6.88) * 396.8;
     t_int = 10.0 * ( q_t_int * T_INT_B + T_INT_A );
     opt_power_enable;
-    timer_a0_delay(100000);
+    //timer_a0_delay(100000);
     adc10_read(8, &q_th, REFVSEL_2);
     t_th = ((q_th * VREF_2_5_5_1 / 1023) * TH_B + TH_A) * 10.0;
     adc10_halt();
@@ -137,7 +137,7 @@ static void main_loop(enum sys_message msg)
 int main(void)
 {
     main_init();
-    uart1_init();
+    uart1_init(9600);
     charge_disable;
 
 #ifdef CALIBRATION

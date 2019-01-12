@@ -1,0 +1,10 @@
+# DO NOT DELETE
+
+proj.o: proj.h config.h calib.h drivers/sys_messagebus.h drivers/pmm.h
+proj.o: drivers/rtc.h drivers/timer_a0.h drivers/uart1.h drivers/adc.h
+drivers/pmm.o: drivers/pmm.h proj.h config.h
+drivers/uart1.o: drivers/uart1.h proj.h config.h drivers/timer_a0.h
+drivers/sys_messagebus.o: drivers/sys_messagebus.h proj.h config.h
+drivers/timer_a0.o: drivers/timer_a0.h proj.h config.h
+drivers/rtc.o: drivers/rtc.h proj.h config.h drivers/rtca_now.h
+drivers/adc.o: drivers/adc.h proj.h config.h

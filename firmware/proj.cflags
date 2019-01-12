@@ -1,0 +1,1 @@
+-mmcu=msp430f5510 -D__MSP430F5510__ -Wall -fno-force-addr -finline-limit=1 -fno-schedule-insns -fshort-enums -Wl,-Map=output.map -Os -fdata-sections -ffunction-sections -fomit-frame-pointer
