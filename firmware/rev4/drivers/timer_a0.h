@@ -22,6 +22,7 @@
 #define _75s            _1s * 75
 
 enum timer_a0_event {
+    TIMER_A0_EVENT_NONE = 0,
     TIMER_A0_EVENT_CCR0 = BIT0,
     TIMER_A0_EVENT_CCR1 = BIT1,
     TIMER_A0_EVENT_CCR2 = BIT2,
@@ -29,9 +30,6 @@ enum timer_a0_event {
     TIMER_A0_EVENT_CCR4 = BIT4,
     TIMER_A0_EVENT_IFG = BIT5,
 };
-
-volatile enum timer_a0_event timer_a0_last_event;
-volatile uint16_t timer_a0_ovf;
 
 void timer_a0_init(void);
 void timer_a0_halt(void);

@@ -8,6 +8,7 @@
 //  available from:  https://github.com/rodan/
 //  license:         GNU GPLv3
 
+#include <inttypes.h>
 #include "adc.h"
 
 volatile uint16_t *adc10_rv;

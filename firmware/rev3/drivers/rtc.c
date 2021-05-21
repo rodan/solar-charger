@@ -44,7 +44,17 @@ void rtca_init(void)
        also enable alarm interrupts */
     RTCCTL01 |= RTCMODE | RTCRDYIE | RTCAIE | RTCTEVIE;
 
-    rtca_set_time();
+    RTCSEC = rtca_time.sec;
+    RTCMIN = rtca_time.min;
+    RTCHOUR = rtca_time.hour;
+    RTCDAY = rtca_time.day;
+    RTCDOW = rtca_time.dow;
+    RTCMON = rtca_time.mon;
+    RTCYEARL = rtca_time.year & 0xff;
+    RTCYEARH = rtca_time.year >> 8;
+
+    /* Enable the RTC */
+    rtca_start();
 
 #ifdef CONFIG_RTC_DST
     /* initialize DST module */
@@ -62,11 +72,6 @@ void rtca_set_time()
     RTCSEC = rtca_time.sec;
     RTCMIN = rtca_time.min;
     RTCHOUR = rtca_time.hour;
-    RTCDAY = rtca_time.day;
-    RTCDOW = rtca_time.dow;
-    RTCMON = rtca_time.mon;
-    RTCYEARL = rtca_time.year & 0xff;
-    RTCYEARH = rtca_time.year >> 8;
 
     /* Resume RTC time keeping */
     rtca_start();

@@ -11,7 +11,7 @@
 
 #include "proj.h"
 #include "calib.h"
-#include "drivers/sys_messagebus.h"
+#include "drivers/event_handler.h"
 #include "drivers/pmm.h"
 #include "drivers/rtc.h"
 #include "drivers/timer_a0.h"
@@ -35,7 +35,7 @@ uint16_t acts;
 uint16_t acts_last;
 
 #ifdef CALIBRATION
-static void do_calib(enum sys_message msg)
+static void do_calib(uint32_t msg)
 {
     uint16_t q_bat = 0, q_pv = 0, q_t_int = 0, q_th = 0;
 
@@ -80,7 +80,7 @@ static void do_calib(enum sys_message msg)
     //P4OUT ^= BIT7;
 }
 #else
-static void main_loop(enum sys_message msg)
+static void main_loop(uint32_t msg)
 {
     uint16_t q_bat = 0;
     uint16_t q_pv = 0, q_t_int = 0;
@@ -126,7 +126,7 @@ static void main_loop(enum sys_message msg)
         acts = acts_last;
     }
 
-    if ((acts != acts_last) || (rtca_time.min % 10 == 0)) {
+    if ((acts != acts_last) || (RTCMIN % 10 == 0)) {
         // removed
         opt_power_disable;
         acts_last = acts;
@@ -141,9 +141,9 @@ int main(void)
     charge_disable;
 
 #ifdef CALIBRATION
-    sys_messagebus_register(&do_calib, SYS_MSG_RTC_MINUTE);
+    eh_register(&do_calib, SYS_MSG_RTC_MINUTE);
 #else
-    sys_messagebus_register(&main_loop, SYS_MSG_RTC_MINUTE);
+    eh_register(&main_loop, SYS_MSG_RTC_MINUTE);
 #endif
 
     while (1) {
@@ -285,20 +285,18 @@ void wake_up(void)
 
 void check_events(void)
 {
-    struct sys_messagebus *p = messagebus;
-    enum sys_message msg = 0;
+    uint16_t msg = SYS_MSG_NULL;
+    uint16_t ev;
 
     // drivers/rtca
-    if (rtca_last_event) {
-        msg |= rtca_last_event;
-        rtca_last_event = 0;
+    ev = rtca_get_event();
+    if (ev & RTCA_EV_MINUTE) {
+        msg |= SYS_MSG_RTC_MINUTE;
+        rtca_rst_event();
     }
-    while (p) {
-        // notify listener if he registered for any of these messages
-        if (msg & p->listens) {
-            p->fn(msg);
-        }
-        p = p->next;
+
+    if (msg != SYS_MSG_NULL) {
+        eh_exec(msg);
     }
 }
 

@@ -18,13 +18,11 @@ enum uart1_tevent {
 #define INTRCHAR_TMOUT     _10ms    // ~10ms in ticks
 #define REPLY_TMOUT        _1s      // ~1s in ticks
 
-volatile char uart1_rx_buf[UART1_RXBUF_SZ];
-volatile uint8_t uart1_p;
-volatile uint8_t uart1_rx_enable;
+#define  UART1_EV_NULL 0
+#define    UART1_EV_RX 0x1
+#define    UART1_EV_TX 0x2
 
 void uart1_init(uint16_t speed);
 uint16_t uart1_tx_str(char *str, const uint16_t size);
-
-volatile enum uart1_tevent uart1_last_event;
 
 #endif

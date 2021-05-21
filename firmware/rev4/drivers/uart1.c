@@ -1,6 +1,13 @@
 
+#include <inttypes.h>
 #include "uart1.h"
 #include "timer_a0.h"
+
+volatile char uart1_rx_buf[UART1_RXBUF_SZ];     // receive buffer
+volatile uint8_t uart1_p;
+volatile uint8_t uart1_rx_enable;
+
+volatile enum uart1_tevent uart1_last_event;
 
 void uart1_init(uint16_t speed)
 {
@@ -21,6 +28,25 @@ void uart1_init(uint16_t speed)
     UCA1IE |= UCRXIE;           // enable USCI_A0 RX interrupt
     uart1_p = 0;
     uart1_rx_enable = 1;
+}
+
+uint8_t uart1_get_event(void)
+{
+    return uart1_last_event;
+}
+
+void uart1_rst_event(void)
+{
+    uart1_last_event = UART1_EV_NULL;
+}
+
+char *uart1_get_rx_buf(void)
+{
+    if (uart1_p) {
+        return (char *)uart1_rx_buf;
+    } else {
+        return NULL;
+    }
 }
 
 uint16_t uart1_tx_str(char *str, const uint16_t size)

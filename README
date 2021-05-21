@@ -6,6 +6,7 @@
  source:       https://github.com/rodan/solar-charger 
  author:       Petre Rodan <2b4eda@subdimension.ro>
  license:      GNU GPLv3
+ toolchain used: msp430-elf-gcc (Mitto Systems Limited - msp430-gcc 9.2.0.50) 9.2.0 linux
 
 Features:
  - an MSP430F5510 uC controls all aspects of charging a 12v Pb battery
@@ -17,7 +18,7 @@ Features:
  - 8 status leds for verbose blinkiness
  - very low quiescent current
 
-rev1 used a LandStar charge controller that got replaced in rev3 with a PB137ACV ic
-
-
+rev1 - used a LandStar charge controller that got replaced in rev3 with a PB137ACV ic
+rev3 - 3V Li cell acts as bakup power for the uC, an SDcard is provided for logging
+rev4 - SDcard is removed, 3V Li cell replaced by a 3.7v lipo + charging circuitry
 

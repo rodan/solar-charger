@@ -10,8 +10,11 @@
 //   available from:  https://github.com/rodan/
 //   license:         GNU GPLv3
 
+#include <inttypes.h>
 #include "timer_a0.h"
-//#include "sim900.h"
+
+volatile enum timer_a0_event timer_a0_last_event;
+volatile uint16_t timer_a0_ovf;
 
 void timer_a0_init(void)
 {
@@ -21,6 +24,16 @@ void timer_a0_init(void)
     TA0EX0 |= TAIDEX_7;
     TA0CTL |= TASSEL__ACLK + MC__CONTINOUS + TACLR + ID__8;
     __enable_interrupt();
+}
+
+uint8_t timer_a0_get_event(void)
+{
+    return timer_a0_last_event;
+}
+
+void timer_a0_rst_event(void)
+{
+    timer_a0_last_event = TIMER_A0_EVENT_NONE;
 }
 
 // ticks = microseconds / 30.5175 if no input divider

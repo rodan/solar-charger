@@ -1,0 +1,460 @@
+Only in drivers/: .rtc.h.swp
+diff -upr drivers/adc.c /tmp/solar-charger/firmware/drivers/adc.c
+--- drivers/adc.c	2021-05-21 20:00:01.978255088 +0300
++++ /tmp/solar-charger/firmware/drivers/adc.c	2021-05-21 19:48:35.804670685 +0300
+@@ -4,11 +4,10 @@
+ //  at least a 1ms delay should be inserted between two adc10_read()s or
+ //  between an adc10_read(port, &rv) and the use of rv.
+ //
+-//  author:          Petre Rodan <2b4eda@subdimension.ro>
++//  author:          Petre Rodan <petre.rodan@simplex.ro>
+ //  available from:  https://github.com/rodan/
+ //  license:         GNU GPLv3
+ 
+-#include <inttypes.h>
+ #include "adc.h"
+ 
+ volatile uint16_t *adc10_rv;
+@@ -53,43 +52,6 @@ void adc10_halt(void)
+     REFCTL0 &= ~REFON;
+ }
+ 
+-// calculate internal temperature based on the linear regression 
+-// established by the two calibration registers flashed into the chip
+-// qtemp the adc value on channel 10 with a 1.5V reference
+-// function returns the temperature in degrees C
+-int16_t calc_temp(const uint16_t qtemp)
+-{
+-    uint16_t x1 = *(uint16_t *)0x1a1a; // value at 30dC
+-    uint16_t x2 = *(uint16_t *)0x1a1c; // value at 85dC, see datasheet
+-    uint16_t y1 = 30;
+-    uint16_t y2 = 85;
+-    int32_t sumxsq;
+-    int32_t sumx, sumy, sumxy;
+-    int32_t coef1, coef2, t10;
+-    int32_t rv;
+-
+-    sumx = x1 + x2;
+-    sumy = y1 + y2;
+-    sumxsq = (int32_t)x1 * (int32_t)x1 + (int32_t)x2 * (int32_t)x2;
+-    sumxy = (int32_t)x1 * (int32_t)y1 + (int32_t)x2 * (int32_t)y2;
+-
+-    coef1 = ((sumy*sumxsq)-(sumx*sumxy))/((2*sumxsq)-(sumx*sumx))*100;
+-    coef2 = 100*((2*sumxy)-(sumx*sumy))/((2*sumxsq)-(sumx*sumx));
+-
+-    t10 = (qtemp * coef2 + coef1)/10;
+-    rv = t10/10;
+-
+-    // add 1 if first digit after decimal is > 4
+-    if ( (t10 % 10) > 4 ) {
+-        if (t10 > 0) {
+-            rv += 1;
+-        } else {
+-            rv -= 1;
+-        }
+-    }
+-    return rv;
+-}
+-
+ __attribute__ ((interrupt(ADC10_VECTOR)))
+ void adc10_ISR(void)
+ {
+diff -upr drivers/adc.h /tmp/solar-charger/firmware/drivers/adc.h
+--- drivers/adc.h	2015-02-16 12:16:31.000000000 +0200
++++ /tmp/solar-charger/firmware/drivers/adc.h	2021-05-21 19:48:35.804670685 +0300
+@@ -5,6 +5,5 @@
+ 
+ void adc10_read(const uint8_t port, uint16_t * rv, const uint8_t vref);
+ void adc10_halt(void);
+-int16_t calc_temp(const uint16_t qtemp);
+ 
+ #endif
+Only in /tmp/solar-charger/firmware/drivers/: diskio.h
+Only in /tmp/solar-charger/firmware/drivers/: hal_sdcard.c
+Only in /tmp/solar-charger/firmware/drivers/: hal_sdcard.h
+Only in /tmp/solar-charger/firmware/drivers/: mmc.c
+Only in /tmp/solar-charger/firmware/drivers/: mmc.h
+diff -upr drivers/rtc.c /tmp/solar-charger/firmware/drivers/rtc.c
+--- drivers/rtc.c	2021-05-21 20:00:25.024320553 +0300
++++ /tmp/solar-charger/firmware/drivers/rtc.c	2021-05-21 19:48:35.804670685 +0300
+@@ -20,7 +20,6 @@
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
+ 
+-#include <inttypes.h>
+ #include "rtc.h"
+ #include "rtca_now.h"
+ 
+@@ -45,7 +44,17 @@ void rtca_init(void)
+        also enable alarm interrupts */
+     RTCCTL01 |= RTCMODE | RTCRDYIE | RTCAIE | RTCTEVIE;
+ 
+-    rtca_set_time();
++    RTCSEC = rtca_time.sec;
++    RTCMIN = rtca_time.min;
++    RTCHOUR = rtca_time.hour;
++    RTCDAY = rtca_time.day;
++    RTCDOW = rtca_time.dow;
++    RTCMON = rtca_time.mon;
++    RTCYEARL = rtca_time.year & 0xff;
++    RTCYEARH = rtca_time.year >> 8;
++
++    /* Enable the RTC */
++    rtca_start();
+ 
+ #ifdef CONFIG_RTC_DST
+     /* initialize DST module */
+@@ -63,11 +72,6 @@ void rtca_set_time()
+     RTCSEC = rtca_time.sec;
+     RTCMIN = rtca_time.min;
+     RTCHOUR = rtca_time.hour;
+-    RTCDAY = rtca_time.day;
+-    RTCDOW = rtca_time.dow;
+-    RTCMON = rtca_time.mon;
+-    RTCYEARL = rtca_time.year & 0xff;
+-    RTCYEARH = rtca_time.year >> 8;
+ 
+     /* Resume RTC time keeping */
+     rtca_start();
+Only in /tmp/solar-charger/firmware/drivers/: rtc_dst.c
+Only in /tmp/solar-charger/firmware/drivers/: rtc_dst.h
+diff -upr drivers/rtca_now.h /tmp/solar-charger/firmware/drivers/rtca_now.h
+--- drivers/rtca_now.h	2021-05-21 20:34:40.316694886 +0300
++++ /tmp/solar-charger/firmware/drivers/rtca_now.h	2021-05-21 19:52:39.562017823 +0300
+@@ -6,7 +6,7 @@
+ #define COMPILE_MON 5
+ #define COMPILE_DAY 21
+ #define COMPILE_DOW 5
+-#define COMPILE_HOUR 20
+-#define COMPILE_MIN 36
++#define COMPILE_HOUR 19
++#define COMPILE_MIN 53
+ 
+ #endif
+diff -upr drivers/timer_a0.c /tmp/solar-charger/firmware/drivers/timer_a0.c
+--- drivers/timer_a0.c	2021-05-21 20:00:46.676382080 +0300
++++ /tmp/solar-charger/firmware/drivers/timer_a0.c	2021-05-21 19:48:35.805670686 +0300
+@@ -1,64 +1,39 @@
+ 
+ //   timer a0 handling
+ //   CCR0 is currently unused
+-//   CCR1 is used for timer_a0_delay_noblk_ccr1()
+-//   CCR2 is used for timer_a0_delay_noblk_ccr2()
+-//   CCR3 is used for timer_a0_delay_noblk_ccr3()
+-//   CCR4 is used for timer_a0_delay_ccr4()
++//   CCR1 is currently unused
++//   CCR2 is used for timer_a0_delay_noblk()
++//   CCR3 is currently unused
++//   CCR4 is used for timer_a0_delay()
+ //
+-//   author:          Petre Rodan <2b4eda@subdimension.ro>
++//   author:          Petre Rodan <petre.rodan@simplex.ro>
+ //   available from:  https://github.com/rodan/
+ //   license:         GNU GPLv3
+ 
+-#include <inttypes.h>
+ #include "timer_a0.h"
+-//#include "sim900.h"
+ 
+ void timer_a0_init(void)
+ {
+     __disable_interrupt();
+-    timer_a0_ovf = 0;
+-
+-    TA0EX0 |= TAIDEX_7;
+-    TA0CTL |= TASSEL__ACLK + MC__CONTINOUS + TACLR + ID__8;
++    TA0CTL |= TASSEL__ACLK + MC__CONTINOUS;
++    TA0R = 0;
++    //TA0CCTL0 |= CCIE;
+     __enable_interrupt();
+ }
+ 
+-// ticks = microseconds / 30.5175 if no input divider
+-// ticks = microseconds / 244.14  if ID__8 is used
+-// ticks = microseconds / 1953.12 if ID__8 and TAIDEX 0x7
+-void timer_a0_delay_noblk_ccr1(uint16_t ticks)
+-{
+-    TA0CCTL1 &= ~CCIE;
+-    TA0CCTL1 = 0;
+-    TA0CCR1 = TA0R + ticks;
+-    TA0CCTL1 = CCIE;
+-}
+-
+-// ticks = microseconds / 30.5175 if no input divider
+-// ticks = microseconds / 244.14  if ID__8 is used
+-void timer_a0_delay_noblk_ccr2(uint16_t ticks)
+-{
+-    TA0CCTL2 &= ~CCIE;
+-    TA0CCTL2 = 0;
+-    TA0CCR2 = TA0R + ticks;
+-    TA0CCTL2 = CCIE;
+-}
+-
+-// ticks = microseconds / 30.5175 if no input divider
+-// ticks = microseconds / 244.14 if ID__8 is used
+-void timer_a0_delay_noblk_ccr3(uint16_t ticks)
++// microseconds must be a value between 31 and 1999964
++void timer_a0_delay(uint32_t microseconds)
+ {
+-    TA0CCTL3 &= ~CCIE;
+-    TA0CCTL3 = 0;
+-    TA0CCR3 = TA0R + ticks;
+-    TA0CCTL3 = CCIE;
+-}
++    // one tick of ACLK is 1/32768 s
++    /*
++       if (microseconds < 31) {
++       microseconds = 31;
++       } else if (microseconds > 1999964) {
++       microseconds = 1999964;
++       }
++     */
+ 
+-// ticks = microseconds / 30.5175 if no input divider
+-// ticks = microseconds / 244.14 if ID__8 is used
+-void timer_a0_delay_ccr4(uint16_t ticks)
+-{
++    uint32_t ticks = microseconds / 30.5175;
+     __disable_interrupt();
+     TA0CCR4 = TA0R + ticks;
+     TA0CCTL4 = CCIE;
+@@ -78,6 +53,16 @@ void timer_a0_delay_ccr4(uint16_t ticks)
+     timer_a0_last_event &= ~TIMER_A0_EVENT_CCR4;
+ }
+ 
++void timer_a0_delay_noblk(uint32_t microseconds)
++{
++    uint32_t ticks = microseconds / 30.5175;
++    __disable_interrupt();
++    TA0CCR2 = TA0R + ticks;
++    TA0CCTL2 = 0;
++    TA0CCTL2 = CCIE;
++    __enable_interrupt();
++}
++
+ __attribute__ ((interrupt(TIMER0_A1_VECTOR)))
+ void timer0_A1_ISR(void)
+ {
+@@ -85,35 +70,18 @@ void timer0_A1_ISR(void)
+     if (iv == TA0IV_TA0CCR4) {
+         // timer used by timer_a0_delay()
+         timer_a0_last_event |= TIMER_A0_EVENT_CCR4;
+-        _BIC_SR_IRQ(LPM3_bits);
+-    } else if (iv == TA0IV_TA0CCR1) {
+-        // timer used by timer_a0_delay_noblk_ccr1()
+-        // disable interrupt
+-        TA0CCTL1 &= ~CCIE;
+-        TA0CCTL1 = 0;
+-        timer_a0_last_event |= TIMER_A0_EVENT_CCR1;
+-        _BIC_SR_IRQ(LPM3_bits);
++        goto exit_lpm3;
+     } else if (iv == TA0IV_TA0CCR2) {
+-        // timer used by timer_a0_delay_noblk_ccr2()
++        // timer used by timer_a0_delay_noblk()
+         // disable interrupt
+         TA0CCTL2 &= ~CCIE;
+-        TA0CCTL2 = 0;
+         timer_a0_last_event |= TIMER_A0_EVENT_CCR2;
+-        _BIC_SR_IRQ(LPM3_bits);
+-    } else if (iv == TA0IV_TA0CCR3) {
+-        // timer used by timer_a0_delay_noblk_ccr3()
+-        // disable interrupt
+-        TA0CCTL3 &= ~CCIE;
+-        TA0CCTL3 = 0;
+-        // use hardware flow control to stop the remote equipment
+-        // from sending more data
+-        //SIM900_RTS_HIGH;
+-        timer_a0_last_event |= TIMER_A0_EVENT_CCR3;
+-        _BIC_SR_IRQ(LPM3_bits);
+-    } else if (iv == TA0IV_TA0IFG) {
+-        TA0CTL &= ~TAIFG;
+-        timer_a0_ovf++;
+-        timer_a0_last_event |= TIMER_A0_EVENT_IFG;
+-        _BIC_SR_IRQ(LPM3_bits);
++        // return to LPM3 (don't mess with SR bits)
++        return;
+     }
++
++    return;
++ exit_lpm3:
++    /* exit from LPM3, give execution back to mainloop */
++    _BIC_SR_IRQ(LPM3_bits);
+ }
+diff -upr drivers/timer_a0.h /tmp/solar-charger/firmware/drivers/timer_a0.h
+--- drivers/timer_a0.h	2014-09-14 10:23:33.000000000 +0300
++++ /tmp/solar-charger/firmware/drivers/timer_a0.h	2021-05-21 19:48:35.805670686 +0300
+@@ -3,41 +3,19 @@
+ 
+ #include "proj.h"
+ 
+-#define _10ms           5UL       // ~10ms
+-#define _500ms          _10ms * 50
+-#define _1200ms         _10ms * 120
+-#define _1s             512UL
+-#define _2s             _1s * 2
+-#define _3s             _1s * 3
+-#define _3sp            _3s + SM_STEP_DELAY
+-#define _5s             _1s * 5
+-#define _5sp            _5s + SM_STEP_DELAY
+-#define _6s             _1s * 6
+-#define _6sp            _6s + SM_STEP_DELAY
+-#define _10s            _1s * 10
+-#define _10sp           _10s + SM_STEP_DELAY
+-#define _14s            _1s * 14
+-#define _30s            _1s * 30
+-#define _60s            _1s * 60
+-#define _75s            _1s * 75
+-
+ enum timer_a0_event {
+     TIMER_A0_EVENT_CCR0 = BIT0,
+     TIMER_A0_EVENT_CCR1 = BIT1,
+     TIMER_A0_EVENT_CCR2 = BIT2,
+     TIMER_A0_EVENT_CCR3 = BIT3,
+     TIMER_A0_EVENT_CCR4 = BIT4,
+-    TIMER_A0_EVENT_IFG = BIT5,
+ };
+ 
+ volatile enum timer_a0_event timer_a0_last_event;
+-volatile uint16_t timer_a0_ovf;
+ 
+ void timer_a0_init(void);
+ void timer_a0_halt(void);
+-void timer_a0_delay_noblk_ccr1(uint16_t ticks);
+-void timer_a0_delay_noblk_ccr2(uint16_t ticks);
+-void timer_a0_delay_noblk_ccr3(uint16_t ticks);
+-void timer_a0_delay_ccr4(uint16_t ticks);
++void timer_a0_delay(uint32_t microseconds);
++void timer_a0_delay_noblk(uint32_t microseconds);
+ 
+ #endif
+diff -upr drivers/uart1.c /tmp/solar-charger/firmware/drivers/uart1.c
+--- drivers/uart1.c	2021-05-21 20:01:02.254426359 +0300
++++ /tmp/solar-charger/firmware/drivers/uart1.c	2021-05-21 19:48:35.805670686 +0300
+@@ -1,30 +1,47 @@
+ 
+-#include <inttypes.h>
++// hardware UART implementation that uses P4.4 as RXI and P4.5 for TXO
++
++//******************************************************************************
++//   MSP430F550x Demo - USCI_A0, Ultra-Low Pwr UART 9600 Echo ISR, 32kHz ACLK
++//
++//   Description: Echo a received character, RX ISR used. Normal mode is LPM3,
++//   USCI_A0 RX interrupt triggers TX Echo.
++//   ACLK = 32768Hz crystal, MCLK = SMCLK = DCO ~1.045MHz
++//   Baud rate divider with 32768Hz XTAL @9600 = 32768Hz/9600 = 3.41
++//   See User Guide for baud rate divider table
++//
++//                MSP430F550x
++//             -----------------
++//        /|\ |              XIN|-
++//         |  |                 | 32kHz
++//         ---|RST          XOUT|-
++//            |                 |
++//            |     P4.4/UCA0TXD|------------>
++//            |                 | 9600 - 8N1
++//            |     P4.5/UCA0RXD|<------------
++//
++//   D. Archbold
++//   Texas Instruments Inc.
++//   March 2010
++//   Built with CCSv4 and IAR Embedded Workbench Version: 4.21
++//******************************************************************************
++
+ #include "uart1.h"
+-#include "timer_a0.h"
+ 
+-void uart1_init(uint16_t speed)
++void uart1_init(void)
+ {
++    // hardware UART
++    P4SEL |= BIT4 + BIT5;       // P4.4,5 = USCI_A0 TXD/RXD
+     UCA1CTL1 |= UCSWRST;        // put state machine in reset
+     UCA1CTL1 |= UCSSEL_1;       // use ACLK
+-
+-    if (speed == 9600) {
+-        UCA1BR0 = 0x03;
+-        UCA1BR1 = 0x00;
+-        UCA1MCTL = UCBRS_3 + UCBRF_0;       // modulation UCBRSx=3, UCBRFx=0
+-    } else if (speed == 2400) {
+-        UCA1BR0 = 0x0D;
+-        UCA1BR1 = 0x00;
+-        UCA1MCTL |= UCBRS_6 + UCBRF_0;            // Modulation UCBRSx=6, UCBRFx=0
+-    }
+-
++    UCA1BR0 = 0x03;             // 32kHz/9600=3.41
++    UCA1BR1 = 0x00;
++    UCA1MCTL = UCBRS_3 + UCBRF_0;       // modulation UCBRSx=3, UCBRFx=0
+     UCA1CTL1 &= ~UCSWRST;       // initialize USCI state machine
+     UCA1IE |= UCRXIE;           // enable USCI_A0 RX interrupt
+-    uart1_p = 0;
+-    uart1_rx_enable = 1;
+ }
+ 
+-uint16_t uart1_tx_str(char *str, const uint16_t size)
++uint16_t uart1_tx_str(char *str, uint16_t size)
+ {
+     uint16_t p = 0;
+     while (p < size) {
+@@ -39,29 +56,15 @@ __attribute__ ((interrupt(USCI_A1_VECTOR
+ void USCI_A1_ISR(void)
+ {
+     uint16_t iv = UCA1IV;
+-    register char rx;
++
+     enum uart1_tevent ev = 0;
+ 
+     // iv is 2 for RXIFG, 4 for TXIFG
+     switch (iv) {
+     case 2:
+-        rx = UCA1RXBUF;
+-        if (uart1_rx_enable && (uart1_p < UART1_RXBUF_SZ-2)) {
+-                if (uart1_p > UART1_RXBUF_SZ-5) {
+-                    // use hardware flow control to stop the remote equipment
+-                    // from sending more data
+-                    //SIM900_RTS_HIGH;
+-                    uart1_rx_buf[uart1_p + 1] = 0; // not really working
+-                }
+-                if (uart1_p == 0) {
+-                    //sim900.console = TTY_RX_PENDING;
+-                    // set up timer that will end the buffer
+-                    //timer_a0_delay_noblk_ccr3(RXBUF_TMOUT);
+-                }
+-                uart1_rx_buf[uart1_p] = rx;
+-                uart1_p++;
+-                timer_a0_delay_noblk_ccr3(INTRCHAR_TMOUT);
+-        } 
++        ev = UART1_EV_RX;
++        uart1_rx_buf = UCA1RXBUF;
++        _BIC_SR_IRQ(LPM3_bits);
+         break;
+     case 4:
+         ev = UART1_EV_TX;
+diff -upr drivers/uart1.h /tmp/solar-charger/firmware/drivers/uart1.h
+--- drivers/uart1.h	2014-08-09 17:08:20.000000000 +0300
++++ /tmp/solar-charger/firmware/drivers/uart1.h	2021-05-21 19:48:35.805670686 +0300
+@@ -8,22 +8,10 @@ enum uart1_tevent {
+     UART1_EV_TX = BIT1
+ };
+ 
+-// SMSs are 160bytes + ~60bytes header + 10 cr|lf
+-#define UART1_RXBUF_SZ     255
++char uart1_rx_buf;
+ 
+-// if after the last char received INTRCHAR_TMOUT elapses 
+-// without any more communication then we end the buffer and
+-// send it to be parsed
+-
+-#define INTRCHAR_TMOUT     _10ms    // ~10ms in ticks
+-#define REPLY_TMOUT        _1s      // ~1s in ticks
+-
+-volatile char uart1_rx_buf[UART1_RXBUF_SZ];
+-volatile uint8_t uart1_p;
+-volatile uint8_t uart1_rx_enable;
+-
+-void uart1_init(uint16_t speed);
+-uint16_t uart1_tx_str(char *str, const uint16_t size);
++void uart1_init();
++uint16_t uart1_tx_str(char *str, uint16_t size);
+ 
+ volatile enum uart1_tevent uart1_last_event;
+ 
