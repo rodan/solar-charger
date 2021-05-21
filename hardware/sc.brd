@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="7.3.0">
+<eagle version="7.5.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -140,7 +140,7 @@
 <vertex x="36.9" y="46.4"/>
 <vertex x="35.4" y="44.9"/>
 </polygon>
-<text x="39.1" y="6.2" size="0.8128" layer="108" ratio="15">Petre Rodan 201511 rev1</text>
+<text x="39.1" y="6.2" size="0.8128" layer="108" ratio="15">sc rev04  Petre Rodan 201511</text>
 <text x="39.1" y="4.6" size="0.8128" layer="108" ratio="15">github.com/rodan/solar-charger</text>
 <text x="45.3" y="48.3" size="0.8128" layer="108" ratio="15">ts</text>
 <text x="57.7" y="48.3" size="0.8128" layer="108" ratio="15">prog</text>
@@ -1427,7 +1427,7 @@ design rules under a new name.</description>
 </element>
 <element name="U$1" library="TI_MSP430_v16" package="PT48" value="F55[0/1]X---PT48" x="50.8" y="18"/>
 <element name="U$17" library="Simplex-ICs" package="S-PVQFN-N16" value="BQ24072" x="38.1" y="45.9" rot="R270"/>
-<element name="U$7" library="SparkFun" package="OSHW-LOGO-M" value="OSHW-LOGOM" x="59.09" y="8.23"/>
+<element name="U$7" library="SparkFun" package="OSHW-LOGO-M" value="OSHW-LOGOM" x="61.09" y="8.63"/>
 <element name="U1" library="SparkFun" package="SOT23-5" value="SPX5205 3v3" x="45.2" y="35.7" rot="R270"/>
 <element name="X3" library="con-phoenix-508" package="MKDSN1,5/4-5,08" value="MKDSN1,5/4-5,08" x="10.23" y="4.25" rot="R180">
 <attribute name="OC_NEWARK" value="70R0300" x="10.23" y="4.25" size="1.778" layer="27" rot="R180" display="off"/>

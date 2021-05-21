@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="7.3.0">
+<eagle version="7.5.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -22642,7 +22642,7 @@ chip, wave soldering</description>
 <sheets>
 <sheet>
 <plain>
-<text x="416.56" y="10.16" size="3.81" layer="97">02</text>
+<text x="416.56" y="10.16" size="3.81" layer="97">04</text>
 <text x="241.3" y="177.8" size="1.778" layer="97">uC pins: 7 11 28</text>
 <text x="322.58" y="304.8" size="1.778" layer="97">ILIM=1610/R15</text>
 <text x="322.58" y="299.72" size="1.778" layer="97">ISET=890/R11</text>
