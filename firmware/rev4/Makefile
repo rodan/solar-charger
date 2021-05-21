@@ -24,7 +24,7 @@ CC_DMACH	= -D__MSP430F5510__
 # http://gcc.gnu.org/ml/gcc-help/2003-08/msg00128.html
 #
 CFLAGS		+= $(CC_CMACH) $(CC_DMACH) -Wall
-CFLAGS		+= -fno-force-addr -finline-limit=1 -fno-schedule-insns
+#CFLAGS		+= -fno-force-addr -finline-limit=1 -fno-schedule-insns
 CFLAGS		+= -fshort-enums -Wl,-Map=output.map
 LDFLAGS		:= -T $(LDDIR).ld -L $(LIB_DIR) -L $(GCC_EXTRA_INC_DIR) -mmcu=$(DEVICE) -mhwmult=f5series -g -Wl,--gc-sections
 
@@ -129,5 +129,11 @@ clean: $(SUBDIRS)
 doc:
 	rm -rf doc/*
 	doxygen Doxyfile
-	
+
+scan-build: clean
+	scan-build --use-cc=$(CC) --analyzer-target=msp430-elf make PARSER=scan-build
+
+cppcheck: clean
+	@cppcheck --quiet --force --enable=warning --enable=performance --enable=information --enable=missingInclude -I $(DRIVERLIB) -I $(GLUELIB) -I ./ ./
+
 -include $(PROJ).dep

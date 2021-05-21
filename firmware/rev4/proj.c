@@ -67,7 +67,7 @@ static void do_calib(uint32_t msg)
 
     snprintf(str_temp, 42,
              "th % 4d  %s%d.%02d\r\n",
-             q_th, t_th < 0 ? "-": "", abs((int16_t) t_th / 10), abs((int16_t) t_th % 10),
+             q_th, t_th < 0 ? "-": "", abs((int16_t) t_th / 10), abs((int16_t) t_th % 10));
     uart1_tx_str(str_temp, strlen(str_temp));
 
     snprintf(str_temp, 35,
