@@ -12,7 +12,7 @@
 /--------------------------------------------------------------------------/
 */
 
-#include <intrinsics.h>         /* Include MSP430-specific intrincs */
+//#include <intrinsics.h>         /* Include MSP430-specific intrincs */
 #include "diskio.h"             /* Common include file for FatFs and disk I/O layer */
 #include "hal_sdcard.h"         /* MSP-EXP430F5529 specific SD Card driver */
 #include "rtc.h"
@@ -44,14 +44,17 @@ BYTE INS = 1;                   //KLQ
 DWORD get_fattime(void)
 {
     DWORD tmr;
+    struct rtca_tm t;
+
+    rtca_get_time(&t);
 
     /* Pack date and time into a DWORD variable */
-    tmr = (((DWORD) rtca_time.year - 1980) << 25)
-        | ((DWORD) rtca_time.mon << 21)
-        | ((DWORD) rtca_time.day << 16)
-        | (WORD) (rtca_time.hour << 11)
-        | (WORD) (rtca_time.min << 5)
-        | (WORD) (rtca_time.sec >> 1);
+    tmr = (((DWORD) t.year - 1980) << 25)
+        | ((DWORD) t.mon << 21)
+        | ((DWORD) t.day << 16)
+        | (WORD) (t.hour << 11)
+        | (WORD) (t.min << 5)
+        | (WORD) (t.sec >> 1);
 
     return (tmr);
 }

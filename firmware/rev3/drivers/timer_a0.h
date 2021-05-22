@@ -11,8 +11,6 @@ enum timer_a0_event {
     TIMER_A0_EVENT_CCR4 = BIT4,
 };
 
-volatile enum timer_a0_event timer_a0_last_event;
-
 void timer_a0_init(void);
 void timer_a0_halt(void);
 void timer_a0_delay(uint32_t microseconds);

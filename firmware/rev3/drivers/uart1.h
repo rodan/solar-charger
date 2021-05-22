@@ -8,11 +8,7 @@ enum uart1_tevent {
     UART1_EV_TX = BIT1
 };
 
-char uart1_rx_buf;
-
 void uart1_init();
 uint16_t uart1_tx_str(char *str, uint16_t size);
-
-volatile enum uart1_tevent uart1_last_event;
 
 #endif

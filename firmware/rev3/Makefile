@@ -1,6 +1,17 @@
 
-SUBDIRS = drivers fatfs
+DEVICE:=MSP430F5510
+SUBDIRS = drivers fatfs 
 PROJ = proj
+
+include ./Makefile.env
+
+######################################
+GCC_BIN_DIR      ?= $(GCC_DIR)/bin
+GCC_INC_DIR      ?= $(GCC_DIR)/msp430-elf/include
+######################################
+CC               = $(GCC_BIN_DIR)/msp430-elf-gcc
+GDB	             = $(GCC_BIN_DIR)/msp430-elf-gdb
+######################################
 
 ### Machine flags
 #
@@ -13,9 +24,8 @@ CC_DMACH	= -D__MSP430F5510__
 # http://gcc.gnu.org/ml/gcc-help/2003-08/msg00128.html
 #
 CFLAGS		+= $(CC_CMACH) $(CC_DMACH) -Wall
-CFLAGS		+= -fno-force-addr -finline-limit=1 -fno-schedule-insns
 CFLAGS		+= -fshort-enums -Wl,-Map=output.map
-LDFLAGS		=
+LDFLAGS		:= -T $(LDDIR).ld -L $(LIB_DIR) -L $(GCC_EXTRA_INC_DIR) -mmcu=$(DEVICE) -mhwmult=f5series -g -Wl,--gc-sections
 
 CFLAGS_REL	+= -Os -fdata-sections -ffunction-sections -fomit-frame-pointer
 LDFLAGS_REL	+= -Wl,--gc-sections -Wl,-s
@@ -24,13 +34,7 @@ CFLAGS_DBG	+= -O1 -ggdb
 LDFLAGS_DBG	+= -Wl,--gc-sections
 
 # linker flags and include directories
-INCLUDES	+= -I./ -Igcc/ -Idrivers/
-### Build tools
-# 
-CC		= msp430-elf-gcc
-LD		= msp430-elf-ld
-AS		= msp430-elf-as
-AR		= msp430-elf-ar
+INCLUDES         := -I $(GCC_EXTRA_INC_DIR) -I $(GCC_INC_DIR) -I $(DRIVERLIB) -I $(GLUELIB) -I $(GCC_CSS_INC_GCC_DIR) -I drivers/ -I fatfs/ -I ./ -I .
 
 BASH := $(shell which bash || which bash)
 
@@ -88,7 +92,7 @@ $(OBJS): $(PROJ).cflags
 
 $(PROJ).elf: $(OBJS)
 	@echo -e "\n>> Building $@ as target $(TARGET)"
-	@$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDES) -o $@ $+ && size $@
+	@$(CC) $(LDFLAGS) $(OBJS) -o $@ && size $@
 
 modinit.o: modinit.c
 	@echo "CC $<"
@@ -97,7 +101,7 @@ modinit.o: modinit.c
 
 %.o: %.c
 	@echo "CC $<"
-	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 modinit.c:
 	@echo "Please do a 'make config' first!" && false
@@ -124,5 +128,11 @@ clean: $(SUBDIRS)
 doc:
 	rm -rf doc/*
 	doxygen Doxyfile
-	
+
+scan-build: clean
+	scan-build --use-cc=$(CC) --analyzer-target=msp430-elf make PARSER=scan-build
+
+cppcheck: clean
+	@cppcheck --quiet --force --enable=warning --enable=performance --enable=information --enable=missingInclude -I $(DRIVERLIB) -I $(GLUELIB) -I ./ ./
+
 -include $(PROJ).dep

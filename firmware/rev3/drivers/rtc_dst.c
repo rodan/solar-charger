@@ -21,6 +21,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <inttypes.h>
 #include "proj.h"
 
 #ifdef CONFIG_RTC_DST
@@ -47,9 +48,11 @@ uint8_t rtc_dst_day_of_week(uint16_t year, uint8_t month, uint8_t day);
 /****************************************************************************/
 void rtc_dst_init(void)
 {
-    /* Calculate when to switch dates */
-    rtc_dst_calculate_dates(rtca_time.year, rtca_time.mon, rtca_time.day,
-                            rtca_time.hour);
+    struct rtca_tm t;
+
+    rtca_get_time(&t);
+    // Calculate when to switch dates
+    rtc_dst_calculate_dates(t.year, t.mon, t.day, t.hour);
 }
 
 /******************************************************************************/
@@ -58,24 +61,28 @@ void rtc_dst_init(void)
 /******************************************************************************/
 void rtc_dst_hourly_update(void)
 {
-    if (rtca_time.hour == 2) {
+     struct rtca_tm t;
+
+    rtca_get_time(&t);
+
+    if (t.hour == 2) {
         /* time changes always occur at 2AM */
         if (rtc_dst_state == RTC_DST_STATE_ST) {
-            if (rtca_time.mon == rtc_dst_dates[0].month
-                && rtca_time.day == rtc_dst_dates[0].day) {
+            if (t.mon == rtc_dst_dates[0].month
+                && t.day == rtc_dst_dates[0].day) {
                 /* spring forward */
                 rtc_dst_state = RTC_DST_STATE_DST;
-                rtca_time.hour++;
-                rtca_set_time();
+                t.hour++;
+                rtca_set_time(&t);
             }
         } else {
             /* rtc_dst_state == RTC_DST_STATE_DST */
-            if (rtca_time.mon == rtc_dst_dates[1].month
-                && rtca_time.day == rtc_dst_dates[1].day) {
+            if (t.mon == rtc_dst_dates[1].month
+                && t.day == rtc_dst_dates[1].day) {
                 /* fall back */
                 rtc_dst_state = RTC_DST_STATE_ST;
-                rtca_time.hour--;
-                rtca_set_time();
+                t.hour--;
+                rtca_set_time(&t);
             }
         }
     }

@@ -10,7 +10,10 @@
 //   available from:  https://github.com/rodan/
 //   license:         GNU GPLv3
 
+#include <inttypes.h>
 #include "timer_a0.h"
+
+volatile enum timer_a0_event timer_a0_last_event;
 
 void timer_a0_init(void)
 {

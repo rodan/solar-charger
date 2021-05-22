@@ -26,7 +26,11 @@
 //   Built with CCSv4 and IAR Embedded Workbench Version: 4.21
 //******************************************************************************
 
+#include <inttypes.h>
 #include "uart1.h"
+
+char uart1_rx_buf;
+volatile enum uart1_tevent uart1_last_event;
 
 void uart1_init(void)
 {

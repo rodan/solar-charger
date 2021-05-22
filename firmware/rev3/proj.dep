@@ -1,19 +1,237 @@
 # DO NOT DELETE
 
-proj.o: proj.h config.h calib.h drivers/sys_messagebus.h drivers/pmm.h
-proj.o: drivers/rtc.h drivers/timer_a0.h drivers/uart1.h drivers/diskio.h
-proj.o: fatfs/integer.h drivers/mmc.h drivers/adc.h drivers/hal_sdcard.h
-proj.o: fatfs/ff.h fatfs/integer.h fatfs/ffconf.h
-drivers/adc.o: drivers/adc.h proj.h config.h
-drivers/hal_sdcard.o: proj.h config.h drivers/hal_sdcard.h
+proj.o: /opt/msp430/msp430-elf/include/stdio.h
+proj.o: /opt/msp430/msp430-elf/include/_ansi.h
+proj.o: /opt/msp430/msp430-elf/include/newlib.h
+proj.o: /opt/msp430/msp430-elf/include/_newlib_version.h
+proj.o: /opt/msp430/msp430-elf/include/sys/config.h
+proj.o: /opt/msp430/msp430-elf/include/machine/ieeefp.h
+proj.o: /opt/msp430/msp430-elf/include/sys/features.h
+proj.o: /opt/msp430/msp430-elf/include/sys/cdefs.h
+proj.o: /opt/msp430/msp430-elf/include/machine/_default_types.h
+proj.o: /opt/msp430/msp430-elf/include/sys/reent.h
+proj.o: /opt/msp430/msp430-elf/include/sys/_types.h
+proj.o: /opt/msp430/msp430-elf/include/machine/_types.h
+proj.o: /opt/msp430/msp430-elf/include/sys/lock.h
+proj.o: /opt/msp430/msp430-elf/include/sys/types.h
+proj.o: /opt/msp430/msp430-elf/include/sys/_stdint.h
+proj.o: /opt/msp430/msp430-elf/include/machine/types.h
+proj.o: /opt/msp430/msp430-elf/include/sys/select.h
+proj.o: /opt/msp430/msp430-elf/include/sys/_sigset.h
+proj.o: /opt/msp430/msp430-elf/include/sys/_timeval.h
+proj.o: /opt/msp430/msp430-elf/include/sys/timespec.h
+proj.o: /opt/msp430/msp430-elf/include/sys/_timespec.h
+proj.o: /opt/msp430/msp430-elf/include/sys/stdio.h
+proj.o: /opt/msp430/msp430-elf/include/string.h
+proj.o: /opt/msp430/msp430-elf/include/sys/string.h proj.h
+proj.o: /opt/msp430-gcc-support-files/include/msp430.h
+proj.o: /opt/msp430/msp430-elf/include/stdlib.h
+proj.o: /opt/msp430/msp430-elf/include/machine/stdlib.h
+proj.o: /opt/msp430/msp430-elf/include/alloca.h config.h calib.h
+proj.o: drivers/event_handler.h drivers/pmm.h drivers/rtc.h
+proj.o: drivers/timer_a0.h drivers/uart1.h drivers/diskio.h fatfs/integer.h
+proj.o: drivers/mmc.h drivers/adc.h drivers/hal_sdcard.h
+proj.o: /opt/msp430/msp430-elf/include/stdint.h
+proj.o: /opt/msp430/msp430-elf/include/sys/_intsup.h fatfs/ff.h
+proj.o: fatfs/ffconf.h
+drivers/adc.o: /opt/msp430/msp430-elf/include/inttypes.h
+drivers/adc.o: /opt/msp430/msp430-elf/include/newlib.h
+drivers/adc.o: /opt/msp430/msp430-elf/include/_newlib_version.h
+drivers/adc.o: /opt/msp430/msp430-elf/include/sys/config.h
+drivers/adc.o: /opt/msp430/msp430-elf/include/machine/ieeefp.h
+drivers/adc.o: /opt/msp430/msp430-elf/include/sys/features.h
+drivers/adc.o: /opt/msp430/msp430-elf/include/sys/_intsup.h
+drivers/adc.o: /opt/msp430/msp430-elf/include/stdint.h
+drivers/adc.o: /opt/msp430/msp430-elf/include/machine/_default_types.h
+drivers/adc.o: /opt/msp430/msp430-elf/include/sys/_stdint.h drivers/adc.h
+drivers/adc.o: proj.h /opt/msp430-gcc-support-files/include/msp430.h
+drivers/adc.o: /opt/msp430/msp430-elf/include/stdlib.h
+drivers/adc.o: /opt/msp430/msp430-elf/include/_ansi.h
+drivers/adc.o: /opt/msp430/msp430-elf/include/sys/reent.h
+drivers/adc.o: /opt/msp430/msp430-elf/include/sys/_types.h
+drivers/adc.o: /opt/msp430/msp430-elf/include/machine/_types.h
+drivers/adc.o: /opt/msp430/msp430-elf/include/sys/lock.h
+drivers/adc.o: /opt/msp430/msp430-elf/include/sys/cdefs.h
+drivers/adc.o: /opt/msp430/msp430-elf/include/machine/stdlib.h
+drivers/adc.o: /opt/msp430/msp430-elf/include/alloca.h config.h
+drivers/event_handler.o: /opt/msp430/msp430-elf/include/inttypes.h
+drivers/event_handler.o: /opt/msp430/msp430-elf/include/newlib.h
+drivers/event_handler.o: /opt/msp430/msp430-elf/include/_newlib_version.h
+drivers/event_handler.o: /opt/msp430/msp430-elf/include/sys/config.h
+drivers/event_handler.o: /opt/msp430/msp430-elf/include/machine/ieeefp.h
+drivers/event_handler.o: /opt/msp430/msp430-elf/include/sys/features.h
+drivers/event_handler.o: /opt/msp430/msp430-elf/include/sys/_intsup.h
+drivers/event_handler.o: /opt/msp430/msp430-elf/include/stdint.h
+drivers/event_handler.o: /opt/msp430/msp430-elf/include/machine/_default_types.h
+drivers/event_handler.o: /opt/msp430/msp430-elf/include/sys/_stdint.h
+drivers/event_handler.o: /opt/msp430/msp430-elf/include/stdlib.h
+drivers/event_handler.o: /opt/msp430/msp430-elf/include/_ansi.h
+drivers/event_handler.o: /opt/msp430/msp430-elf/include/sys/reent.h
+drivers/event_handler.o: /opt/msp430/msp430-elf/include/sys/_types.h
+drivers/event_handler.o: /opt/msp430/msp430-elf/include/machine/_types.h
+drivers/event_handler.o: /opt/msp430/msp430-elf/include/sys/lock.h
+drivers/event_handler.o: /opt/msp430/msp430-elf/include/sys/cdefs.h
+drivers/event_handler.o: /opt/msp430/msp430-elf/include/machine/stdlib.h
+drivers/event_handler.o: /opt/msp430/msp430-elf/include/alloca.h
+drivers/event_handler.o: /opt/msp430/msp430-elf/include/string.h
+drivers/event_handler.o: /opt/msp430/msp430-elf/include/sys/string.h
+drivers/event_handler.o: drivers/event_handler.h proj.h
+drivers/event_handler.o: /opt/msp430-gcc-support-files/include/msp430.h
+drivers/event_handler.o: config.h
+drivers/hal_sdcard.o: proj.h /opt/msp430-gcc-support-files/include/msp430.h
+drivers/hal_sdcard.o: /opt/msp430/msp430-elf/include/stdlib.h
+drivers/hal_sdcard.o: /opt/msp430/msp430-elf/include/machine/ieeefp.h
+drivers/hal_sdcard.o: /opt/msp430/msp430-elf/include/_ansi.h
+drivers/hal_sdcard.o: /opt/msp430/msp430-elf/include/newlib.h
+drivers/hal_sdcard.o: /opt/msp430/msp430-elf/include/_newlib_version.h
+drivers/hal_sdcard.o: /opt/msp430/msp430-elf/include/sys/config.h
+drivers/hal_sdcard.o: /opt/msp430/msp430-elf/include/sys/features.h
+drivers/hal_sdcard.o: /opt/msp430/msp430-elf/include/sys/reent.h
+drivers/hal_sdcard.o: /opt/msp430/msp430-elf/include/sys/_types.h
+drivers/hal_sdcard.o: /opt/msp430/msp430-elf/include/machine/_types.h
+drivers/hal_sdcard.o: /opt/msp430/msp430-elf/include/machine/_default_types.h
+drivers/hal_sdcard.o: /opt/msp430/msp430-elf/include/sys/lock.h
+drivers/hal_sdcard.o: /opt/msp430/msp430-elf/include/sys/cdefs.h
+drivers/hal_sdcard.o: /opt/msp430/msp430-elf/include/machine/stdlib.h
+drivers/hal_sdcard.o: /opt/msp430/msp430-elf/include/alloca.h config.h
+drivers/hal_sdcard.o: drivers/hal_sdcard.h
+drivers/hal_sdcard.o: /opt/msp430/msp430-elf/include/stdint.h
+drivers/hal_sdcard.o: /opt/msp430/msp430-elf/include/sys/_intsup.h
+drivers/hal_sdcard.o: /opt/msp430/msp430-elf/include/sys/_stdint.h
 drivers/mmc.o: drivers/diskio.h fatfs/integer.h drivers/hal_sdcard.h
-drivers/mmc.o: drivers/rtc.h proj.h config.h
-drivers/pmm.o: drivers/pmm.h proj.h config.h
-drivers/rtc.o: drivers/rtc.h proj.h config.h drivers/rtca_now.h
-drivers/rtc.o: drivers/rtc_dst.h
-drivers/rtc_dst.o: proj.h config.h drivers/rtc.h drivers/rtc_dst.h
-drivers/sys_messagebus.o: drivers/sys_messagebus.h proj.h config.h
-drivers/timer_a0.o: drivers/timer_a0.h proj.h config.h
-drivers/uart1.o: drivers/uart1.h proj.h config.h
-fatfs/ff.o: fatfs/ff.h fatfs/integer.h fatfs/ffconf.h drivers/diskio.h
-fatfs/ff.o: fatfs/integer.h
+drivers/mmc.o: /opt/msp430/msp430-elf/include/stdint.h
+drivers/mmc.o: /opt/msp430/msp430-elf/include/machine/_default_types.h
+drivers/mmc.o: /opt/msp430/msp430-elf/include/sys/features.h
+drivers/mmc.o: /opt/msp430/msp430-elf/include/_newlib_version.h
+drivers/mmc.o: /opt/msp430/msp430-elf/include/sys/_intsup.h
+drivers/mmc.o: /opt/msp430/msp430-elf/include/sys/_stdint.h drivers/rtc.h
+drivers/mmc.o: proj.h /opt/msp430-gcc-support-files/include/msp430.h
+drivers/mmc.o: /opt/msp430/msp430-elf/include/stdlib.h
+drivers/mmc.o: /opt/msp430/msp430-elf/include/machine/ieeefp.h
+drivers/mmc.o: /opt/msp430/msp430-elf/include/_ansi.h
+drivers/mmc.o: /opt/msp430/msp430-elf/include/newlib.h
+drivers/mmc.o: /opt/msp430/msp430-elf/include/sys/config.h
+drivers/mmc.o: /opt/msp430/msp430-elf/include/sys/reent.h
+drivers/mmc.o: /opt/msp430/msp430-elf/include/sys/_types.h
+drivers/mmc.o: /opt/msp430/msp430-elf/include/machine/_types.h
+drivers/mmc.o: /opt/msp430/msp430-elf/include/sys/lock.h
+drivers/mmc.o: /opt/msp430/msp430-elf/include/sys/cdefs.h
+drivers/mmc.o: /opt/msp430/msp430-elf/include/machine/stdlib.h
+drivers/mmc.o: /opt/msp430/msp430-elf/include/alloca.h config.h
+drivers/pmm.o: drivers/pmm.h proj.h
+drivers/pmm.o: /opt/msp430-gcc-support-files/include/msp430.h
+drivers/pmm.o: /opt/msp430/msp430-elf/include/stdlib.h
+drivers/pmm.o: /opt/msp430/msp430-elf/include/machine/ieeefp.h
+drivers/pmm.o: /opt/msp430/msp430-elf/include/_ansi.h
+drivers/pmm.o: /opt/msp430/msp430-elf/include/newlib.h
+drivers/pmm.o: /opt/msp430/msp430-elf/include/_newlib_version.h
+drivers/pmm.o: /opt/msp430/msp430-elf/include/sys/config.h
+drivers/pmm.o: /opt/msp430/msp430-elf/include/sys/features.h
+drivers/pmm.o: /opt/msp430/msp430-elf/include/sys/reent.h
+drivers/pmm.o: /opt/msp430/msp430-elf/include/sys/_types.h
+drivers/pmm.o: /opt/msp430/msp430-elf/include/machine/_types.h
+drivers/pmm.o: /opt/msp430/msp430-elf/include/machine/_default_types.h
+drivers/pmm.o: /opt/msp430/msp430-elf/include/sys/lock.h
+drivers/pmm.o: /opt/msp430/msp430-elf/include/sys/cdefs.h
+drivers/pmm.o: /opt/msp430/msp430-elf/include/machine/stdlib.h
+drivers/pmm.o: /opt/msp430/msp430-elf/include/alloca.h config.h
+drivers/rtc.o: /opt/msp430/msp430-elf/include/inttypes.h
+drivers/rtc.o: /opt/msp430/msp430-elf/include/newlib.h
+drivers/rtc.o: /opt/msp430/msp430-elf/include/_newlib_version.h
+drivers/rtc.o: /opt/msp430/msp430-elf/include/sys/config.h
+drivers/rtc.o: /opt/msp430/msp430-elf/include/machine/ieeefp.h
+drivers/rtc.o: /opt/msp430/msp430-elf/include/sys/features.h
+drivers/rtc.o: /opt/msp430/msp430-elf/include/sys/_intsup.h
+drivers/rtc.o: /opt/msp430/msp430-elf/include/stdint.h
+drivers/rtc.o: /opt/msp430/msp430-elf/include/machine/_default_types.h
+drivers/rtc.o: /opt/msp430/msp430-elf/include/sys/_stdint.h drivers/rtc.h
+drivers/rtc.o: proj.h /opt/msp430-gcc-support-files/include/msp430.h
+drivers/rtc.o: /opt/msp430/msp430-elf/include/stdlib.h
+drivers/rtc.o: /opt/msp430/msp430-elf/include/_ansi.h
+drivers/rtc.o: /opt/msp430/msp430-elf/include/sys/reent.h
+drivers/rtc.o: /opt/msp430/msp430-elf/include/sys/_types.h
+drivers/rtc.o: /opt/msp430/msp430-elf/include/machine/_types.h
+drivers/rtc.o: /opt/msp430/msp430-elf/include/sys/lock.h
+drivers/rtc.o: /opt/msp430/msp430-elf/include/sys/cdefs.h
+drivers/rtc.o: /opt/msp430/msp430-elf/include/machine/stdlib.h
+drivers/rtc.o: /opt/msp430/msp430-elf/include/alloca.h config.h
+drivers/rtc.o: drivers/rtca_now.h drivers/rtc_dst.h
+drivers/rtc_dst.o: /opt/msp430/msp430-elf/include/inttypes.h
+drivers/rtc_dst.o: /opt/msp430/msp430-elf/include/newlib.h
+drivers/rtc_dst.o: /opt/msp430/msp430-elf/include/_newlib_version.h
+drivers/rtc_dst.o: /opt/msp430/msp430-elf/include/sys/config.h
+drivers/rtc_dst.o: /opt/msp430/msp430-elf/include/machine/ieeefp.h
+drivers/rtc_dst.o: /opt/msp430/msp430-elf/include/sys/features.h
+drivers/rtc_dst.o: /opt/msp430/msp430-elf/include/sys/_intsup.h
+drivers/rtc_dst.o: /opt/msp430/msp430-elf/include/stdint.h
+drivers/rtc_dst.o: /opt/msp430/msp430-elf/include/machine/_default_types.h
+drivers/rtc_dst.o: /opt/msp430/msp430-elf/include/sys/_stdint.h proj.h
+drivers/rtc_dst.o: /opt/msp430-gcc-support-files/include/msp430.h
+drivers/rtc_dst.o: /opt/msp430/msp430-elf/include/stdlib.h
+drivers/rtc_dst.o: /opt/msp430/msp430-elf/include/_ansi.h
+drivers/rtc_dst.o: /opt/msp430/msp430-elf/include/sys/reent.h
+drivers/rtc_dst.o: /opt/msp430/msp430-elf/include/sys/_types.h
+drivers/rtc_dst.o: /opt/msp430/msp430-elf/include/machine/_types.h
+drivers/rtc_dst.o: /opt/msp430/msp430-elf/include/sys/lock.h
+drivers/rtc_dst.o: /opt/msp430/msp430-elf/include/sys/cdefs.h
+drivers/rtc_dst.o: /opt/msp430/msp430-elf/include/machine/stdlib.h
+drivers/rtc_dst.o: /opt/msp430/msp430-elf/include/alloca.h config.h
+drivers/rtc_dst.o: drivers/rtc.h drivers/rtc_dst.h
+drivers/timer_a0.o: /opt/msp430/msp430-elf/include/inttypes.h
+drivers/timer_a0.o: /opt/msp430/msp430-elf/include/newlib.h
+drivers/timer_a0.o: /opt/msp430/msp430-elf/include/_newlib_version.h
+drivers/timer_a0.o: /opt/msp430/msp430-elf/include/sys/config.h
+drivers/timer_a0.o: /opt/msp430/msp430-elf/include/machine/ieeefp.h
+drivers/timer_a0.o: /opt/msp430/msp430-elf/include/sys/features.h
+drivers/timer_a0.o: /opt/msp430/msp430-elf/include/sys/_intsup.h
+drivers/timer_a0.o: /opt/msp430/msp430-elf/include/stdint.h
+drivers/timer_a0.o: /opt/msp430/msp430-elf/include/machine/_default_types.h
+drivers/timer_a0.o: /opt/msp430/msp430-elf/include/sys/_stdint.h
+drivers/timer_a0.o: drivers/timer_a0.h proj.h
+drivers/timer_a0.o: /opt/msp430-gcc-support-files/include/msp430.h
+drivers/timer_a0.o: /opt/msp430/msp430-elf/include/stdlib.h
+drivers/timer_a0.o: /opt/msp430/msp430-elf/include/_ansi.h
+drivers/timer_a0.o: /opt/msp430/msp430-elf/include/sys/reent.h
+drivers/timer_a0.o: /opt/msp430/msp430-elf/include/sys/_types.h
+drivers/timer_a0.o: /opt/msp430/msp430-elf/include/machine/_types.h
+drivers/timer_a0.o: /opt/msp430/msp430-elf/include/sys/lock.h
+drivers/timer_a0.o: /opt/msp430/msp430-elf/include/sys/cdefs.h
+drivers/timer_a0.o: /opt/msp430/msp430-elf/include/machine/stdlib.h
+drivers/timer_a0.o: /opt/msp430/msp430-elf/include/alloca.h config.h
+drivers/uart1.o: /opt/msp430/msp430-elf/include/inttypes.h
+drivers/uart1.o: /opt/msp430/msp430-elf/include/newlib.h
+drivers/uart1.o: /opt/msp430/msp430-elf/include/_newlib_version.h
+drivers/uart1.o: /opt/msp430/msp430-elf/include/sys/config.h
+drivers/uart1.o: /opt/msp430/msp430-elf/include/machine/ieeefp.h
+drivers/uart1.o: /opt/msp430/msp430-elf/include/sys/features.h
+drivers/uart1.o: /opt/msp430/msp430-elf/include/sys/_intsup.h
+drivers/uart1.o: /opt/msp430/msp430-elf/include/stdint.h
+drivers/uart1.o: /opt/msp430/msp430-elf/include/machine/_default_types.h
+drivers/uart1.o: /opt/msp430/msp430-elf/include/sys/_stdint.h drivers/uart1.h
+drivers/uart1.o: proj.h /opt/msp430-gcc-support-files/include/msp430.h
+drivers/uart1.o: /opt/msp430/msp430-elf/include/stdlib.h
+drivers/uart1.o: /opt/msp430/msp430-elf/include/_ansi.h
+drivers/uart1.o: /opt/msp430/msp430-elf/include/sys/reent.h
+drivers/uart1.o: /opt/msp430/msp430-elf/include/sys/_types.h
+drivers/uart1.o: /opt/msp430/msp430-elf/include/machine/_types.h
+drivers/uart1.o: /opt/msp430/msp430-elf/include/sys/lock.h
+drivers/uart1.o: /opt/msp430/msp430-elf/include/sys/cdefs.h
+drivers/uart1.o: /opt/msp430/msp430-elf/include/machine/stdlib.h
+drivers/uart1.o: /opt/msp430/msp430-elf/include/alloca.h config.h
+fatfs/ff.o: /opt/msp430/msp430-elf/include/string.h
+fatfs/ff.o: /opt/msp430/msp430-elf/include/_ansi.h
+fatfs/ff.o: /opt/msp430/msp430-elf/include/newlib.h
+fatfs/ff.o: /opt/msp430/msp430-elf/include/_newlib_version.h
+fatfs/ff.o: /opt/msp430/msp430-elf/include/sys/config.h
+fatfs/ff.o: /opt/msp430/msp430-elf/include/machine/ieeefp.h
+fatfs/ff.o: /opt/msp430/msp430-elf/include/sys/features.h
+fatfs/ff.o: /opt/msp430/msp430-elf/include/sys/reent.h
+fatfs/ff.o: /opt/msp430/msp430-elf/include/sys/_types.h
+fatfs/ff.o: /opt/msp430/msp430-elf/include/machine/_types.h
+fatfs/ff.o: /opt/msp430/msp430-elf/include/machine/_default_types.h
+fatfs/ff.o: /opt/msp430/msp430-elf/include/sys/lock.h
+fatfs/ff.o: /opt/msp430/msp430-elf/include/sys/cdefs.h
+fatfs/ff.o: /opt/msp430/msp430-elf/include/sys/string.h fatfs/ff.h
+fatfs/ff.o: fatfs/ffconf.h drivers/diskio.h fatfs/integer.h
+fatfs/ffsystem.o: fatfs/ff.h fatfs/ffconf.h
+fatfs/ffunicode.o: fatfs/ff.h fatfs/ffconf.h

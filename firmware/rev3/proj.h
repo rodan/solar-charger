@@ -25,6 +25,9 @@
 #define opt_power_enable    P1OUT &= ~BIT6
 #define opt_power_disable   P1OUT |= BIT6; I2C_MASTER_DIR &= ~(I2C_MASTER_SCL + I2C_MASTER_SDA);
 
+#define SYS_MSG_NULL 0
+#define SYS_MSG_RTC_MINUTE 0x1
+
 void main_init(void);
 void sleep(void);
 void wake_up(void);

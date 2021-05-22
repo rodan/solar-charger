@@ -20,6 +20,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <inttypes.h>
 #include "rtc.h"
 #include "rtca_now.h"
 
@@ -27,9 +28,11 @@
 #include "rtc_dst.h"
 #endif
 
+volatile enum rtca_tevent rtca_last_event;
+static struct rtca_tm rtca_time;
+
 void rtca_init(void)
 {
-
     rtca_time.year = COMPILE_YEAR;
     rtca_time.mon = COMPILE_MON;
     rtca_time.day = COMPILE_DAY;
@@ -44,17 +47,7 @@ void rtca_init(void)
        also enable alarm interrupts */
     RTCCTL01 |= RTCMODE | RTCRDYIE | RTCAIE | RTCTEVIE;
 
-    RTCSEC = rtca_time.sec;
-    RTCMIN = rtca_time.min;
-    RTCHOUR = rtca_time.hour;
-    RTCDAY = rtca_time.day;
-    RTCDOW = rtca_time.dow;
-    RTCMON = rtca_time.mon;
-    RTCYEARL = rtca_time.year & 0xff;
-    RTCYEARH = rtca_time.year >> 8;
-
-    /* Enable the RTC */
-    rtca_start();
+    rtca_set_time(&rtca_time);
 
 #ifdef CONFIG_RTC_DST
     /* initialize DST module */
@@ -63,18 +56,45 @@ void rtca_init(void)
 
 }
 
-void rtca_set_time()
+void rtca_set_time(struct rtca_tm *t)
 {
-    /* Stop RTC timekeeping for a while */
+    // Stop RTC timekeeping for a while
     rtca_stop();
 
-    /* update RTC registers */
-    RTCSEC = rtca_time.sec;
-    RTCMIN = rtca_time.min;
-    RTCHOUR = rtca_time.hour;
+    // update RTC registers
+    RTCSEC = t->sec;
+    RTCMIN = t->min;
+    RTCHOUR = t->hour;
+    RTCDAY = t->day;
+    RTCDOW = t->dow;
+    RTCMON = t->mon;
+    RTCYEARL = t->year & 0xff;
+    RTCYEARH = t->year >> 8;
 
-    /* Resume RTC time keeping */
+    // Resume RTC time keeping
     rtca_start();
+}
+
+void rtca_get_time(struct rtca_tm *t)
+{
+    // update RTC registers
+    t->sec = RTCSEC;
+    t->min = RTCMIN;
+    t->hour = RTCHOUR;
+    t->day = RTCDAY;
+    t->dow = RTCDOW;
+    t->mon = RTCMON;
+    t->year = (uint16_t) RTCYEARL | ((uint16_t) RTCYEARH << 8);
+}
+
+uint8_t rtca_get_event(void)
+{
+    return rtca_last_event;
+}
+
+void rtca_rst_event(void)
+{
+    rtca_last_event = RTCA_EV_NONE;
 }
 
 /*
@@ -112,10 +132,10 @@ void RTC_A_ISR(void)
     /* the IV is cleared after a read, so we store it */
     uint16_t iv = RTCIV;
 
-    /* copy register values */
+    // copy register values
     rtca_time.sec = RTCSEC;
 
-    /* count system time */
+    // count system time
     rtca_time.sys++;
 
     enum rtca_tevent ev = 0;

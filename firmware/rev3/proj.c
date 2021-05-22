@@ -11,7 +11,7 @@
 
 #include "proj.h"
 #include "calib.h"
-#include "drivers/sys_messagebus.h"
+#include "drivers/event_handler.h"
 #include "drivers/pmm.h"
 #include "drivers/rtc.h"
 #include "drivers/timer_a0.h"
@@ -26,7 +26,7 @@
 #undef DIR
 #include "fatfs/ff.h"
 
-char str_temp[64];
+char str_temp[71];
 FATFS fatfs;
 DIR dir;
 FIL f;
@@ -52,7 +52,7 @@ void die(uint8_t loc, FRESULT rc)
 }
 
 #ifdef CALIBRATION
-static void do_calib(enum sys_message msg)
+static void do_calib(uint32_t msg)
 {
     uint16_t q_bat = 0, q_pv = 0, q_t_int = 0, q_ch = 0, q_th = 0;
 
@@ -100,11 +100,13 @@ static void do_calib(enum sys_message msg)
     //P4OUT ^= BIT7;
 }
 #else
-static void main_loop(enum sys_message msg)
+static void main_loop(uint32_t msg)
 {
     uint16_t q_bat = 0;
     uint16_t q_pv = 0, q_t_int = 0;
     uint16_t q_ch = 0, q_th = 0;
+    struct rtca_tm t;
+    unsigned int bw;
 
     acts = 0;
 
@@ -148,7 +150,9 @@ static void main_loop(enum sys_message msg)
         acts = acts_last;
     }
 
-    if ((acts != acts_last) || (rtca_time.min % 10 == 0)) {
+    rtca_get_time(&t);
+
+    if ((acts != acts_last) || (t.min % 10 == 0)) {
     //if (true) {
 
         FRESULT rc;
@@ -157,20 +161,19 @@ static void main_loop(enum sys_message msg)
         rc = detectCard();
 
         if (rc) {
-            uint16_t bw;
             f_opendir(&dir, "/");
-            snprintf(str_temp, 5, "%d", rtca_time.year);
+            snprintf(str_temp, 5, "%d", t.year);
             rc = f_mkdir(str_temp);
             if ((rc == FR_OK) || (rc == FR_EXIST)) {
-                snprintf(str_temp, 9, "/%d/%02d", rtca_time.year, rtca_time.mon);
+                snprintf(str_temp, 9, "/%d/%02d", t.year, t.mon);
                 rc = f_open(&f, str_temp, FA_WRITE | FA_OPEN_ALWAYS);
                 if (!rc) {
                     f_lseek(&f, f_size(&f));
                     //20130620 07:12 -12.2 -34.5 12.30 13.40 1.22 0xffffDA0//53
-                    snprintf(str_temp, 63,
+                    snprintf(str_temp, 70,
                              "%04d%02d%02d %02d:%02d %s%d.%1d %s%d.%1d %02d.%02d %02d.%02d %01d.%02d 0x%04x\r\n",
-                             rtca_time.year, rtca_time.mon, rtca_time.day,
-                             rtca_time.hour, rtca_time.min,
+                             t.year, t.mon, t.day,
+                             t.hour, t.min,
                              t_int < 0 ? "-": "", abs((int16_t) t_int / 10), abs((int16_t) t_int % 10),
                              t_th < 0 ? "-": "", abs((int16_t) t_th / 10), abs((int16_t) t_th % 10),
                              (uint16_t) v_bat / 100, (uint16_t) v_bat % 100,
@@ -211,9 +214,9 @@ int main(void)
     charge_disable;
 
 #ifdef CALIBRATION
-    sys_messagebus_register(&do_calib, SYS_MSG_RTC_MINUTE);
+    eh_register(&do_calib, SYS_MSG_RTC_MINUTE);
 #else
-    sys_messagebus_register(&main_loop, SYS_MSG_RTC_MINUTE);
+    eh_register(&main_loop, SYS_MSG_RTC_MINUTE);
 #endif
 
     while (1) {
@@ -355,20 +358,18 @@ void wake_up(void)
 
 void check_events(void)
 {
-    struct sys_messagebus *p = messagebus;
-    enum sys_message msg = 0;
+    uint16_t msg = SYS_MSG_NULL;
+    uint16_t ev;
 
     // drivers/rtca
-    if (rtca_last_event) {
-        msg |= rtca_last_event;
-        rtca_last_event = 0;
+    ev = rtca_get_event();
+    if (ev & RTCA_EV_MINUTE) {
+        msg |= SYS_MSG_RTC_MINUTE;
+        rtca_rst_event();
     }
-    while (p) {
-        // notify listener if he registered for any of these messages
-        if (msg & p->listens) {
-            p->fn(msg);
-        }
-        p = p->next;
+
+    if (msg != SYS_MSG_NULL) {
+        eh_exec(msg);
     }
 }
 
