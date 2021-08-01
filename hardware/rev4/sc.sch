@@ -22512,8 +22512,8 @@ chip, wave soldering</description>
 <part name="GND16" library="SparkFun" deviceset="GND" device=""/>
 <part name="GND22" library="SparkFun" deviceset="GND" device=""/>
 <part name="C10" library="rcl" deviceset="C-EU" device="C0805" value="470nF"/>
-<part name="R6" library="rcl" deviceset="R-EU_" device="R0805W" value="4.7k"/>
-<part name="R7" library="rcl" deviceset="R-EU_" device="R0805W" value="4.7k"/>
+<part name="R6" library="rcl" deviceset="R-EU_" device="R0805W" value="470"/>
+<part name="R7" library="rcl" deviceset="R-EU_" device="R0805W" value="470"/>
 <part name="Y1" library="Simplex-FreqCtrl" deviceset="CRYSTAL" device="3.2X1.5" value="32768Hz CFPX-217 12.5pF"/>
 <part name="C23" library="rcl" deviceset="C-EU" device="C0805" value="22pF"/>
 <part name="C24" library="rcl" deviceset="C-EU" device="C0805" value="22pF"/>
@@ -22528,9 +22528,9 @@ chip, wave soldering</description>
 <part name="R25" library="rcl" deviceset="R-EU_" device="R0805W" value="2M"/>
 <part name="R26" library="rcl" deviceset="R-EU_" device="R0805W" value="330k"/>
 <part name="GND34" library="SparkFun" deviceset="GND" device=""/>
-<part name="R3" library="rcl" deviceset="R-EU_" device="R0805W" value="220k"/>
-<part name="Q1" library="Simplex-DiscreteSemi" deviceset="MOSFET-PCHANNEL" device="SMD_POWER" value="si2305cd"/>
-<part name="R8" library="rcl" deviceset="R-EU_" device="R0805W" value="10k"/>
+<part name="R3" library="rcl" deviceset="R-EU_" device="R0805W" value="220k DNP"/>
+<part name="Q1" library="Simplex-DiscreteSemi" deviceset="MOSFET-PCHANNEL" device="SMD_POWER" value="si2305cd DNP"/>
+<part name="R8" library="rcl" deviceset="R-EU_" device="R0805W" value="10k DNP"/>
 <part name="C17" library="rcl" deviceset="C-EU" device="C0805" value="100nF"/>
 <part name="GND32" library="SparkFun" deviceset="GND" device=""/>
 <part name="C8" library="rcl" deviceset="C-EU" device="C0805" value="100nF"/>
@@ -22546,15 +22546,15 @@ chip, wave soldering</description>
 <part name="GND39" library="SparkFun" deviceset="GND" device=""/>
 <part name="GND40" library="SparkFun" deviceset="GND" device=""/>
 <part name="GND41" library="SparkFun" deviceset="GND" device=""/>
-<part name="IC1" library="linear" deviceset="78*" device="TV" technology="12" value="PB137ACV"/>
+<part name="IC1" library="linear" deviceset="78*" device="TV" technology="12" value="PB137ACV DNP"/>
 <part name="Q3" library="transistor-power" deviceset="IRF?5305" device="R"/>
 <part name="R2" library="rcl" deviceset="R-EU_" device="R0805W" value="10k"/>
-<part name="R11" library="rcl" deviceset="R-EU_" device="R0805W" value="30k"/>
-<part name="C25" library="rcl" deviceset="C-EU" device="C0805" value="100nF"/>
+<part name="R11" library="rcl" deviceset="R-EU_" device="R0805W" value="30k DNP"/>
+<part name="C25" library="rcl" deviceset="C-EU" device="C0805" value="100nF DNP"/>
 <part name="GND8" library="SparkFun" deviceset="GND" device=""/>
 <part name="JP2" library="SparkFun-Connectors" deviceset="M02" device="PTH" value="thermistor"/>
-<part name="C27" library="SparkFun-Capacitors" deviceset="CAP_POL" device="D" value="10uF"/>
-<part name="C26" library="SparkFun-Capacitors" deviceset="CAP_POL" device="D" value="1uF"/>
+<part name="C27" library="SparkFun-Capacitors" deviceset="CAP_POL" device="D" value="10uF DNP"/>
+<part name="C26" library="SparkFun-Capacitors" deviceset="CAP_POL" device="D" value="1uF DNP"/>
 <part name="R21" library="rcl" deviceset="R-EU_" device="R0805W" value="1M"/>
 <part name="LED6" library="led" deviceset="LED" device="CHIP-LED0805" value="green"/>
 <part name="R28" library="rcl" deviceset="R-EU_" device="R0805W" value="1M"/>
@@ -22606,7 +22606,7 @@ chip, wave soldering</description>
 <part name="+3V5" library="supply1" deviceset="+3V3" device=""/>
 <part name="Q2" library="transistor-power" deviceset="IRF?5305" device="R"/>
 <part name="GND15" library="SparkFun" deviceset="GND" device=""/>
-<part name="C16" library="rcl" deviceset="C-EU" device="C0805" value="1uF"/>
+<part name="C16" library="rcl" deviceset="C-EU" device="C0805" value="1uF DNP"/>
 <part name="R23" library="rcl" deviceset="R-EU_" device="R0805W" value="4.7k"/>
 <part name="R27" library="rcl" deviceset="R-EU_" device="R0805W" value="4.7k"/>
 <part name="R4" library="rcl" deviceset="R-EU_" device="R0805W" value="2M"/>

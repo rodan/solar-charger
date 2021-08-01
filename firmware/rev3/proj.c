@@ -213,6 +213,7 @@ int main(void)
 
     charge_disable;
 
+    eh_init();
 #ifdef CALIBRATION
     eh_register(&do_calib, SYS_MSG_RTC_MINUTE);
 #else

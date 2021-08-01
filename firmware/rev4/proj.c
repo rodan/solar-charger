@@ -140,6 +140,7 @@ int main(void)
     uart1_init(9600);
     charge_disable;
 
+    eh_init();
 #ifdef CALIBRATION
     eh_register(&do_calib, SYS_MSG_RTC_MINUTE);
 #else

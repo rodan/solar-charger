@@ -93,7 +93,7 @@ $(OBJS): $(PROJ).cflags
 
 $(PROJ).elf: $(OBJS)
 	@echo -e "\n>> Building $@ as target $(TARGET)"
-	$(CC) $(LDFLAGS) $(OBJS) -o $@ && size $@
+	@$(CC) $(LDFLAGS) $(OBJS) -o $@ && size $@
 
 modinit.o: modinit.c
 	@echo "CC $<"
