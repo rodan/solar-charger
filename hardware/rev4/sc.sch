@@ -22523,8 +22523,8 @@ chip, wave soldering</description>
 <part name="T1" library="transistor" deviceset="BC846" device=""/>
 <part name="R16" library="rcl" deviceset="R-EU_" device="R0805W" value="100k"/>
 <part name="R19" library="rcl" deviceset="R-EU_" device="R0805W" value="220k"/>
-<part name="R22" library="rcl" deviceset="R-EU_" device="R0805W" value="2M"/>
-<part name="R24" library="rcl" deviceset="R-EU_" device="R0805W" value="220k"/>
+<part name="R22" library="rcl" deviceset="R-EU_" device="R0805W" value="1M2"/>
+<part name="R24" library="rcl" deviceset="R-EU_" device="R0805W" value="100k"/>
 <part name="R25" library="rcl" deviceset="R-EU_" device="R0805W" value="2M"/>
 <part name="R26" library="rcl" deviceset="R-EU_" device="R0805W" value="330k"/>
 <part name="GND34" library="SparkFun" deviceset="GND" device=""/>
@@ -22565,7 +22565,7 @@ chip, wave soldering</description>
 <part name="IC2" library="Simplex-ICs" deviceset="LM2674" device="" value="LM2675M-ADJ"/>
 <part name="GND7" library="supply1" deviceset="GND" device=""/>
 <part name="R1" library="rcl" deviceset="R-EU_" device="R0805W" value="1.5K 1%"/>
-<part name="R9" library="rcl" deviceset="R-EU_" device="R0805W" value="4.75k 1%"/>
+<part name="R9" library="rcl" deviceset="R-EU_" device="R0805W" value="4K3"/>
 <part name="C5" library="rcl" deviceset="C-EU" device="C0805" value="10nF"/>
 <part name="GND12" library="supply1" deviceset="GND" device=""/>
 <part name="D1" library="SparkFun-DiscreteSemi" deviceset="DIODE-SCHOTTKY" device="-MBRA140" value="15MQ040"/>
@@ -22609,8 +22609,8 @@ chip, wave soldering</description>
 <part name="C16" library="rcl" deviceset="C-EU" device="C0805" value="1uF DNP"/>
 <part name="R23" library="rcl" deviceset="R-EU_" device="R0805W" value="4.7k"/>
 <part name="R27" library="rcl" deviceset="R-EU_" device="R0805W" value="4.7k"/>
-<part name="R4" library="rcl" deviceset="R-EU_" device="R0805W" value="2M"/>
-<part name="R5" library="rcl" deviceset="R-EU_" device="R0805W" value="1M3"/>
+<part name="R4" library="rcl" deviceset="R-EU_" device="R0805W" value="680K"/>
+<part name="R5" library="rcl" deviceset="R-EU_" device="R0805W" value="330k"/>
 <part name="C13" library="rcl" deviceset="C-EU" device="C0805" value="100nF"/>
 <part name="GND1" library="SparkFun" deviceset="GND" device=""/>
 <part name="GND17" library="SparkFun" deviceset="GND" device=""/>
@@ -22635,7 +22635,7 @@ chip, wave soldering</description>
 <part name="C11" library="rcl" deviceset="C-EU" device="C0805" value="10nF"/>
 <part name="T3" library="transistor" deviceset="BC846" device=""/>
 <part name="R31" library="rcl" deviceset="R-EU_" device="R0805W" value="1M"/>
-<part name="R32" library="rcl" deviceset="R-EU_" device="R0805W" value="100k"/>
+<part name="R32" library="rcl" deviceset="R-EU_" device="R0805W" value="DNP 100k"/>
 <part name="C14" library="rcl" deviceset="C-EU" device="C0805" value="100nF"/>
 <part name="GND25" library="SparkFun" deviceset="GND" device=""/>
 </parts>
