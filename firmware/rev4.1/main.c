@@ -18,8 +18,8 @@
 #include "pwr_mng.h"
 #include "rtca_now.h"
 #include "timer_a0.h"
+#include "timer_a2.h"
 
-//float v_bat, v_pv, t_th, t_int;
 struct adc_conv adc;
 
 void port_init(void)
@@ -50,11 +50,11 @@ static void uart1_rx_irq(uint32_t msg)
 void check_events(void)
 {
     uint16_t msg = SYS_MSG_NULL;
-    uint16_t local_ev;
+    uint16_t ev;
 
     // RTC
-    local_ev = rtca_get_event();
-    if (local_ev) {
+    ev = rtca_get_event();
+    if (ev) {
         if (rtca_get_event() & RTCA_EV_MINUTE) {
             msg |= SYS_MSG_RTC_MINUTE;
         }
@@ -70,13 +70,55 @@ void check_events(void)
         uart1_rst_event();
     }
 
+    // timer_a2
+    ev = timer_a2_get_event();
+    if (ev) {
+        if (ev & TIMER_A2_EVENT_CCR1) {
+            msg |= SYS_MSG_TIMERA2_CCR1;
+        }
+        timer_a2_rst_event();
+    }
+
+    // timer_a2-based scheduler
+    ev = timer_a2_get_event_schedule();
+    if (ev) {
+        if (ev & (1 << SCHEDULE_LED_ON)) {
+            msg |= SYS_MSG_SCH_LED_ON;
+        }
+        if (ev & (1 << SCHEDULE_LED_OFF)) {
+            msg |= SYS_MSG_SCH_LED_OFF;
+        }
+        timer_a2_rst_event_schedule();
+    }
+
     eh_exec(msg);
+}
+
+static void scheduler_irq(uint32_t msg)
+{
+    timer_a2_scheduler_handler();
+}
+
+static void led_on_irq(uint32_t msg)
+{
+    st_on;
+    timer_a2_set_trigger_slot(SCHEDULE_LED_OFF, systime() + 200, TIMER_A2_EVENT_ENABLE);
+}
+
+static void led_off_irq(uint32_t msg)
+{
+    st_off;
+    timer_a2_set_trigger_slot(SCHEDULE_LED_ON, systime() + 200, TIMER_A2_EVENT_ENABLE);
 }
 
 static void rtc_alarm(uint32_t msg)
 {
     uart1_print("alarm!");
     uart1_print("\r\n");
+    
+    //led_on_irq(0);
+    //st_on;
+    //timer_a2_set_trigger_slot(SCHEDULE_LED_OFF, systime() + 100, TIMER_A2_EVENT_ENABLE);
 }
 
 static void main_loop(uint32_t msg)
@@ -84,37 +126,42 @@ static void main_loop(uint32_t msg)
     float ftemp;
     char itoa_buf[CONV_BASE_10_BUF_SZ];
 
-    sig0_on;
-    adc10_read(1, &adc.lipo.raw, REFVSEL_0);
+    //sig0_on;
+    adc10_read(1, &adc.lipo, REFVSEL_0);
     //adc10_read(2, &q_vbat, REFVSEL_0);
-    adc10_read(3, &adc.pv.raw, REFVSEL_0);
+    adc10_read(3, &adc.pv, REFVSEL_0);
     //adc10_read(9, &q_th, REFVSEL_0);
-    adc10_read(10, &adc.t_internal.raw, REFVSEL_0);
+    adc10_read(10, &adc.t_internal, REFVSEL_0);
     adc10_halt();
-    sig0_off;
+    //sig0_off;
 
-    ftemp = (float) adc.lipo.raw * LIPO_SLOPE;
+    ftemp = (float) adc.lipo.counts_calib * LIPO_SLOPE;
     adc.lipo.conv = (uint16_t) ftemp;
     adc.lipo.calib = adc.lipo.conv; // FIXME
 
-    ftemp = (float) adc.pv.raw * PV_SLOPE;
+    ftemp = (float) adc.pv.counts_calib * PV_SLOPE;
     adc.pv.conv = (uint16_t) ftemp;
     adc.pv.calib = adc.pv.conv; // FIXME
 
     pwr_mng(&adc);
 
     uart1_print("lipo ");
-    uart1_print(_utoa(itoa_buf, adc.lipo.raw));
+    uart1_print(_utoa(itoa_buf, adc.lipo.counts));
+    uart1_print(" ");
+    uart1_print(_utoa(itoa_buf, adc.lipo.counts_calib));
     uart1_print(" ");
     uart1_print(_utoa(itoa_buf, adc.lipo.conv));
     uart1_print(", pv ");
-    uart1_print(_utoa(itoa_buf, adc.pv.raw));
+    uart1_print(_utoa(itoa_buf, adc.pv.counts));
+    uart1_print(" ");
+    uart1_print(_utoa(itoa_buf, adc.pv.counts_calib));
     uart1_print(" ");
     uart1_print(_utoa(itoa_buf, adc.pv.conv));
     uart1_print(", tint ");
-    uart1_print(_utoa(itoa_buf, adc.t_internal.raw));
+    uart1_print(_utoa(itoa_buf, adc.t_internal.counts));
+    uart1_print(" ");
+    uart1_print(_utoa(itoa_buf, adc.t_internal.conv));
     uart1_print("\r\n");
-
 }
 
 int main(void)
@@ -131,8 +178,6 @@ int main(void)
 
     rtca_init();
 
-    //timer_a0_init();
-
     uart1_port_init();
     uart1_init();
 
@@ -142,13 +187,8 @@ int main(void)
     uart1_set_rx_irq_handler(uart1_rx_simple_handler);
 #endif
 
-//#if (defined(USE_XT2) && defined(SMCLK_FREQ_16M)) || defined(UART1_TX_USES_IRQ)
-    // an external high frequency crystal can't be woken up quickly enough
-    // from LPM, so make sure that SMCLK never powers down
-
-    // also the uart tx irq ain't working without this for some reason
     timer_a0_init();
-//#endif
+    timer_a2_init();
 
     st_off;
     //sig1_off;
@@ -165,10 +205,16 @@ int main(void)
     eh_register(&rtc_alarm, SYS_MSG_RTC_ALARM);
     eh_register(&uart1_rx_irq, SYS_MSG_UART1_RX);
 
+    eh_register(&scheduler_irq, SYS_MSG_TIMERA2_CCR1);
+    eh_register(&led_off_irq, SYS_MSG_SCH_LED_OFF);
+    eh_register(&led_on_irq, SYS_MSG_SCH_LED_ON);
+
     rtca_set_alarm(COMPILE_HOUR, COMPILE_MIN + 2);
     rtca_enable_alarm();
 
     display_menu();
+
+    led_on_irq(0);
 
     while (1) {
         // sleep

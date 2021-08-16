@@ -9,16 +9,21 @@
 //  license:         GNU GPLv3
 
 #include <inttypes.h>
+#include "tlv.h"
 #include "adc.h"
+#include "proj.h"
 
 volatile uint16_t *adc10_rv;
 volatile uint8_t adcready;
+
+uint16_t adc10_apply_adc_correction(const uint16_t counts);
+int16_t adc10_conv_temp_counts(const uint16_t counts);
 
 // port: 0 = P6.A0, 1 = P6.A1, .., 0xa = P6.A10 = internal temp sensor
 // vref is one of:  REFVSEL_0  - 1.5v vref
 //                  REFVSEL_1  - 2.0v vref
 //                  REFVSEL_2  - 2.5v vref
-void adc10_read(const uint8_t port, uint16_t * rv, const uint8_t vref)
+void adc10_read(const uint8_t port, adc_channel *ch, const uint8_t vref)
 {
     //*((uint16_t *)portreg) |= 1 << port;
     // if ref or adc10 are busy then wait
@@ -40,11 +45,17 @@ void adc10_read(const uint8_t port, uint16_t * rv, const uint8_t vref)
     ADC10MCTL0 = ADC10SREF_1 + port;
     ADC10CTL2 |= ADC10PDIV_2 + ADC10SR;
     adcready = 0;
-    adc10_rv = rv;
+    adc10_rv = &ch->counts;
     // trigger conversion
     ADC10IE = ADC10IE0;
     ADC10CTL0 |= ADC10ENC + ADC10SC;
     while (!adcready) ;
+
+    if (port != 10) {
+        ch->counts_calib = adc10_apply_adc_correction(ch->counts);
+    } else {
+        ch->conv = adc10_conv_temp_counts(ch->counts);
+    }
 }
 
 void adc10_halt(void)
@@ -53,40 +64,53 @@ void adc10_halt(void)
     REFCTL0 &= ~REFON;
 }
 
-// calculate internal temperature based on the linear regression 
-// established by the two calibration registers flashed into the chip
-// qtemp the adc value on channel 10 with a 1.5V reference
-// function returns the temperature in degrees C
-int16_t calc_temp(const uint16_t qtemp)
+int16_t adc10_conv_temp_counts(const uint16_t counts)
 {
-    uint16_t x1 = *(uint16_t *)0x1a1a; // value at 30dC
-    uint16_t x2 = *(uint16_t *)0x1a1c; // value at 85dC, see datasheet
-    uint16_t y1 = 30;
-    uint16_t y2 = 85;
-    int32_t sumxsq;
-    int32_t sumx, sumy, sumxy;
-    int32_t coef1, coef2, t10;
-    int32_t rv;
+    uint8_t tag_length;
+    uint16_t *tag_pointer;
+    uint16_t cal_adc_t30, cal_adc_t85; // ideal counts at 30, 85 dC saved in the TLV adc10 calibration structure
+    int32_t tmp;
+    int16_t rv;
 
-    sumx = x1 + x2;
-    sumy = y1 + y2;
-    sumxsq = (int32_t)x1 * (int32_t)x1 + (int32_t)x2 * (int32_t)x2;
-    sumxy = (int32_t)x1 * (int32_t)y1 + (int32_t)x2 * (int32_t)y2;
+    TLV_getInfo(TLV_ADC10CAL, 0, &tag_length, (uint16_t **)&tag_pointer );
 
-    coef1 = ((sumy*sumxsq)-(sumx*sumxy))/((2*sumxsq)-(sumx*sumx))*100;
-    coef2 = 100*((2*sumxy)-(sumx*sumy))/((2*sumxsq)-(sumx*sumx));
-
-    t10 = (qtemp * coef2 + coef1)/10;
-    rv = t10/10;
-
-    // add 1 if first digit after decimal is > 4
-    if ( (t10 % 10) > 4 ) {
-        if (t10 > 0) {
-            rv += 1;
-        } else {
-            rv -= 1;
-        }
+    if (tag_pointer != 0) {
+        cal_adc_t30 = tag_pointer[2];
+        cal_adc_t85 = tag_pointer[3];
+        tmp = ((int32_t)counts - (int32_t)cal_adc_t30) * (85-30) * 100 / ((int32_t)cal_adc_t85 - (int32_t)cal_adc_t30) + 30 * 100;
+        rv = tmp;
+    } else {
+        rv = -25500;
     }
+
+    return rv;
+}
+
+
+uint16_t adc10_apply_adc_correction(const uint16_t counts)
+{
+    int32_t tmp;
+    uint16_t rv;
+    uint16_t adc_gain_factor;
+    int16_t adc_offset;
+    uint8_t tag_length;
+    uint16_t *tag_pointer;
+
+    TLV_getInfo(TLV_ADC10CAL, 0, &tag_length, (uint16_t **)&tag_pointer );
+
+    if (tag_pointer != 0) {
+        adc_gain_factor = tag_pointer[0];
+        adc_offset = tag_pointer[1];
+        tmp = ((uint32_t) counts * (uint32_t) adc_gain_factor) >> 15;
+        tmp += adc_offset;
+        if (tmp < 0) {
+            tmp = 0;
+        }
+        rv = tmp;
+    } else {
+        rv = counts;
+    }
+
     return rv;
 }
 
