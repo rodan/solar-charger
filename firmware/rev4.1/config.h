@@ -9,6 +9,8 @@
 //#define SMCLK_FREQ_8M
 //#define SMCLK_FREQ_16M
 
+#define USE_WATCHDOG
+
 #define USE_UART1
 
 //#define BAUD_9600

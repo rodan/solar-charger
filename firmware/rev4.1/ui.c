@@ -7,6 +7,7 @@
 #include "ui.h"
 #include "version.h"
 #include "timer_a2.h"
+#include "pwr_mng.h"
 
 static const char menu_head[]="\r\n batt charger rev4.1 build ";
 static const char menu_str[]="\
@@ -79,6 +80,8 @@ void parse_user_input(void)
     } else if (strstr(input, "chg")) {
         uart1_print("P1IN.5 ");
         uart1_print(_itoa(itoa_buf, (P1IN & BIT5)));
+        uart1_print("lipo ");
+        uart1_print(_itoa(itoa_buf, pwr_mng_get_lipo_charge()));
         uart1_print("\r\n");
     } else if (strstr(input, "sch")) {
         display_schedule();

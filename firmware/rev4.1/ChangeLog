@@ -3,3 +3,5 @@
 	convert temperature counts to dC
 	converted value is now based on counts_calib
 	add timer_a2 for scheduling
+	replace all floating points with ints
+	add interrupt on CHG rising edge

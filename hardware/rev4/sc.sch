@@ -22580,10 +22580,10 @@ chip, wave soldering</description>
 <part name="R15" library="rcl" deviceset="R-EU_" device="R0805W" value="47k"/>
 <part name="GND51" library="SparkFun" deviceset="GND" device=""/>
 <part name="GND57" library="SparkFun" deviceset="GND" device=""/>
-<part name="R17" library="rcl" deviceset="R-EU_" device="R0805W" value="3k"/>
+<part name="R17" library="rcl" deviceset="R-EU_" device="R0805W" value="8k9"/>
 <part name="R18" library="rcl" deviceset="R-EU_" device="R0805W" value="DNP 10k th"/>
 <part name="GND58" library="SparkFun" deviceset="GND" device=""/>
-<part name="R20" library="rcl" deviceset="R-EU_" device="R0805W" value="1k1"/>
+<part name="R20" library="rcl" deviceset="R-EU_" device="R0805W" value="8k"/>
 <part name="GND59" library="SparkFun" deviceset="GND" device=""/>
 <part name="C38" library="rcl" deviceset="C-EU" device="C1206" value="4u7"/>
 <part name="GND68" library="SparkFun" deviceset="GND" device=""/>

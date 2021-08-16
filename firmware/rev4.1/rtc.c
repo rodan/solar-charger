@@ -104,12 +104,12 @@ void rtca_get_alarm(uint8_t *hour, uint8_t *min)
 	*min  = RTCAMIN  & 0x3F;
 }
 
-void rtca_set_alarm(uint8_t hour, uint8_t min)
+void rtca_set_alarm(const uint8_t hour, const uint8_t min)
 {
     uint16_t state = RTCCTL01;
     RTCCTL01 &= ~(RTCAIE | RTCAIFG);
-	RTCAMIN  = (RTCAMIN & RTCAE) | min;
-	RTCAHOUR = (RTCAHOUR & RTCAE) | hour;
+	RTCAMIN  = RTCAE | min;
+	RTCAHOUR = RTCAE | hour;
     RTCADOW = 0;
     RTCADAY = 0;
     RTCCTL01 = state;
