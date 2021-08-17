@@ -254,7 +254,7 @@ int main(void)
     eh_register(&refresh_vis_handler, SYS_MSG_SCH_REFRESH_VIS);
 
     //rtca_set_alarm(COMPILE_HOUR, COMPILE_MIN + 2);
-    rtca_set_alarm(9, 0);
+    rtca_set_alarm(10, 0);
     rtca_enable_alarm();
 
     st_off;                     // init ended
