@@ -28,6 +28,12 @@ struct rtca_tm {
 #define rtca_stop()		(RTCCTL01 |=  RTCHOLD)
 #define rtca_start()	(RTCCTL01 &= ~RTCHOLD)
 
+// ae_flags  - alarm enable flags
+#define    AE_MIN  0x01
+#define   AE_HOUR  0x02
+#define    AE_DAY  0x04
+#define    AE_DOW  0x08
+
 /* the ev variable holds the time event, see enum rtca_tevent for more info.
 please add -fshort-enums to CFLAGS to store rtca_tevent as only a byte */
 void rtca_init(void);
@@ -37,8 +43,8 @@ void rtca_get_time(struct rtca_tm *t);
 uint8_t rtca_get_event(void);
 void rtca_rst_event(void);
 
-void rtca_get_alarm(uint8_t *hour, uint8_t *min);
-void rtca_set_alarm(uint8_t hour, uint8_t min);
+void rtca_get_alarm(struct rtca_tm *t, uint8_t *ae_flags);
+void rtca_set_alarm(struct rtca_tm *t, const uint8_t ae_flags);
 void rtca_enable_alarm();
 void rtca_disable_alarm();
 

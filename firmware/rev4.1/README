@@ -1,0 +1,46 @@
+
+ source:       https://github.com/rodan/solar-charger 
+ author:       Petre Rodan <2b4eda@subdimension.ro>
+ license:      GNU GPLv3
+ toolchain used: msp430-elf-gcc (Mitto Systems Limited - msp430-gcc 9.2.0.50) 9.2.0 linux
+
+this firmware revision is to be used with rev4 hardware.
+
+* How does this project work?
+
+a photovoltaic cell and a lipo battery provide redundant power to the microcontroller. 
+
+if the PV voltage is above 6.2V (1.5s after being enabled) then it means that it can provide 4mA of current to feed the buck circuitry and it becomes the primary power for the BQ24072 powerpath IC and the entire board. otherwise the lipo 1-cell provides power to the board.
+
+if the PV voltage is above 6.2V (1.5s after charging circuit was enabled) then it means that it can provide the ~700mW of power needed to charge the lipo cell.
+
+a RTC-based alarm will trigger an irrigation relay once per day.
+
+this setup described above can be reached if J1 ties VIN to the center tap, J2 is open, a jumper ties VBAT to Q3's drain (to skip the 12V charger) and the following compoments are not populated: R32, R23, R27, D2, IC1, C26, C27.
+
+otherwise a lead-acid 12V battery can also be charged. this option is not currently covered by the firmware.
+
+* Compiling the project
+
+the toolchain used for this project is provided by TI [1]. the rest of the tools needed by the Makefile in order to compile the project are readily available in most Linux distributions.
+make sure to 'git clone' the msp430 reference libraries [2] (or provide a symlink to them) to /opt/reference_libs_msp430
+
+use the following commands:
+
+ ln -s "/FIXTHIS/reference_libs_msp430" /opt/reference_libs_msp430
+
+ make
+    builds the entire project with the MSP430F5510 target. all the resulting objects and the elf binary will be inside the './build/MSP430F5510' subdirectory
+
+ make install
+    takes ./build/MSP430F5510/main.elf and tries to flash it. this needs the mspdebug application, an ezfet-1.2 or msp-fet programmer connected to the target board.
+
+ make scan-build
+    optional static scan provided by Clang (if installed)
+
+ make cppcheck
+    optional static scan provided by Cppcheck (if installed)
+
+
+[1] https://www.ti.com/tool/MSP430-GCC-OPENSOURCE
+[2] https://github.com/rodan/reference_libs_msp430

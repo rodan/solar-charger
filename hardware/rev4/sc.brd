@@ -1384,7 +1384,7 @@ design rules under a new name.</description>
 <element name="D1" library="SparkFun-DiscreteSemi" package="SMA-DIODE" value="15MQ040" x="18.17" y="38.97" rot="R180">
 <attribute name="PROD_ID" value="DIO-08053" x="18.17" y="38.97" size="1.778" layer="27" rot="R180" display="off"/>
 </element>
-<element name="D2" library="diode" package="C1702-05" value="SB560" x="6.98" y="21.65" rot="R270"/>
+<element name="D2" library="diode" package="C1702-05" value="SB560 DNP" x="6.98" y="21.65" rot="R270"/>
 <element name="IC1" library="linear" package="TO220V" value="PB137ACV DNP" x="0.34" y="28.73" rot="R90"/>
 <element name="IC2" library="Simplex-ICs" package="SO-08" value="LM2675M-ADJ" x="18.58" y="45.92" rot="R180"/>
 <element name="JP2" library="SparkFun-Connectors" package="1X02" value="thermistor" x="2.79" y="18.98" rot="R90"/>

@@ -22561,7 +22561,7 @@ chip, wave soldering</description>
 <part name="LED7" library="led" deviceset="LED" device="CHIP-LED0805" value="green"/>
 <part name="R36" library="rcl" deviceset="R-EU_" device="R0805W" value="1M"/>
 <part name="LED8" library="led" deviceset="LED" device="CHIP-LED0805" value="green"/>
-<part name="D2" library="diode" deviceset="DIODE-" device="C1702-05" value="SB560"/>
+<part name="D2" library="diode" deviceset="DIODE-" device="C1702-05" value="SB560 DNP"/>
 <part name="IC2" library="Simplex-ICs" deviceset="LM2674" device="" value="LM2675M-ADJ"/>
 <part name="GND7" library="supply1" deviceset="GND" device=""/>
 <part name="R1" library="rcl" deviceset="R-EU_" device="R0805W" value="1.5K 1%"/>

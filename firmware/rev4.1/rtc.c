@@ -18,12 +18,11 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 #include <inttypes.h>
 #include "rtc.h"
 #include "rtca_now.h"
-#include "proj.h"               // FIXME remove
 
 #ifdef CONFIG_RTC_DST
 #include "rtc_dst.h"
@@ -40,18 +39,12 @@ void rtca_init(void)
     rtca_time.dow = COMPILE_DOW;
     rtca_time.hour = COMPILE_HOUR;
     rtca_time.min = COMPILE_MIN;
-    rtca_time.sec = 59;
+    rtca_time.sec = 57; // minute irq will happen 3s after uC start
 
-    /* Enable calendar mode (date/time registers are automatically reset)
-       and enable read ready interrupts
-       and set time event interrupts at each minute
-       also enable alarm interrupts */
     RTCCTL01 |= RTCMODE | RTCRDYIE | RTCTEVIE;
-
     rtca_set_time(&rtca_time);
 
 #ifdef CONFIG_RTC_DST
-    /* initialize DST module */
     rtc_dst_init();
 #endif
 
@@ -59,10 +52,8 @@ void rtca_init(void)
 
 void rtca_set_time(struct rtca_tm *t)
 {
-    // Stop RTC timekeeping for a while
     rtca_stop();
 
-    // update RTC registers
     RTCSEC = t->sec;
     RTCMIN = t->min;
     RTCHOUR = t->hour;
@@ -72,7 +63,6 @@ void rtca_set_time(struct rtca_tm *t)
     RTCYEARL = t->year & 0xff;
     RTCYEARH = t->year >> 8;
 
-    // Resume RTC time keeping
     rtca_start();
 }
 
@@ -98,28 +88,62 @@ void rtca_rst_event(void)
     rtca_last_event = RTCA_EV_NONE;
 }
 
-void rtca_get_alarm(uint8_t * hour, uint8_t * min)
+void rtca_get_alarm(struct rtca_tm *t, uint8_t *ae_flags)
 {
-    *hour = RTCAHOUR & 0x1F;
-    *min = RTCAMIN & 0x3F;
+    *ae_flags = 0;
+    t->min = RTCAMIN & 0x7f;
+    t->hour = RTCAHOUR & 0x7f;
+    t->day = RTCADAY & 0x7f;
+    t->dow = RTCADOW & 0x7f;
+
+    if (RTCAMIN & RTCAE) {
+        *ae_flags |= AE_MIN;
+    }
+    if (RTCAHOUR & RTCAE) {
+        *ae_flags |= AE_HOUR;
+    }
+    if (RTCADAY & RTCAE) {
+        *ae_flags |= AE_DAY;
+    }
+    if (RTCADOW & RTCAE) {
+        *ae_flags |= AE_DOW;
+    }
 }
 
-void rtca_set_alarm(const uint8_t hour, const uint8_t min)
+void rtca_set_alarm(struct rtca_tm *t, const uint8_t ae_flags)
 {
-    uint16_t state = RTCCTL01;
+    uint16_t reg = RTCCTL01;
     RTCCTL01 &= ~(RTCAIE | RTCAIFG);
-    RTCAMIN = RTCAE | min;
-    RTCAHOUR = RTCAE | hour;
-    RTCADOW = 0;
-    RTCADAY = 0;
-    RTCCTL01 = state;
+
+    if (ae_flags & AE_MIN) {
+        RTCAMIN = RTCAE | t->min;
+    } else {
+        RTCAMIN = 0;
+    }
+
+    if (ae_flags & AE_HOUR) {
+        RTCAHOUR = RTCAE | t->hour;
+    } else {
+        RTCAHOUR = 0;
+    }
+
+    if (ae_flags & AE_DAY) {
+        RTCADAY = RTCAE | t->day;
+    } else {
+        RTCADAY = 0;
+    }
+
+    if (ae_flags & AE_DOW) {
+        RTCADOW = RTCAE | t->dow;
+    } else {
+        RTCADOW = 0;
+    }
+
+    RTCCTL01 = reg;
 }
 
 void rtca_enable_alarm()
 {
-//      RTCCTL01 &= ~(RTCAIE);
-//      RTCAHOUR |= RTCAE;
-//      RTCAMIN  |= RTCAE;
     RTCCTL01 &= ~(RTCAIFG);
     RTCCTL01 |= RTCAIE;
 }
@@ -134,18 +158,14 @@ void rtca_disable_alarm()
 __attribute__((interrupt(RTC_VECTOR)))
 void RTC_A_ISR(void)
 {
-    /* the IV is cleared after a read, so we store it */
     uint16_t iv = RTCIV;
 
-    // copy register values
     rtca_time.sec = RTCSEC;
 
-    // count system time
     rtca_time.sys++;
 
     enum rtca_tevent ev = 0;
 
-    /* second event (from the read ready interrupt flag) */
     if (iv == RTCIV_RTCRDYIFG) {
         ev = RTCA_EV_SECOND;
         goto finish;
@@ -158,13 +178,13 @@ void RTC_A_ISR(void)
     }
 
     {
-        if (iv != RTCIV_RTCTEVIFG)      /* Minute changed! */
+        if (iv != RTCIV_RTCTEVIFG)
             goto finish;
 
         ev |= RTCA_EV_MINUTE;
         rtca_time.min = RTCMIN;
 
-        if (rtca_time.min != 0) /* Hour changed */
+        if (rtca_time.min != 0)
             goto finish;
 
         ev |= RTCA_EV_HOUR;
@@ -174,35 +194,31 @@ void RTC_A_ISR(void)
         rtc_dst_hourly_update();
 #endif
 
-        if (rtca_time.hour != 0)        /* Day changed */
+        if (rtca_time.hour != 0)
             goto finish;
 
         ev |= RTCA_EV_DAY;
         rtca_time.day = RTCDAY;
         rtca_time.dow = RTCDOW;
 
-        if (rtca_time.day != 1) /* Month changed */
+        if (rtca_time.day != 1)
             goto finish;
 
         ev |= RTCA_EV_MONTH;
         rtca_time.mon = RTCMON;
 
-        if (rtca_time.mon != 1) /* Year changed */
+        if (rtca_time.mon != 1)
             goto finish;
 
         ev |= RTCA_EV_YEAR;
         rtca_time.year = RTCYEARL | (RTCYEARH << 8);
 #ifdef CONFIG_RTC_DST
-        /* calculate new DST switch dates */
         rtc_dst_calculate_dates(rtca_time.year, rtca_time.mon, rtca_time.day, rtca_time.hour);
 #endif
     }
 
  finish:
-    /* append events, since ISR could be triggered
-       multipe times until rtca_last_event gets parsed */
     rtca_last_event |= ev;
 
-    /* exit from LPM3, give execution back to mainloop */
     _BIC_SR_IRQ(LPM3_bits);
 }

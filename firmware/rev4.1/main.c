@@ -172,7 +172,7 @@ static void check_pv_handler(uint32_t msg)
 {
     update_adc();
     if (pwr_mng_check_pv(&adc) == PWR_PV_CHECK_RERUN) {
-        timer_a2_set_trigger_slot(SCHEDULE_CHECK_PV, systime() + 100, TIMER_A2_EVENT_ENABLE);
+        timer_a2_set_trigger_slot(SCHEDULE_CHECK_PV, systime() + 150, TIMER_A2_EVENT_ENABLE);
     }
 }
 
@@ -183,12 +183,13 @@ static void refresh_vis_handler(uint32_t msg)
 
 static void main_loop(uint32_t msg)
 {
-    char itoa_buf[CONV_BASE_10_BUF_SZ];
-
     update_adc();
     pwr_mng(&adc);
-    timer_a2_set_trigger_slot(SCHEDULE_CHECK_PV, systime() + 100, TIMER_A2_EVENT_ENABLE);
-    timer_a2_set_trigger_slot(SCHEDULE_REFRESH_VIS, systime() + 300, TIMER_A2_EVENT_ENABLE);
+    timer_a2_set_trigger_slot(SCHEDULE_CHECK_PV, systime() + 150, TIMER_A2_EVENT_ENABLE);
+    timer_a2_set_trigger_slot(SCHEDULE_REFRESH_VIS, systime() + 350, TIMER_A2_EVENT_ENABLE);
+
+#ifdef CONFIG_DEBUG
+    char itoa_buf[CONV_BASE_10_BUF_SZ];
 
     uart1_print("lipo ");
     uart1_print(_utoa(itoa_buf, adc.lipo.counts));
@@ -207,11 +208,14 @@ static void main_loop(uint32_t msg)
     uart1_print(" ");
     uart1_print(_utoa(itoa_buf, adc.t_internal.conv));
     uart1_print("\r\n");
+#endif
 
 }
 
 int main(void)
 {
+    struct rtca_tm t;
+
     // watchdog triggers after 25sec when not cleared
 #ifdef USE_WATCHDOG
     WDTCTL = WDTPW + WDTIS__512K + WDTSSEL__ACLK + WDTCNTCL;
@@ -226,6 +230,12 @@ int main(void)
     clock_init();
 
     rtca_init();
+    //t.hour = COMPILE_HOUR;
+    //t.min = COMPILE_MIN + 2;
+    t.hour = 10;
+    t.min = 0;
+    rtca_set_alarm(&t, AE_MIN | AE_HOUR);
+    rtca_enable_alarm();
 
     uart1_port_init();
     uart1_init();
@@ -253,13 +263,9 @@ int main(void)
     eh_register(&check_pv_handler, SYS_MSG_SCH_CHECK_PV);
     eh_register(&refresh_vis_handler, SYS_MSG_SCH_REFRESH_VIS);
 
-    //rtca_set_alarm(COMPILE_HOUR, COMPILE_MIN + 2);
-    rtca_set_alarm(10, 0);
-    rtca_enable_alarm();
-
     st_off;                     // init ended
 
-    display_menu();
+    //display_menu();
 
     while (1) {
         // sleep
