@@ -5,3 +5,6 @@
 	add timer_a2 for scheduling
 	replace all floating points with ints
 	add interrupt on CHG rising edge
+
+20210817 PR
+	pwr_mng_check_pv() is re-scheduled in some conditions

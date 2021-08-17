@@ -23,7 +23,7 @@
 #include <inttypes.h>
 #include "rtc.h"
 #include "rtca_now.h"
-#include "proj.h" // FIXME remove
+#include "proj.h"               // FIXME remove
 
 #ifdef CONFIG_RTC_DST
 #include "rtc_dst.h"
@@ -98,18 +98,18 @@ void rtca_rst_event(void)
     rtca_last_event = RTCA_EV_NONE;
 }
 
-void rtca_get_alarm(uint8_t *hour, uint8_t *min)
+void rtca_get_alarm(uint8_t * hour, uint8_t * min)
 {
-	*hour = RTCAHOUR & 0x1F;
-	*min  = RTCAMIN  & 0x3F;
+    *hour = RTCAHOUR & 0x1F;
+    *min = RTCAMIN & 0x3F;
 }
 
 void rtca_set_alarm(const uint8_t hour, const uint8_t min)
 {
     uint16_t state = RTCCTL01;
     RTCCTL01 &= ~(RTCAIE | RTCAIFG);
-	RTCAMIN  = RTCAE | min;
-	RTCAHOUR = RTCAE | hour;
+    RTCAMIN = RTCAE | min;
+    RTCAHOUR = RTCAE | hour;
     RTCADOW = 0;
     RTCADAY = 0;
     RTCCTL01 = state;
@@ -117,21 +117,21 @@ void rtca_set_alarm(const uint8_t hour, const uint8_t min)
 
 void rtca_enable_alarm()
 {
-//	RTCCTL01 &= ~(RTCAIE);
-//	RTCAHOUR |= RTCAE;
-//	RTCAMIN  |= RTCAE;
+//      RTCCTL01 &= ~(RTCAIE);
+//      RTCAHOUR |= RTCAE;
+//      RTCAMIN  |= RTCAE;
     RTCCTL01 &= ~(RTCAIFG);
-	RTCCTL01 |= RTCAIE;
+    RTCCTL01 |= RTCAIE;
 }
 
 void rtca_disable_alarm()
 {
-	RTCCTL01 &= ~RTCAIE;
-	RTCAHOUR &= ~RTCAE;
-	RTCAMIN  &= ~RTCAE;
+    RTCCTL01 &= ~RTCAIE;
+    RTCAHOUR &= ~RTCAE;
+    RTCAMIN &= ~RTCAE;
 }
 
-__attribute__ ((interrupt(RTC_VECTOR)))
+__attribute__((interrupt(RTC_VECTOR)))
 void RTC_A_ISR(void)
 {
     /* the IV is cleared after a read, so we store it */
@@ -194,8 +194,7 @@ void RTC_A_ISR(void)
         rtca_time.year = RTCYEARL | (RTCYEARH << 8);
 #ifdef CONFIG_RTC_DST
         /* calculate new DST switch dates */
-        rtc_dst_calculate_dates(rtca_time.year, rtca_time.mon, rtca_time.day,
-                                rtca_time.hour);
+        rtc_dst_calculate_dates(rtca_time.year, rtca_time.mon, rtca_time.day, rtca_time.hour);
 #endif
     }
 

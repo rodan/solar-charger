@@ -25,6 +25,9 @@ struct pwr_mng_blinky {
 #define      PWR_ST_DEACTIVATE  0x00
 #define        PWR_ST_ACTIVATE  0x01
 
+#define        PWR_PV_CHECK_OK  0x00
+#define     PWR_PV_CHECK_RERUN  0x01
+
 #define            LIPO_THRESH  378 // 90% of 4.2V (*100) - dont start charging the lipo cell if it's above 90%
 #define              LIPO_ALRM  300 // minimum lipo voltage
 #define              LIPO_FULL  415 // charged lipo voltage
@@ -33,7 +36,7 @@ struct pwr_mng_blinky {
 
 void pwr_mng_init(void);
 void pwr_mng(struct adc_conv *adc_c);
-void pwr_mng_check_pv(struct adc_conv *adc_c);
+uint8_t pwr_mng_check_pv(struct adc_conv *adc_c);
 void pwr_mng_refresh_vis(struct adc_conv *adc_c);
 
 void pwr_mng_state_display(const uint8_t state_flags, const uint8_t activate);

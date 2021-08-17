@@ -71,13 +71,11 @@ void check_events(void)
         }
         rtca_rst_event();
     }
-
     // uart RX
     if (uart1_get_event() == UART1_EV_RX) {
         msg |= SYS_MSG_UART1_RX;
         uart1_rst_event();
     }
-
     // timer_a2
     ev = timer_a2_get_event();
     if (ev) {
@@ -86,7 +84,6 @@ void check_events(void)
         }
         timer_a2_rst_event();
     }
-
     // timer_a2-based scheduler
     ev = timer_a2_get_event_schedule();
     if (ev) {
@@ -108,7 +105,6 @@ void check_events(void)
 
         timer_a2_rst_event_schedule();
     }
-
     // p1.5 rising edge trigger
     if (port1_last_event) {
         msg |= SYS_MSG_P1IFG;
@@ -165,7 +161,7 @@ void update_adc(void)
 
     tmp = (uint32_t) ((uint32_t) adc.lipo.counts_calib * (uint32_t) LIPO_SLOPE) >> 12;
     adc.lipo.conv = (uint16_t) tmp;
-    adc.lipo.calib = adc.lipo.conv; // FIXME
+    adc.lipo.calib = adc.lipo.conv;     // FIXME
 
     tmp = (uint32_t) ((uint32_t) adc.pv.counts_calib * (uint32_t) PV_SLOPE) >> 12;
     adc.pv.conv = (uint16_t) tmp;
@@ -175,7 +171,9 @@ void update_adc(void)
 static void check_pv_handler(uint32_t msg)
 {
     update_adc();
-    pwr_mng_check_pv(&adc);
+    if (pwr_mng_check_pv(&adc) == PWR_PV_CHECK_RERUN) {
+        timer_a2_set_trigger_slot(SCHEDULE_CHECK_PV, systime() + 100, TIMER_A2_EVENT_ENABLE);
+    }
 }
 
 static void refresh_vis_handler(uint32_t msg)
@@ -190,7 +188,7 @@ static void main_loop(uint32_t msg)
     update_adc();
     pwr_mng(&adc);
     timer_a2_set_trigger_slot(SCHEDULE_CHECK_PV, systime() + 100, TIMER_A2_EVENT_ENABLE);
-    timer_a2_set_trigger_slot(SCHEDULE_REFRESH_VIS, systime() + 200, TIMER_A2_EVENT_ENABLE);
+    timer_a2_set_trigger_slot(SCHEDULE_REFRESH_VIS, systime() + 300, TIMER_A2_EVENT_ENABLE);
 
     uart1_print("lipo ");
     uart1_print(_utoa(itoa_buf, adc.lipo.counts));
@@ -259,7 +257,7 @@ int main(void)
     rtca_set_alarm(9, 0);
     rtca_enable_alarm();
 
-    st_off; // init ended
+    st_off;                     // init ended
 
     display_menu();
 
@@ -281,7 +279,7 @@ int main(void)
 #pragma vector=PORT1_VECTOR
 __interrupt void Port_1(void)
 #elif defined(__GNUC__)
-__attribute__ ((interrupt(PORT1_VECTOR)))
+__attribute__((interrupt(PORT1_VECTOR)))
 void Port1_ISR(void)
 #else
 #error Compiler not supported!

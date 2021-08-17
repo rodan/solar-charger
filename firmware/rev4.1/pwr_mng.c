@@ -2,7 +2,7 @@
 #include "proj.h"
 #include "pwr_mng.h"
 
-uint8_t lipo_charge; // percentage of charge between LIPO_ALRM and LIPO_FULL
+uint8_t lipo_charge;            // percentage of charge between LIPO_ALRM and LIPO_FULL
 struct pwr_mng_blinky blinky;
 
 enum charging_state CHG_status(void)
@@ -55,7 +55,7 @@ void pwr_mng_state_display(const uint8_t state_flags, const uint8_t activate)
     blinky.on = blinky_tmp.on;
     blinky.off = blinky_tmp.off;
 
-    if (blinky.on && (blinky_tmp.flags != blinky.flags))  {
+    if (blinky.on && (blinky_tmp.flags != blinky.flags)) {
         led_on_handler(0);
     }
 
@@ -72,17 +72,21 @@ uint8_t pwr_mng_get_lipo_charge(void)
     return lipo_charge;
 }
 
-void pwr_mng_check_pv(struct adc_conv *adc_c)
+uint8_t pwr_mng_check_pv(struct adc_conv *adc_c)
 {
     // if pv is weak then disable
     if (adc_c->pv.calib < PV_THRESH) {
         if (CE_status() == IS_NOT_CHARGING) {
             pve_off;
+            return PWR_PV_CHECK_OK;
         } else {
             ce_off;
+            // rerun this function after a second and possibly disable pve as well
+            return PWR_PV_CHECK_RERUN;
         }
     }
 
+    return PWR_PV_CHECK_OK;
 }
 
 void pwr_mng_refresh_vis(struct adc_conv *adc_c)
@@ -110,7 +114,7 @@ void pwr_mng(struct adc_conv *adc_c)
         pve = ON;
         if ((adc_c->lipo.calib < LIPO_THRESH) && (adc_c->pv.calib > PV_CHG_THRESH)) {
             ce = ON;
-        } // else {} - no need to stop the charging process
+        }                       // else {} - no need to stop the charging process
     } else {
         if (CE_status() == IS_NOT_CHARGING) {
             pve = OFF;
@@ -122,7 +126,6 @@ void pwr_mng(struct adc_conv *adc_c)
     if ((adc_c->lipo.calib > LIPO_FULL) && (CHG_status() == IS_NOT_CHARGING)) {
         ce = OFF;
     }
-
     // get a percentage for lipo charge
     tmp = (uint32_t) (adc_c->lipo.calib - LIPO_ALRM) * 100 / (uint32_t) (LIPO_FULL - LIPO_ALRM);
     if (tmp < 0) {
@@ -134,25 +137,24 @@ void pwr_mng(struct adc_conv *adc_c)
 
     // apply mosfet configuration as a last step
     switch (ce) {
-        case ON:
-            ce_on;
-            break;
-        case OFF:
-            ce_off;
-            break;
-        default:
-            break;
+    case ON:
+        ce_on;
+        break;
+    case OFF:
+        ce_off;
+        break;
+    default:
+        break;
     }
 
     switch (pve) {
-        case ON:
-            pve_on;
-            break;
-        case OFF:
-            pve_off;
-            break;
-        default:
-            break;
+    case ON:
+        pve_on;
+        break;
+    case OFF:
+        pve_off;
+        break;
+    default:
+        break;
     }
 }
-

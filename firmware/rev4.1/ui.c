@@ -12,9 +12,12 @@
 static const char menu_head[]="\r\n batt charger rev4.1 build ";
 static const char menu_str[]="\
  --- available commands:\r\n\r\n\
-\e[33;1mdate\e[0m - RTC read\r\n\
-\e[33;1mchg\e[0m  - CHG status\r\n\
-\e[33;1m?\e[0m    - show menu\r\n";
+\e[33;1mpv[01]\e[0m - control photovoltaic cell switch\r\n\
+\e[33;1mce[01]\e[0m - control charge enable switch\r\n\
+\e[33;1mdate\e[0m   - RTC read\r\n\
+\e[33;1mchg\e[0m    - CHG status\r\n\
+\e[33;1msch\e[0m    - view schedule\r\n\
+\e[33;1m?\e[0m      - show menu\r\n";
 
 void display_menu(void)
 {
@@ -78,11 +81,16 @@ void parse_user_input(void)
     if (f == '?') {
         display_menu();
     } else if (strstr(input, "chg")) {
-        uart1_print("P1IN.5 ");
-        uart1_print(_itoa(itoa_buf, (P1IN & BIT5)));
-        uart1_print("lipo ");
+        uart1_print("CHG ");
+        if (P1IN & BIT5) {
+            uart1_print("off");
+        } else {
+            uart1_print("on");
+        }
+        //uart1_print(_itoa(itoa_buf, (P1IN & BIT5)));
+        uart1_print(", lipo ");
         uart1_print(_itoa(itoa_buf, pwr_mng_get_lipo_charge()));
-        uart1_print("\r\n");
+        uart1_print("%\r\n");
     } else if (strstr(input, "sch")) {
         display_schedule();
     } else if (strstr(input, "date")) {
