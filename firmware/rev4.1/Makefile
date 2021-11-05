@@ -28,6 +28,7 @@ GDB              = $(GCC_BIN_DIR)/msp430-elf-gdb
 
 CFLAGS           := -D__$(DEVICE)__ -mmcu=$(DEVICE) # -g -DDEPRECATED
 CFLAGS           += -Wall -Wno-switch -Wno-int-to-pointer-cast
+#CFLAGS           += -S -fverbose-asm
 #CFLAGS		 += -fno-force-addr -finline-limit=1 -fno-schedule-insns
 #CFLAGS		 += -fshort-enums -Wl,-Map=output.map
 LDFLAGS          := -T $(LDDIR).ld -L $(LIB_DIR) -L $(GCC_EXTRA_INC_DIR) -mmcu=$(DEVICE) $(HWMULT) -g -Wl,--gc-sections
@@ -35,7 +36,7 @@ CFLAGS_REL	 += -Os -fdata-sections -ffunction-sections -fomit-frame-pointer
 LDFLAGS_REL	 += -Wl,-s
 CFLAGS_DBG	 += -O1 -ggdb
 LDFLAGS_DBG	 += 
-INCLUDES         := -I $(GCC_EXTRA_INC_DIR) -I $(GCC_INC_DIR) -I $(DRIVERLIB) -I $(GLUELIB) -I $(GLUELIB_HAL) -I $(GCC_CSS_INC_GCC_DIR) -I ./ -I .
+INCLUDES         := -I $(GCC_EXTRA_INC_DIR) -I $(GCC_INC_DIR) -I $(DRIVERLIB) -I $(GLUELIB) -I $(GLUELIB_HAL) -I $(GCC_CCS_INC_GCC_DIR) -I ./ -I .
 ######################################
 DRIVERLIB_SRC    := $(wildcard $(DRIVERLIB)/*.c)
 GLUELIB_SRC      := $(wildcard $(GLUELIB)/*.c)
@@ -75,20 +76,20 @@ DEBUG := $(shell grep "^\#define CONFIG_DEBUG" config.h)
 MACROS := -DDEVICE=$(DEVICE) -DFAMILY=$(FAMILY) $(shell $(REFLIB_ROOT)/tools/extract_macros.sh config.h)
 CFLAGS += $(MACROS)
 ifeq ($(DEBUG),)
-TARGET	:= RELEASE
+CTARGET	:= RELEASE
 CFLAGS	+= $(CFLAGS_REL)
 LDFLAGS	+= $(LDFLAGS_REL)
 else
-TARGET	:= DEBUG
+CTARGET	:= DEBUG
 CFLAGS	+= $(CFLAGS_DBG)
 LDFLAGS	+= $(LDFLAGS_DBG)
 endif
-all: new_timestamps depend version.h config.h config_macros tags driverlib $(EXOUTPUT) size
+all: depend version.h config.h new_timestamps config_macros tags driverlib $(EXOUTPUT) size
 endif
 
 ifeq ($(MEMORY_MODEL),LARGE)
-CFLAGS	+= -mlarge -mcode-region=upper -mdata-region=lower
-LDFLAGS	+= -mlarge -mcode-region=upper
+CFLAGS	+= -mlarge -mcode-region=lower -mdata-region=lower
+LDFLAGS	+= -mlarge -mcode-region=lower
 endif
 
 config.h:
@@ -114,7 +115,7 @@ $(OBJ_DIR)/%.o: %.c
 	@$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@
 
 $(EXOUTPUT): $(DRIVERLIB_OBJECTS) $(GLUELIB_OBJECTS) $(LOCAL_OBJECTS) $(EXOBJECT)
-	@echo -e "\n>> Building $@ as target $(TARGET)"
+	@echo -e "\n>> Building $@ as target $(CTARGET)"
 	@$(CC) $(LDFLAGS) $(DRIVERLIB_OBJECTS) $(GLUELIB_OBJECTS) $(LOCAL_OBJECTS) -o $@
 
 mkdir_od:
@@ -151,8 +152,7 @@ $(OBJ_DIR)/$(PROJ).dep: $(SRC)
 
 tags: $(PROJ_SRC) $(DRIVERLIB_SRC) $(GLUELIB_SRC) $(GLUELIB_HAL_SRC) $(LOCAL_SRC) $(OBJ_DIR)/$(PROJ).dep
 	@echo "Generating tags .."
-	@echo $(deps)
-	@exuberant-ctags --recurse=yes ./ $(DRIVERLIB) $(GLUELIB) $(LDDIR).h $(shell cat $(OBJ_DIR)/$(PROJ).hdep)
+	@exuberant-ctags --recurse=yes ./ $(DRIVERLIB) $(GLUELIB) $(GLUELIB_HAL) $(LDDIR).h $(shell cat $(OBJ_DIR)/$(PROJ).hdep)
 
 new_timestamps:
 	@$(BASH) $(REFLIB_ROOT)/tools/update_rtca_now.sh
