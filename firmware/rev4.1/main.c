@@ -222,7 +222,7 @@ int main(void)
 #else
     WDTCTL = WDTPW + WDTHOLD;
 #endif
-    msp430_hal_init();
+    msp430_hal_init(HAL_GPIO_DIR_OUTPUT | HAL_GPIO_OUT_LOW);
     port_init();
     st_on;
 
