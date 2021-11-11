@@ -85,12 +85,12 @@ CTARGET	:= DEBUG
 CFLAGS	+= $(CFLAGS_DBG)
 LDFLAGS	+= $(LDFLAGS_DBG)
 endif
-all: new_timestamps depend version.h config.h config_macros tags driverlib $(EXOUTPUT) size
+all: depend version.h config.h new_timestamps config_macros tags driverlib $(EXOUTPUT) size
 endif
 
 ifeq ($(MEMORY_MODEL),LARGE)
-CFLAGS	+= -mlarge -mcode-region=upper -mdata-region=lower
-LDFLAGS	+= -mlarge -mcode-region=upper
+CFLAGS	+= -mlarge -mcode-region=lower -mdata-region=lower
+LDFLAGS	+= -mlarge -mcode-region=lower
 endif
 
 config.h:
