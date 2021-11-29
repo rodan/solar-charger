@@ -23,11 +23,11 @@ otherwise a lead-acid 12V battery can also be charged. this option is not curren
 * Compiling the project
 
 the toolchain used for this project is provided by TI [1]. the rest of the tools needed by the Makefile in order to compile the project are readily available in most Linux distributions.
-make sure to 'git clone' the msp430 reference libraries [2] (or provide a symlink to them) to /opt/reference_libs_msp430
+make sure to 'git clone' the msp430 reference libraries [2] (or provide a symlink to them) to /opt/atlas430
 
 use the following commands:
 
- ln -s "/FIXTHIS/reference_libs_msp430" /opt/reference_libs_msp430
+ ln -s "/FIXTHIS/reference_libs_msp430" /opt/atlas430
 
  make
     builds the entire project with the MSP430F5510 target. all the resulting objects and the elf binary will be inside the './build/MSP430F5510' subdirectory
@@ -43,4 +43,4 @@ use the following commands:
 
 
 [1] https://www.ti.com/tool/MSP430-GCC-OPENSOURCE
-[2] https://github.com/rodan/reference_libs_msp430
+[2] https://github.com/rodan/atlas430

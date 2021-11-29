@@ -6,7 +6,7 @@
 #==============================================================================
 
 PROJ:=main
-REFLIB_ROOT:=/opt/reference_libs_msp430/
+REFLIB_ROOT:=/opt/atlas430/
 TARGET=MSP430F5510
 
 include $(REFLIB_ROOT)/Makefile.env
