@@ -226,6 +226,7 @@ int main(void)
     port_init();
     st_on;
 
+    clock_pin_init();
     clock_init();
 
     rtca_init();
