@@ -1,9 +1,9 @@
 #ifndef __VERSION_H__
 #define __VERSION_H__
 
-// compiled on Mon Nov 29 13:26:51 UTC 2021
+// compiled on Sun Jan  9 08:14:59 UTC 2022
 
-#define BUILD 550
-#define COMMIT 58
+#define BUILD 552
+#define COMMIT 60
 
 #endif

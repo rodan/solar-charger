@@ -237,7 +237,7 @@ int main(void)
     rtca_set_alarm(&t, AE_MIN | AE_HOUR);
     rtca_enable_alarm();
 
-    uart1_pin_init();
+    uart_uca1_pin_init();
     uart1_init();
 
 #ifdef UART1_RX_USES_RINGBUF
