@@ -22,6 +22,7 @@
 
 uint8_t port1_last_event;
 struct adc_conv adc;
+uart_descriptor bc; // backchannel uart interface
 
 void port_init(void)
 {
@@ -49,10 +50,10 @@ void port_init(void)
     P1IE |= BIT5;
 }
 
-static void uart1_rx_irq(uint32_t msg)
+static void uart_rx_irq(uint32_t msg)
 {
     parse_user_input();
-    uart1_set_eol();
+    uart_set_eol(&bc);
 }
 
 void check_events(void)
@@ -72,9 +73,9 @@ void check_events(void)
         rtca_rst_event();
     }
     // uart RX
-    if (uart1_get_event() == UART1_EV_RX) {
+    if (uart_get_event(&bc) == UART_EV_RX) {
         msg |= SYS_MSG_UART1_RX;
-        uart1_rst_event();
+        uart_rst_event(&bc);
     }
     // timer_a2
     ev = timer_a2_get_event();
@@ -191,23 +192,23 @@ static void main_loop(uint32_t msg)
 #ifdef CONFIG_DEBUG
     char itoa_buf[CONV_BASE_10_BUF_SZ];
 
-    uart1_print("lipo ");
-    uart1_print(_utoa(itoa_buf, adc.lipo.counts));
-    uart1_print(" ");
-    uart1_print(_utoa(itoa_buf, adc.lipo.counts_calib));
-    uart1_print(" ");
-    uart1_print(_utoa(itoa_buf, adc.lipo.conv));
-    uart1_print(", pv ");
-    uart1_print(_utoa(itoa_buf, adc.pv.counts));
-    uart1_print(" ");
-    uart1_print(_utoa(itoa_buf, adc.pv.counts_calib));
-    uart1_print(" ");
-    uart1_print(_utoa(itoa_buf, adc.pv.conv));
-    uart1_print(", tint ");
-    uart1_print(_utoa(itoa_buf, adc.t_internal.counts));
-    uart1_print(" ");
-    uart1_print(_utoa(itoa_buf, adc.t_internal.conv));
-    uart1_print("\r\n");
+    uart_print(&bc, "lipo ");
+    uart_print(&bc, _utoa(itoa_buf, adc.lipo.counts));
+    uart_print(&bc, " ");
+    uart_print(&bc, _utoa(itoa_buf, adc.lipo.counts_calib));
+    uart_print(&bc, " ");
+    uart_print(&bc, _utoa(itoa_buf, adc.lipo.conv));
+    uart_print(&bc, ", pv ");
+    uart_print(&bc, _utoa(itoa_buf, adc.pv.counts));
+    uart_print(&bc, " ");
+    uart_print(&bc, _utoa(itoa_buf, adc.pv.counts_calib));
+    uart_print(&bc, " ");
+    uart_print(&bc, _utoa(itoa_buf, adc.pv.conv));
+    uart_print(&bc, ", tint ");
+    uart_print(&bc, _utoa(itoa_buf, adc.t_internal.counts));
+    uart_print(&bc, " ");
+    uart_print(&bc, _utoa(itoa_buf, adc.t_internal.conv));
+    uart_print(&bc, "\r\n");
 #endif
 
 }
@@ -237,13 +238,14 @@ int main(void)
     rtca_set_alarm(&t, AE_MIN | AE_HOUR);
     rtca_enable_alarm();
 
-    uart_uca1_pin_init();
-    uart1_init();
-
-#ifdef UART1_RX_USES_RINGBUF
-    uart1_set_rx_irq_handler(uart1_rx_ringbuf_handler);
+    bc.baseAddress = USCI_A1_BASE;
+    bc.baudrate = BAUDRATE_57600;
+    uart_pin_init(&bc);
+    uart_init(&bc);
+#if defined UART_RX_USES_RINGBUF
+    uart_set_rx_irq_handler(&bc, uart_rx_ringbuf_handler);
 #else
-    uart1_set_rx_irq_handler(uart1_rx_simple_handler);
+    uart_set_rx_irq_handler(&bc, uart_rx_simple_handler);
 #endif
 
     timer_a0_init();
@@ -254,7 +256,7 @@ int main(void)
     eh_init();
     eh_register(&main_loop, SYS_MSG_RTC_MINUTE);
     eh_register(&rtc_alarm, SYS_MSG_RTC_ALARM);
-    eh_register(&uart1_rx_irq, SYS_MSG_UART1_RX);
+    eh_register(&uart_rx_irq, SYS_MSG_UART1_RX);
     //eh_register(&main_loop, SYS_MSG_P1IFG);
     eh_register(&scheduler_handler, SYS_MSG_TIMERA2_CCR1);
     eh_register(&led_off_handler, SYS_MSG_SCH_LED_OFF);

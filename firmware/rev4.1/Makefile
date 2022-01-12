@@ -171,7 +171,8 @@ scan-build: clean
 	@scan-build --use-cc=$(CC) --analyzer-target=msp430-elf --exclude ./driverlib/MSP430FR5xx_6xx make PARSER=scan-build
 
 cppcheck: clean
-	@cppcheck --quiet --force --enable=warning --enable=performance --enable=information --enable=missingInclude -I $(DRIVERLIB) -I $(GLUELIB) -I $(GLUELIB_HAL) -I ./ ./
+	@mkdir -p build/cppcheck
+	@cppcheck -j8 --enable=warning --enable=performance --enable=information --enable=missingInclude --cppcheck-build-dir=build/cppcheck -D__GNUC__ -D__$(DEVICE)__ $(MACROS) -I $(DRIVERLIB) -I $(GLUELIB) -I $(GLUELIB_HAL) -I $(GCC_EXTRA_INC_DIR) -I ./ ./ $(SRC)
 
 $(EXOBJECT): $(PROJ_SRC) $(OBJ_DIR)/$(PROJ).cflags
 	@$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@

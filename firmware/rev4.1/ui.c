@@ -9,6 +9,8 @@
 #include "timer_a2.h"
 #include "pwr_mng.h"
 
+extern uart_descriptor bc;
+
 static const char menu_head[]="\r\n batt charger rev4.1 build ";
 static const char menu_str[]="\
  --- available commands:\r\n\r\n\
@@ -23,9 +25,9 @@ void display_menu(void)
 {
     char itoa_buf[CONV_BASE_10_BUF_SZ];
 
-    uart1_print(menu_head);
-    uart1_print(_utoa(&itoa_buf[0], BUILD));
-    uart1_print(menu_str);
+    uart_print(&bc, menu_head);
+    uart_print(&bc, _utoa(&itoa_buf[0], BUILD));
+    uart_print(&bc, menu_str);
 }
 
 void display_schedule(void)
@@ -37,27 +39,27 @@ void display_schedule(void)
 
     for (c = 0; c < TIMER_A2_SLOTS_COUNT; c++) {
         timer_a2_get_trigger_slot(c, &trigger, &flag);
-        uart1_print(_utoa(itoa_buf, c));
-        uart1_print(" \t");
-        uart1_print(_utoa(itoa_buf, trigger));
-        uart1_print(" \t");
-        uart1_print(_utoa(itoa_buf, flag));
-        uart1_print("\r\n");
+        uart_print(&bc, _utoa(itoa_buf, c));
+        uart_print(&bc, " \t");
+        uart_print(&bc, _utoa(itoa_buf, trigger));
+        uart_print(&bc, " \t");
+        uart_print(&bc, _utoa(itoa_buf, flag));
+        uart_print(&bc, "\r\n");
     }
     trigger = timer_a2_get_trigger_next();
-    uart1_print("sch next ");
-    uart1_print(_utoa(itoa_buf, trigger));
-    uart1_print(" sys ");
-    uart1_print(_utoa(itoa_buf, systime()));
-    uart1_print("\r\n");
+    uart_print(&bc, "sch next ");
+    uart_print(&bc, _utoa(itoa_buf, trigger));
+    uart_print(&bc, " sys ");
+    uart_print(&bc, _utoa(itoa_buf, systime()));
+    uart_print(&bc, "\r\n");
 }
 
 #define PARSER_CNT 16
 
 void parse_user_input(void)
 {
-#ifdef uart1_RX_USES_RINGBUF
-    struct ringbuf *rbr = uart1_get_rx_ringbuf();
+#if defined UART_RX_USES_RINGBUF
+    struct ringbuf *rbr = uart_get_rx_ringbuf(&bc);
     uint8_t rx;
     uint8_t c = 0;
     char input[PARSER_CNT];
@@ -72,8 +74,9 @@ void parse_user_input(void)
         c++;
     }
 #else
-    char *input = uart1_get_rx_buf();
+    char *input = uart_get_rx_buf(&bc);
 #endif
+
     struct rtca_tm t;
     char f = input[0];
     char itoa_buf[CONV_BASE_10_BUF_SZ];
@@ -81,34 +84,34 @@ void parse_user_input(void)
     if (f == '?') {
         display_menu();
     } else if (strstr(input, "chg")) {
-        uart1_print("CHG ");
+        uart_print(&bc, "CHG ");
         if (P1IN & BIT5) {
-            uart1_print("off");
+            uart_print(&bc, "off");
         } else {
-            uart1_print("on");
+            uart_print(&bc, "on");
         }
-        //uart1_print(_itoa(itoa_buf, (P1IN & BIT5)));
-        uart1_print(", lipo ");
-        uart1_print(_itoa(itoa_buf, pwr_mng_get_lipo_charge()));
-        uart1_print("%\r\n");
+        //uart_print(&bc, _itoa(itoa_buf, (P1IN & BIT5)));
+        uart_print(&bc, ", lipo ");
+        uart_print(&bc, _itoa(itoa_buf, pwr_mng_get_lipo_charge()));
+        uart_print(&bc, "%\r\n");
     } else if (strstr(input, "sch")) {
         display_schedule();
     } else if (strstr(input, "date")) {
         rtca_get_time(&t);
-        uart1_print(_itoa(itoa_buf, t.hour));
-        uart1_print(":");
-        uart1_print(_itoa(itoa_buf, t.min));
-        uart1_print(":");
-        uart1_print(_itoa(itoa_buf, t.sec));
-        uart1_print(" ");
-        uart1_print(_itoa(itoa_buf, t.year));
-        uart1_print(".");
-        uart1_print(_itoa(itoa_buf, t.mon));
-        uart1_print(".");
-        uart1_print(_itoa(itoa_buf, t.day));
-        uart1_print(" sys ");
-        uart1_print(_itoa(itoa_buf, t.sys));
-        uart1_print("\r\n");
+        uart_print(&bc, _itoa(itoa_buf, t.hour));
+        uart_print(&bc, ":");
+        uart_print(&bc, _itoa(itoa_buf, t.min));
+        uart_print(&bc, ":");
+        uart_print(&bc, _itoa(itoa_buf, t.sec));
+        uart_print(&bc, " ");
+        uart_print(&bc, _itoa(itoa_buf, t.year));
+        uart_print(&bc, ".");
+        uart_print(&bc, _itoa(itoa_buf, t.mon));
+        uart_print(&bc, ".");
+        uart_print(&bc, _itoa(itoa_buf, t.day));
+        uart_print(&bc, " sys ");
+        uart_print(&bc, _itoa(itoa_buf, t.sys));
+        uart_print(&bc, "\r\n");
     } else if (strstr(input, "ce0")) {
         ce_off;
     } else if (strstr(input, "ce1")) {
